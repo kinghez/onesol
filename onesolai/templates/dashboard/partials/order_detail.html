@@ -1,0 +1,155 @@
+<div class="od-header">
+  <div class="od-title">Order #{{ order.id }}</div>
+  <div class="od-date">{{ order.created_at|date:"d M Y, H:i" }}</div>
+</div>
+
+<div class="od-grid">
+  <!-- Left Col: Details -->
+  <div class="od-main">
+    <div class="od-section-label">Items Purchased</div>
+    {% for item in items %}
+    <div class="od-item-card">
+      {% if item.tool.image_url %}
+        <img src="{{ item.tool.image_url }}" alt="{{ item.tool.name }}" class="od-item-icon" onerror="this.style.display='none'">
+      {% endif %}
+      <div class="od-item-info">
+        <div class="od-item-name">{{ item.tool.name|default:"Deleted Tool" }}</div>
+        <div class="od-item-plan">{{ item.plan.name|default:"Monthly Subscription" }}</div>
+      </div>
+      <div class="od-item-price">₦{{ item.price_ngn|floatformat:0 }}</div>
+    </div>
+    {% endfor %}
+
+    <div class="od-section-label mt-4">Order Summary</div>
+    <div class="od-summary-card">
+      <div class="od-row"><span>Status</span> <span class="status-pill status-{{ order.status }}">{{ order.status|title }}</span></div>
+      <div class="od-row"><span>Total Amount</span> <span class="od-val-white font-mono">₦{{ order.total_amount_ngn|floatformat:0 }}</span></div>
+      {% if order.paystack_reference %}
+        <div class="od-row"><span>Payment Ref</span> <span class="od-val-mono">{{ order.paystack_reference }}</span></div>
+      {% endif %}
+    </div>
+  </div>
+
+  <!-- Right Col: Delivery & Access -->
+  <div class="od-side">
+    <div class="od-section-label">Access Details</div>
+    <div class="od-access-card">
+      {% if order.status == 'paid' %}
+        {% if order.access_details %}
+          <div class="od-access-content">{{ order.access_details }}</div>
+          <button class="btn-copy-access" onclick="copyAccessInfo(this)">
+            <i class="fa-regular fa-copy"></i> Copy Details
+          </button>
+        {% else %}
+          <div class="od-pending-box">
+            <i class="fa-solid fa-hourglass-half"></i>
+            <p>Access details are being prepared by our team. Check back shortly.</p>
+          </div>
+        {% endif %}
+      {% else %}
+        <div class="od-pending-box text-muted">
+          <i class="fa-solid fa-lock"></i>
+          <p>Payment required to view access details.</p>
+        </div>
+      {% endif %}
+    </div>
+
+    <!-- Refund Action -->
+    {% if order.status == 'paid' %}
+      <div class="od-section-label mt-4">Need Help?</div>
+      <div class="od-refund-card">
+        <p>If you have an issue with this order, you can request a refund.</p>
+        <button class="btn-refund" onclick="document.getElementById('refundForm').style.display='block';this.style.display='none'">Request Refund</button>
+        
+        <form id="refundForm" method="POST" action="{% url 'dashboard:request_refund' order.id %}" style="display:none; margin-top:12px;">
+          {% csrf_token %}
+          <textarea name="reason" class="od-textarea" placeholder="Please explain why you need a refund..." required rows="3"></textarea>
+          <button type="submit" class="btn-refund-submit">Submit Request</button>
+        </form>
+      </div>
+    {% endif %}
+    
+    {% if order.refund_requests.all %}
+      <div class="od-section-label mt-4">Refund Status</div>
+      {% for req in order.refund_requests.all %}
+        <div class="od-refund-status-card status-{{ req.status }}">
+          <div class="req-title">Refund Request ({{ req.created_at|date:"d M Y" }})</div>
+          <div class="req-badge">{{ req.status|title }}</div>
+          {% if req.admin_note %}
+            <div class="req-note"><strong>Note:</strong> {{ req.admin_note }}</div>
+          {% endif %}
+        </div>
+      {% endfor %}
+    {% endif %}
+  </div>
+</div>
+
+<style>
+.od-header { border-bottom: 1px solid rgba(255,255,255,.08); padding-bottom: 16px; margin-bottom: 20px; }
+.od-title { font-size: 20px; font-weight: 700; color: #fff; }
+.od-date { font-size: 13px; color: #636A8A; margin-top: 4px; }
+.od-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; }
+@media(max-width: 768px) { .od-grid { grid-template-columns: 1fr; } }
+.od-section-label { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; color: #636A8A; margin-bottom: 12px; }
+.mt-4 { margin-top: 24px; }
+
+.od-item-card { display: flex; align-items: center; gap: 12px; padding: 12px; background: rgba(255,255,255,.04); border: 1px solid rgba(255,255,255,.08); border-radius: 10px; margin-bottom: 12px; }
+.od-item-icon { width: 40px; height: 40px; border-radius: 8px; }
+.od-item-info { flex: 1; }
+.od-item-name { font-size: 14px; font-weight: 700; color: #fff; }
+.od-item-plan { font-size: 12px; color: #AEB5CA; }
+.od-item-price { font-size: 14px; font-weight: 700; color: #A78BFA; }
+
+.od-summary-card { padding: 16px; background: rgba(255,255,255,.02); border-radius: 12px; border: 1px solid rgba(255,255,255,.05); }
+.od-row { display: flex; justify-content: space-between; align-items: center; padding: 8px 0; border-bottom: 1px solid rgba(255,255,255,.05); font-size: 13px; color: #AEB5CA; }
+.od-row:last-child { border-bottom: none; }
+.od-val-white { color: #fff; font-weight: 600; }
+.od-val-mono { font-family: monospace; color: #7C83FA; }
+
+.od-access-card { padding: 16px; background: rgba(18,22,52,.5); border: 1px solid rgba(91,99,246,.2); border-radius: 12px; }
+.od-access-content { font-family: monospace; font-size: 13px; color: #A5F3FC; white-space: pre-wrap; word-break: break-all; margin-bottom: 12px; background: rgba(0,0,0,.3); padding: 12px; border-radius: 8px; }
+.btn-copy-access { width: 100%; background: rgba(91,99,246,.15); border: 1px solid rgba(91,99,246,.3); color: #7C83FA; padding: 8px; border-radius: 6px; font-size: 13px; font-weight: 600; cursor: pointer; transition: all .2s; }
+.btn-copy-access:hover { background: rgba(91,99,246,.25); color: #fff; }
+
+.od-pending-box { text-align: center; padding: 20px 10px; }
+.od-pending-box i { font-size: 24px; color: rgba(255,255,255,.2); margin-bottom: 10px; }
+.od-pending-box p { font-size: 13px; color: #AEB5CA; margin: 0; }
+
+.od-refund-card { padding: 16px; background: rgba(255,255,255,.02); border-radius: 12px; border: 1px dashed rgba(255,255,255,.15); }
+.od-refund-card p { font-size: 12px; color: #AEB5CA; margin-bottom: 12px; }
+.btn-refund { width: 100%; background: transparent; border: 1px solid rgba(255,255,255,.2); color: #fff; padding: 8px; border-radius: 6px; font-size: 12px; cursor: pointer; }
+.btn-refund:hover { border-color: rgba(239,68,68,.5); color: #f87171; }
+.od-textarea { width: 100%; background: rgba(255,255,255,.05); border: 1px solid rgba(255,255,255,.1); border-radius: 6px; padding: 10px; color: #fff; font-size: 13px; outline: none; margin-bottom: 10px; resize: vertical; }
+.od-textarea:focus { border-color: rgba(239,68,68,.5); }
+.btn-refund-submit { width: 100%; background: rgba(239,68,68,.2); border: 1px solid rgba(239,68,68,.4); color: #f87171; padding: 8px; border-radius: 6px; font-size: 12px; font-weight: 700; cursor: pointer; }
+
+.od-refund-status-card { padding: 12px; border-radius: 8px; border: 1px solid transparent; margin-bottom: 10px; }
+.od-refund-status-card.status-pending { background: rgba(251,191,36,.05); border-color: rgba(251,191,36,.2); }
+.od-refund-status-card.status-approved { background: rgba(34,197,94,.05); border-color: rgba(34,197,94,.2); }
+.od-refund-status-card.status-rejected { background: rgba(239,68,68,.05); border-color: rgba(239,68,68,.2); }
+.req-title { font-size: 11px; color: #636A8A; margin-bottom: 4px; }
+.req-badge { font-size: 12px; font-weight: 700; }
+.status-pending .req-badge { color: #FBBF24; }
+.status-approved .req-badge { color: #4ade80; }
+.status-rejected .req-badge { color: #f87171; }
+.req-note { font-size: 12px; color: #AEB5CA; margin-top: 6px; border-top: 1px dashed rgba(255,255,255,.1); padding-top: 6px; }
+</style>
+
+<script>
+function copyAccessInfo(btn) {
+  var content = document.querySelector('.od-access-content').innerText;
+  navigator.clipboard.writeText(content).then(function() {
+    var oldHtml = btn.innerHTML;
+    btn.innerHTML = '<i class="fa-solid fa-check"></i> Copied!';
+    btn.style.background = 'rgba(34,197,94,.15)';
+    btn.style.borderColor = 'rgba(34,197,94,.3)';
+    btn.style.color = '#4ade80';
+    setTimeout(function() {
+      btn.innerHTML = oldHtml;
+      btn.style.background = '';
+      btn.style.borderColor = '';
+      btn.style.color = '';
+    }, 2000);
+  });
+}
+</script>

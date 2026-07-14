@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="OneSol AI Hub - Access Affordable, Powerful AI & SaaS Tools in Africa.">
+    <title>OneSol AI Hub - Affordable AI & SaaS Tools in Africa</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+    <!-- BG gradient -->
+    <div class="bg-base"></div>
+
+    <!-- Ambient glows -->
+    <div class="amb-glows">
+        <div class="amb amb-purple"></div>
+        <div class="amb amb-blue"></div>
+        <div class="amb amb-gold-tr"></div>
+        <div class="amb amb-gold-bl"></div>
+    </div>
+
+    <!-- Left angular ribbons -->
+    <div class="ribbons">
+        <div class="rib rib-1"></div>
+        <div class="rib rib-2"></div>
+        <div class="rib rib-3"></div>
+        <div class="rib rib-4"></div>
+    </div>
+
+    <!-- Particle + grid canvas -->
+    <canvas id="bgCanvas"></canvas>
+
+    <!-- ══════ NAVBAR ══════ -->
+    <nav class="nav" id="nav">
+        <div class="nav-inner">
+            <a href="#" class="nav-brand">
+                <img src="assets/logo.png" alt="OneSol" class="nav-logo-img">
+                <div class="nav-logo-txt">
+                    <span class="nav-logo-name">OneSol</span>
+                    <span class="nav-logo-sub">AI Hub</span>
+                </div>
+            </a>
+            <ul class="nav-links" id="navLinks">
+                <li><a href="index.html" class="nav-a">Home</a></li>
+                <li><a href="tools.html" class="nav-a active">Tools</a></li>
+                <li><a href="#" class="nav-a">Pricing</a></li>
+                <li><a href="#" class="nav-a">Features</a></li>
+                <li><a href="#" class="nav-a">About Us</a></li>
+            </ul>
+            <div class="nav-right">
+                <div class="nav-currency">
+                    <span>NGN</span>
+                    <img src="https://flagcdn.com/w20/ng.png" alt="NG" class="nav-flag">
+                </div>
+                <a href="login.html" class="nav-sign">Sign In</a>
+                <a href="signup.html" class="nav-get">Get Started</a>
+            </div>
+            <button class="nav-mob" id="navMob" aria-label="Menu">
+                <span></span><span></span><span></span>
+            </button>
+        </div>
+    </nav>
+
+    <!-- ══════ ALL TOOLS PAGE ══════ -->
+    <main class="all-tools-page">
+        <div class="at-top">
+            <div class="at-badge">Get Started</div>
+            <h1 class="at-title">All Tools</h1>
+            <p class="at-subtitle">Discover and access the best AI & SaaS tools at unbeatable prices.</p>
+        </div>
+        
+        <div class="at-container">
+            <!-- Sidebar -->
+            <aside class="at-sidebar">
+                <div class="at-sidebar-section">
+                    <h3 class="at-sidebar-title">Categories</h3>
+                    <ul class="at-category-list">
+                        <li><a href="#" class="at-cat-link"><span><i class="fas fa-robot"></i> AI Chatbots</span> <span class="at-cat-count">12</span></a></li>
+                        <li><a href="#" class="at-cat-link"><span><i class="fas fa-image"></i> AI Image</span> <span class="at-cat-count">8</span></a></li>
+                        <li><a href="#" class="at-cat-link"><span><i class="fas fa-bolt"></i> Productivity</span> <span class="at-cat-count">15</span></a></li>
+                        <li><a href="#" class="at-cat-link"><span><i class="fas fa-pen"></i> Writing</span> <span class="at-cat-count">10</span></a></li>
+                        <li><a href="#" class="at-cat-link"><span><i class="fas fa-palette"></i> Design</span> <span class="at-cat-count">8</span></a></li>
+                        <li><a href="#" class="at-cat-link"><span><i class="fas fa-video"></i> Video</span> <span class="at-cat-count">7</span></a></li>
+                        <li><a href="#" class="at-cat-link"><span><i class="fas fa-bullhorn"></i> Marketing</span> <span class="at-cat-count">9</span></a></li>
+                        <li><a href="#" class="at-cat-link"><span><i class="fas fa-code"></i> Development</span> <span class="at-cat-count">6</span></a></li>
+                        <li><a href="#" class="at-cat-link"><span><i class="fas fa-briefcase"></i> Business</span> <span class="at-cat-count">7</span></a></li>
+                    </ul>
+                </div>
+
+                <div class="at-sidebar-section">
+                    <h3 class="at-sidebar-title">Filters</h3>
+                    
+                    <div class="at-filter-group">
+                        <label class="at-filter-label">Price Range</label>
+                        <div class="at-range-slider">
+                            <div class="at-range-track">
+                                <div class="at-range-fill"></div>
+                                <div class="at-range-thumb left"></div>
+                                <div class="at-range-thumb right"></div>
+                            </div>
+                        </div>
+                        <div class="at-range-labels">
+                            <span>NGN 0</span>
+                            <span>NGN 20,000+</span>
+                        </div>
+                    </div>
+
+                    <div class="at-filter-group">
+                        <label class="at-filter-label">Sort by</label>
+                        <div class="at-select-wrap">
+                            <select class="at-select">
+                                <option>Popular</option>
+                                <option>Price: Low to High</option>
+                                <option>Price: High to Low</option>
+                                <option>Newest</option>
+                            </select>
+                            <i class="fas fa-chevron-down at-select-icon"></i>
+                        </div>
+                    </div>
+
+                    <div class="at-filter-group">
+                        <label class="at-checkbox-label">
+                            <input type="checkbox" class="at-checkbox">
+                            <span class="at-checkbox-custom"></span>
+                            Show Popular Only
+                        </label>
+                    </div>
+                </div>
+            </aside>
+
+            <!-- Main Content -->
+            <div class="at-main">
+                <div class="at-search-bar">
+                    <div class="at-search-input-wrap">
+                        <i class="fas fa-search at-search-icon"></i>
+                        <input type="text" class="at-search-input" placeholder="Search tools...">
+                    </div>
+                    <div class="at-currency-select">
+                        <span>NGN (₦)</span>
+                        <i class="fas fa-chevron-down"></i>
+                    </div>
+                </div>
+
+                <div class="at-grid" id="allToolsGrid">
+                    <!-- Rendered by JS -->
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- ══════ FOOTER ══════ -->
+    <footer class="footer">
+        <div class="footer-wrap">
+            
+            <!-- Col 1: Brand & Socials -->
+            <div class="footer-col brand-col">
+                <a href="#" class="footer-brand">
+                    <img src="assets/logo.png" alt="OneSol" class="footer-logo-img">
+                    <div class="footer-logo-txt">
+                        <span class="footer-logo-name">OneSol</span>
+                        <span class="footer-logo-sub">AI Hub</span>
+                    </div>
+                </a>
+                <p class="footer-desc">
+                    Your #1 marketplace for premium<br>
+                    AI & SaaS tools in Africa.
+                </p>
+                <div class="footer-socials">
+                    <a href="#" class="social-btn" style="color: #1877F2; font-size: 18px;"><i class="fa-brands fa-facebook-f"></i></a>
+                    <a href="#" class="social-btn" style="color: #FFFFFF; font-size: 18px;"><i class="fa-brands fa-x-twitter"></i></a>
+                    <a href="#" class="social-btn" style="color: #E4405F; font-size: 18px;"><i class="fa-brands fa-instagram"></i></a>
+                    <a href="#" class="social-btn" style="color: #0A66C2; font-size: 18px;"><i class="fa-brands fa-linkedin-in"></i></a>
+                </div>
+            </div>
+
+            <!-- Col 2: Quick Links -->
+            <div class="footer-col">
+                <h4 class="footer-title">Quick Links</h4>
+                <a href="#" class="footer-link">Home</a>
+                <a href="#" class="footer-link">Tools</a>
+                <a href="#" class="footer-link">Categories</a>
+                <a href="#" class="footer-link">Pricing</a>
+            </div>
+
+            <!-- Col 3: Company -->
+            <div class="footer-col">
+                <h4 class="footer-title">Company</h4>
+                <a href="#" class="footer-link">About Us</a>
+                <a href="#" class="footer-link">How It Works</a>
+                <a href="#" class="footer-link">Support</a>
+                <a href="#" class="footer-link">Contact Us</a>
+            </div>
+
+            <!-- Col 4: Legal -->
+            <div class="footer-col">
+                <h4 class="footer-title">Legal</h4>
+                <a href="#" class="footer-link">Terms of Service</a>
+                <a href="#" class="footer-link">Privacy Policy</a>
+                <a href="#" class="footer-link">Refund Policy</a>
+            </div>
+
+            <!-- Col 5: Payment Partners -->
+            <div class="footer-col payment-col">
+                <h4 class="footer-title">Payment Partners</h4>
+                <div class="payment-grid">
+                    <img src="assets/images/logos/paystack.svg" alt="Paystack" class="payment-logo">
+                    <img src="assets/images/logos/flutterwave.svg" alt="Flutterwave" class="payment-logo">
+                    <img src="assets/images/logos/ssl_secure.svg" alt="SSL Secure" class="payment-logo">
+                    <img src="assets/images/logos/pci_compliant.svg" alt="PCI Compliant" class="payment-logo">
+                </div>
+            </div>
+
+            <!-- Col 6: Newsletter -->
+            <div class="footer-col news-col">
+                <h4 class="footer-title">Stay Updated</h4>
+                <p class="footer-desc">Subscribe to get updates and exclusive offers.</p>
+                <form class="newsletter-form" onsubmit="event.preventDefault();">
+                    <input type="email" class="news-input" placeholder="Enter your email" required>
+                    <button type="submit" class="news-btn">Subscribe</button>
+                </form>
+            </div>
+
+        </div>
+        
+        <div class="footer-bottom">
+            <p>© 2024 OneSol AI Hub. All rights reserved.</p>
+        </div>
+    </footer>
+
+    <script src="script.js"></script>
+</body>
+</html>

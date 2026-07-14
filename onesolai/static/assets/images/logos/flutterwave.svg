@@ -1,0 +1,6 @@
+<svg viewBox="0 0 140 24" xmlns="http://www.w3.org/2000/svg">
+        <path d="M12 4 Q16 10, 10 16 Q6 10, 12 4 Z" fill="#F5A623"/>
+        <path d="M4 12 Q10 18, 16 12 Q10 6, 4 12 Z" fill="#F8E71C" opacity="0.8"/>
+        <path d="M10 12 Q14 16, 18 12 Q14 8, 10 12 Z" fill="#F5A623"/>
+        <text x="24" y="18" font-family="-apple-system, sans-serif" font-weight="700" font-size="16" fill="#FFFFFF">flutterwave</text>
+    </svg>

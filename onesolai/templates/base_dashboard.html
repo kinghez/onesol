@@ -1,0 +1,178 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}OneSol AI Hub - Dashboard{% endblock %}</title>
+
+    <!-- External Dependencies -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+
+    <!-- CSS System -->
+    <link rel="stylesheet" href="{% static 'css/reset.css' %}">
+    <link rel="stylesheet" href="{% static 'css/variables.css' %}">
+    <link rel="stylesheet" href="{% static 'css/typography.css' %}">
+    <link rel="stylesheet" href="{% static 'css/layout.css' %}">
+    <link rel="stylesheet" href="{% static 'css/utilities.css' %}">
+
+    <!-- Components -->
+    <link rel="stylesheet" href="{% static 'components/buttons.css' %}">
+    <link rel="stylesheet" href="{% static 'components/cards.css' %}">
+    <link rel="stylesheet" href="{% static 'components/sidebar.css' %}">
+    <link rel="stylesheet" href="{% static 'components/navbar.css' %}">
+    <link rel="stylesheet" href="{% static 'components/badges.css' %}">
+    {% block extra_css %}{% endblock %}
+
+    <!-- Page Specific -->
+    <link rel="stylesheet" href="{% static 'pages/dashboard.css' %}">
+</head>
+<body class="fade-in">
+    <div class="app-container">
+
+        <!-- ══════ SIDEBAR ══════ -->
+        <aside class="sidebar-wrapper">
+            <div class="sidebar">
+                <div class="sidebar-brand">
+                    <img src="{% static 'assets/logo.png' %}" alt="OneSol Logo" class="sidebar-logo" style="width: 32px; height: 32px; border-radius: 8px;">
+                    <span class="sidebar-text">OneSol AI Hub</span>
+                </div>
+
+                <nav class="sidebar-nav">
+                    <div class="sidebar-section-title sidebar-text">Main</div>
+
+                    <a href="{% url 'dashboard:home' %}" class="sidebar-item {% block nav_dashboard %}{% endblock %}">
+                        <i class="fa-solid fa-border-all fa-fw"></i>
+                        <span class="sidebar-text">Dashboard</span>
+                    </a>
+
+                    <a href="{% url 'dashboard:subscriptions' %}" class="sidebar-item {% block nav_subscriptions %}{% endblock %}">
+                        <i class="fa-regular fa-calendar-check fa-fw"></i>
+                        <span class="sidebar-text">My Subscriptions</span>
+                    </a>
+
+                    <a href="{% url 'dashboard:order_history' %}" class="sidebar-item {% block nav_orders %}{% endblock %}">
+                        <i class="fa-solid fa-receipt fa-fw"></i>
+                        <span class="sidebar-text">Order History</span>
+                    </a>
+
+                    <a href="{% url 'dashboard:referrals' %}" class="sidebar-item {% block nav_referrals %}{% endblock %}">
+                        <i class="fa-solid fa-users fa-fw"></i>
+                        <span class="sidebar-text">Referrals</span>
+                    </a>
+
+                    <a href="{% url 'dashboard:wallet' %}" class="sidebar-item {% block nav_wallet %}{% endblock %}">
+                        <i class="fa-solid fa-wallet fa-fw"></i>
+                        <span class="sidebar-text">Wallet</span>
+                    </a>
+
+                    <a href="{% url 'notifications:list' %}" class="sidebar-item {% block nav_notifications %}{% endblock %}">
+                        <i class="fa-regular fa-bell fa-fw"></i>
+                        <span class="sidebar-text">Notifications</span>
+                    </a>
+
+                    <div class="sidebar-divider"></div>
+
+                    <div class="sidebar-section-title sidebar-text">Account</div>
+
+                    <a href="{% url 'dashboard:profile' %}" class="sidebar-item {% block nav_profile %}{% endblock %}">
+                        <i class="fa-regular fa-user fa-fw"></i>
+                        <span class="sidebar-text">Profile Settings</span>
+                    </a>
+
+                    <a href="{% url 'dashboard:security' %}" class="sidebar-item {% block nav_security %}{% endblock %}">
+                        <i class="fa-solid fa-shield-halved fa-fw"></i>
+                        <span class="sidebar-text">Security</span>
+                    </a>
+
+                    <a href="{% url 'dashboard:support' %}" class="sidebar-item {% block nav_support %}{% endblock %}">
+                        <i class="fa-regular fa-circle-question fa-fw"></i>
+                        <span class="sidebar-text">Support</span>
+                    </a>
+
+                    <a href="{% url 'accounts:logout' %}" class="sidebar-item mt-4">
+                        <i class="fa-solid fa-arrow-right-from-bracket fa-fw"></i>
+                        <span class="sidebar-text">Logout</span>
+                    </a>
+                </nav>
+
+                <div class="sidebar-cta-banner">
+                    <div class="sidebar-cta-icon">
+                        <i class="fa-solid fa-gift fa-lg"></i>
+                    </div>
+                    <div class="sidebar-cta-title">Refer &amp; Earn</div>
+                    <div class="sidebar-cta-desc">Earn NGN 2,000 for each successful referral.</div>
+                    <a href="{% url 'dashboard:referrals' %}" class="btn btn-primary btn-block">Get Referral Link</a>
+                </div>
+            </div>
+        </aside>
+
+        <!-- ══════ MAIN CONTENT AREA ══════ -->
+        <main class="main-content">
+            <!-- Top Navbar -->
+            <header class="navbar">
+                <div class="navbar-left">
+                    <button class="nav-icon-btn mobile-menu-btn">
+                        <i class="fa-solid fa-bars"></i>
+                    </button>
+                    <div>
+                        <h1 class="navbar-title">{% block page_title %}Dashboard{% endblock %} {% block page_title_emoji %}👋{% endblock %}</h1>
+                        <p class="navbar-subtitle">{% block page_subtitle %}Here's what's happening with your account today.{% endblock %}</p>
+                    </div>
+                </div>
+
+                <div class="navbar-right">
+                    <button class="nav-icon-btn">
+                        <i class="fa-solid fa-magnifying-glass"></i>
+                    </button>
+                    <button class="nav-icon-btn" onclick="window.location.href='{% url 'notifications:list' %}'" style="position:relative;">
+                        <i class="fa-regular fa-bell"></i>
+                        <span id="notif-badge" style="display:none;position:absolute;top:6px;right:6px;width:8px;height:8px;background:#f87171;border-radius:50%;box-shadow:0 0 0 2px #0f1535;"></span>
+                    </button>
+                    <div class="user-profile">
+                        <div class="avatar flex items-center justify-center bg-transparent">
+                            {% if user.profile.avatar %}
+                                <img src="{{ user.profile.avatar.url }}" alt="Avatar" style="width: 36px; height: 36px; border-radius: 50%; object-fit: cover;">
+                            {% elif user.profile.avatar_url %}
+                                <img src="{{ user.profile.avatar_url }}" alt="Avatar" style="width: 36px; height: 36px; border-radius: 50%; object-fit: cover;">
+                            {% else %}
+                                <i class="fa-solid fa-circle-user" style="font-size: 36px; color: var(--text-secondary);"></i>
+                            {% endif %}
+                        </div>
+                        <span class="user-name">
+                            {% if user.is_authenticated %}{{ user.get_full_name|default:user.username }}{% else %}Guest{% endif %}
+                            <i class="fa-solid fa-chevron-down" style="font-size: 10px;"></i>
+                        </span>
+                    </div>
+                </div>
+            </header>
+
+            <!-- Page Content -->
+            <div class="dashboard-content">
+                {% block content %}{% endblock %}
+            </div>
+        </main>
+
+    </div>
+
+    <script src="{% static 'js/sidebar.js' %}"></script>
+    <script src="{% static 'js/animations.js' %}"></script>
+    <script>
+    document.addEventListener('DOMContentLoaded', function() {
+        var csrf = (document.cookie.match(/csrftoken=([^;]+)/) || [])[1] || '';
+        if (csrf) {
+            fetch('/notifications/unread-count/')
+            .then(r => r.json())
+            .then(d => {
+                if (d.count && d.count > 0) {
+                    var b = document.getElementById('notif-badge');
+                    if (b) b.style.display = 'block';
+                }
+            }).catch(e => console.error(e));
+        }
+    });
+    </script>
+    {% block extra_js %}{% endblock %}
+</body>
+</html>

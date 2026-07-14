@@ -1,0 +1,159 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="{% block meta_description %}OneSol AI Hub - Access Affordable, Powerful AI &amp; SaaS Tools in Africa.{% endblock %}">
+    <title>{% block title %}OneSol AI Hub - Affordable AI &amp; SaaS Tools in Africa{% endblock %}</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <link rel="stylesheet" href="{% static 'css/styles.css' %}">
+    {% block extra_css %}{% endblock %}
+</head>
+
+<body {% block body_class %}{% endblock %}>
+
+    <!-- BG gradient -->
+    <div class="bg-base"></div>
+
+    <!-- Ambient glows -->
+    <div class="amb-glows">
+        <div class="amb amb-purple"></div>
+        <div class="amb amb-blue"></div>
+        <div class="amb amb-gold-tr"></div>
+        <div class="amb amb-gold-bl"></div>
+    </div>
+
+    <!-- Left angular ribbons -->
+    <div class="ribbons">
+        <div class="rib rib-1"></div>
+        <div class="rib rib-2"></div>
+        <div class="rib rib-3"></div>
+        <div class="rib rib-4"></div>
+    </div>
+
+    <!-- Particle + grid canvas -->
+    <canvas id="bgCanvas"></canvas>
+
+    <!-- ══════ NAVBAR ══════ -->
+    <nav class="nav" id="nav">
+        <div class="nav-inner">
+            <a href="{% url 'home' %}" class="nav-brand">
+                <img src="{% static 'assets/logo.png' %}" alt="OneSol" class="nav-logo-img">
+                <div class="nav-logo-txt">
+                    <span class="nav-logo-name">OneSol</span>
+                    <span class="nav-logo-sub">AI Hub</span>
+                </div>
+            </a>
+            <ul class="nav-links" id="navLinks">
+                <li><a href="{% url 'home' %}" class="nav-a {% block nav_home %}{% endblock %}">Home</a></li>
+                <li><a href="{% url 'tools:tools_list' %}" class="nav-a {% block nav_tools %}{% endblock %}">Tools</a></li>
+                <li><a href="#" class="nav-a">Pricing</a></li>
+                <li><a href="#" class="nav-a">Features</a></li>
+                <li><a href="#" class="nav-a">About Us</a></li>
+            </ul>
+            <div class="nav-right">
+                <div class="nav-currency" id="navCurrency">
+                    <span id="navCurrencyCode">NGN</span>
+                    <img src="https://flagcdn.com/w20/ng.png" alt="NG" class="nav-flag" id="navCurrencyFlag">
+                </div>
+                <a href="{% url 'accounts:login' %}" class="nav-sign">Sign In</a>
+                <a href="{% url 'accounts:signup' %}" class="nav-get">Get Started</a>
+            </div>
+            <button class="nav-mob" id="navMob" aria-label="Menu">
+                <span></span><span></span><span></span>
+            </button>
+        </div>
+    </nav>
+
+    <!-- ══════ PAGE CONTENT ══════ -->
+    {% block content %}{% endblock %}
+
+    <!-- ══════ FOOTER ══════ -->
+    <footer class="footer">
+        <div class="footer-wrap">
+
+            <!-- Col 1: Brand & Socials -->
+            <div class="footer-col brand-col">
+                <a href="{% url 'home' %}" class="footer-brand">
+                    <img src="{% static 'assets/logo.png' %}" alt="OneSol" class="footer-logo-img">
+                    <div class="footer-logo-txt">
+                        <span class="footer-logo-name">OneSol</span>
+                        <span class="footer-logo-sub">AI Hub</span>
+                    </div>
+                </a>
+                <p class="footer-desc">
+                    Your #1 marketplace for premium<br>
+                    AI &amp; SaaS tools in Africa.
+                </p>
+                <div class="footer-socials">
+                    <a href="#" class="social-btn" style="color: #1877F2; font-size: 18px;"><i class="fa-brands fa-facebook-f"></i></a>
+                    <a href="#" class="social-btn" style="color: #FFFFFF; font-size: 18px;"><i class="fa-brands fa-x-twitter"></i></a>
+                    <a href="#" class="social-btn" style="color: #E4405F; font-size: 18px;"><i class="fa-brands fa-instagram"></i></a>
+                    <a href="#" class="social-btn" style="color: #0A66C2; font-size: 18px;"><i class="fa-brands fa-linkedin-in"></i></a>
+                </div>
+            </div>
+
+            <!-- Col 2: Quick Links -->
+            <div class="footer-col">
+                <h4 class="footer-title">Quick Links</h4>
+                <a href="{% url 'home' %}" class="footer-link">Home</a>
+                <a href="{% url 'tools:tools_list' %}" class="footer-link">Tools</a>
+                <a href="#" class="footer-link">Categories</a>
+                <a href="#" class="footer-link">Pricing</a>
+            </div>
+
+            <!-- Col 3: Company -->
+            <div class="footer-col">
+                <h4 class="footer-title">Company</h4>
+                <a href="#" class="footer-link">About Us</a>
+                <a href="#" class="footer-link">How It Works</a>
+                <a href="#" class="footer-link">Support</a>
+                <a href="#" class="footer-link">Contact Us</a>
+            </div>
+
+            <!-- Col 4: Legal -->
+            <div class="footer-col">
+                <h4 class="footer-title">Legal</h4>
+                <a href="#" class="footer-link">Terms of Service</a>
+                <a href="#" class="footer-link">Privacy Policy</a>
+                <a href="#" class="footer-link">Refund Policy</a>
+            </div>
+
+            <!-- Col 5: Payment Partners -->
+            <div class="footer-col payment-col">
+                <h4 class="footer-title">Payment Partners</h4>
+                <div class="payment-grid">
+                    <img src="{% static 'assets/images/logos/paystack.svg' %}" alt="Paystack" class="payment-logo">
+                    <img src="{% static 'assets/images/logos/flutterwave.svg' %}" alt="Flutterwave" class="payment-logo">
+                    <img src="{% static 'assets/images/logos/ssl_secure.svg' %}" alt="SSL Secure" class="payment-logo">
+                    <img src="{% static 'assets/images/logos/pci_compliant.svg' %}" alt="PCI Compliant" class="payment-logo">
+                </div>
+            </div>
+
+            <!-- Col 6: Newsletter -->
+            <div class="footer-col news-col">
+                <h4 class="footer-title">Stay Updated</h4>
+                <p class="footer-desc">Subscribe to get updates and exclusive offers.</p>
+                <form class="newsletter-form" onsubmit="event.preventDefault();">
+                    <input type="email" class="news-input" placeholder="Enter your email" required>
+                    <button type="submit" class="news-btn">Subscribe</button>
+                </form>
+            </div>
+
+        </div>
+
+        <div class="footer-bottom">
+            <p>&copy; 2026 OneSol AI Hub. All rights reserved.</p>
+        </div>
+    </footer>
+
+    <script src="{% static 'js/script.js' %}"></script>
+    {% block extra_js %}{% endblock %}
+</body>
+
+</html>

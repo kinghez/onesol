@@ -1,0 +1,360 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>OneSol AI Hub - Dashboard</title>
+    
+    <!-- External Dependencies -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    
+    <!-- CSS System -->
+    <link rel="stylesheet" href="./css/reset.css">
+    <link rel="stylesheet" href="./css/variables.css">
+    <link rel="stylesheet" href="./css/typography.css">
+    <link rel="stylesheet" href="./css/layout.css">
+    <link rel="stylesheet" href="./css/utilities.css">
+    
+    <!-- Components -->
+    <link rel="stylesheet" href="./components/buttons.css">
+    <link rel="stylesheet" href="./components/cards.css">
+    <link rel="stylesheet" href="./components/sidebar.css">
+    <link rel="stylesheet" href="./components/navbar.css">
+    <link rel="stylesheet" href="./components/badges.css">
+    
+    <!-- Page Specific -->
+    <link rel="stylesheet" href="./pages/dashboard.css">
+</head>
+<body class="fade-in">
+    <div class="app-container">
+        
+        <!-- Sidebar -->
+        <aside class="sidebar-wrapper">
+            <div class="sidebar">
+                <div class="sidebar-brand">
+                    <img src="./assets/logo.png" alt="OneSol Logo" class="sidebar-logo" style="width: 32px; height: 32px; border-radius: 8px;">
+                    <span class="sidebar-text">OneSol AI Hub</span>
+                </div>
+
+                <nav class="sidebar-nav">
+                    <div class="sidebar-section-title sidebar-text">Main</div>
+                    
+                    <a href="#" class="sidebar-item active">
+                        <i class="fa-solid fa-border-all fa-fw"></i>
+                        <span class="sidebar-text">Dashboard</span>
+                    </a>
+                    
+                    <a href="#" class="sidebar-item">
+                        <i class="fa-regular fa-calendar-check fa-fw"></i>
+                        <span class="sidebar-text">My Subscriptions</span>
+                    </a>
+                    
+                    <a href="#" class="sidebar-item">
+                        <i class="fa-solid fa-receipt fa-fw"></i>
+                        <span class="sidebar-text">Order History</span>
+                    </a>
+                    
+                    <a href="#" class="sidebar-item">
+                        <i class="fa-solid fa-users fa-fw"></i>
+                        <span class="sidebar-text">Referrals</span>
+                    </a>
+
+                    <a href="#" class="sidebar-item">
+                        <i class="fa-solid fa-wallet fa-fw"></i>
+                        <span class="sidebar-text">Wallet</span>
+                    </a>
+
+                    <div class="sidebar-divider"></div>
+                    
+                    <div class="sidebar-section-title sidebar-text">Account</div>
+                    
+                    <a href="#" class="sidebar-item">
+                        <i class="fa-regular fa-user fa-fw"></i>
+                        <span class="sidebar-text">Profile Settings</span>
+                    </a>
+                    
+                    <a href="#" class="sidebar-item">
+                        <i class="fa-solid fa-shield-halved fa-fw"></i>
+                        <span class="sidebar-text">Security</span>
+                    </a>
+                    
+                    <a href="#" class="sidebar-item">
+                        <i class="fa-regular fa-circle-question fa-fw"></i>
+                        <span class="sidebar-text">Support</span>
+                    </a>
+                    
+                    <a href="#" class="sidebar-item mt-4">
+                        <i class="fa-solid fa-arrow-right-from-bracket fa-fw"></i>
+                        <span class="sidebar-text">Logout</span>
+                    </a>
+                </nav>
+
+                <div class="sidebar-cta-banner">
+                    <div class="sidebar-cta-icon">
+                        <i class="fa-solid fa-gift fa-lg"></i>
+                    </div>
+                    <div class="sidebar-cta-title">Refer & Earn</div>
+                    <div class="sidebar-cta-desc">Earn NGN 2,000 for each successful referral.</div>
+                    <a href="#" class="btn btn-primary btn-block">Get Referral Link</a>
+                </div>
+            </div>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <!-- Header -->
+            <header class="navbar">
+                <div class="navbar-left">
+                    <button class="nav-icon-btn mobile-menu-btn">
+                        <i class="fa-solid fa-bars"></i>
+                    </button>
+                    <div>
+                        <h1 class="navbar-title">Welcome back, John 👋</h1>
+                        <p class="navbar-subtitle">Here's what's happening with your account today.</p>
+                    </div>
+                </div>
+                
+                <div class="navbar-right">
+                    <button class="nav-icon-btn">
+                        <i class="fa-solid fa-magnifying-glass"></i>
+                    </button>
+                    <button class="nav-icon-btn">
+                        <i class="fa-regular fa-bell"></i>
+                    </button>
+                    <div class="user-profile">
+                        <div class="avatar flex items-center justify-center bg-transparent">
+                            <i class="fa-solid fa-circle-user" style="font-size: 36px; color: var(--text-secondary);"></i>
+                        </div>
+                        <span class="user-name">John Doe <i class="fa-solid fa-chevron-down" style="font-size: 10px;"></i></span>
+                    </div>
+                </div>
+            </header>
+
+            <!-- Dashboard Content -->
+            <div class="dashboard-content">
+                
+                <!-- Stats Grid -->
+                <div class="dashboard-grid">
+                    <div class="card stat-card">
+                        <div class="stat-title">
+                            <div class="stat-icon" style="width: 20px; height: 20px; margin: 0;">
+                                <i class="fa-solid fa-lock" style="font-size: 10px;"></i>
+                            </div>
+                            Active Subscriptions
+                        </div>
+                        <div class="stat-number mb-2">6</div>
+                        <a href="#" class="card-link">View all &rarr;</a>
+                    </div>
+                    
+                    <div class="card stat-card">
+                        <div class="stat-title">
+                            <div class="stat-icon" style="width: 20px; height: 20px; margin: 0;">
+                                <i class="fa-solid fa-box-open" style="font-size: 10px;"></i>
+                            </div>
+                            Total Orders
+                        </div>
+                        <div class="stat-number mb-2">12</div>
+                        <a href="#" class="card-link">View all &rarr;</a>
+                    </div>
+                    
+                    <div class="card stat-card">
+                        <div class="stat-title">
+                            <div class="stat-icon" style="width: 20px; height: 20px; margin: 0; background-color: rgba(16, 185, 129, 0.1); color: #10B981;">
+                                <i class="fa-solid fa-coins" style="font-size: 10px;"></i>
+                            </div>
+                            Referral Earnings
+                        </div>
+                        <div class="stat-number mb-2" style="font-size: 28px; line-height: 1.35;">NGN 48,000</div>
+                        <a href="#" class="card-link">View all &rarr;</a>
+                    </div>
+                    
+                    <div class="card stat-card">
+                        <div class="stat-title">
+                            <div class="stat-icon" style="width: 20px; height: 20px; margin: 0; background-color: rgba(16, 185, 129, 0.1); color: #10B981;">
+                                <i class="fa-solid fa-wallet" style="font-size: 10px;"></i>
+                            </div>
+                            Wallet Balance
+                        </div>
+                        <div class="stat-number mb-2" style="font-size: 28px; line-height: 1.35;">NGN 12,500</div>
+                        <a href="#" class="card-link">Top up wallet &rarr;</a>
+                    </div>
+                </div>
+
+                <!-- Middle Content Grid -->
+                <div class="dashboard-bottom-grid">
+                    
+                    <!-- Active Subscriptions -->
+                    <div class="card">
+                        <div class="card-header">
+                            <h3 class="card-title">Active Subscriptions</h3>
+                            <a href="#" class="card-link">View all</a>
+                        </div>
+                        <div class="list-container">
+                            <!-- Item 1 -->
+                            <div class="list-item">
+                                <div class="list-item-left">
+                                    <div class="list-item-logo" style="background-color: #10A37F20;">
+                                        <img src="./assets/images/logos/chatgpt.svg" alt="ChatGPT">
+                                    </div>
+                                    <div>
+                                        <div class="list-item-title">ChatGPT Plus</div>
+                                        <div class="list-item-subtitle">Renews on May 23, 2024</div>
+                                    </div>
+                                </div>
+                                <div class="list-item-right">
+                                    <span class="badge badge-success">Active</span>
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="text-secondary" style="width:16px"><polyline points="9 18 15 12 9 6"></polyline></svg>
+                                </div>
+                            </div>
+                            
+                            <!-- Item 2 -->
+                            <div class="list-item">
+                                <div class="list-item-left">
+                                    <div class="list-item-logo" style="background-color: #00C4CC20;">
+                                        <img src="./assets/images/logos/canva.svg" alt="Canva">
+                                    </div>
+                                    <div>
+                                        <div class="list-item-title">Canva Pro</div>
+                                        <div class="list-item-subtitle">Renews on May 30, 2024</div>
+                                    </div>
+                                </div>
+                                <div class="list-item-right">
+                                    <span class="badge badge-success">Active</span>
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="text-secondary" style="width:16px"><polyline points="9 18 15 12 9 6"></polyline></svg>
+                                </div>
+                            </div>
+                            
+                            <!-- Item 3 -->
+                            <div class="list-item">
+                                <div class="list-item-left">
+                                    <div class="list-item-logo" style="background-color: #000000;">
+                                        <img src="./assets/images/logos/midjourney.svg" alt="Midjourney">
+                                    </div>
+                                    <div>
+                                        <div class="list-item-title">Midjourney</div>
+                                        <div class="list-item-subtitle">Renews on June 2, 2024</div>
+                                    </div>
+                                </div>
+                                <div class="list-item-right">
+                                    <span class="badge badge-success">Active</span>
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="text-secondary" style="width:16px"><polyline points="9 18 15 12 9 6"></polyline></svg>
+                                </div>
+                            </div>
+                            
+                            <!-- Item 4 -->
+                            <div class="list-item">
+                                <div class="list-item-left">
+                                    <div class="list-item-logo" style="background-color: #15835620;">
+                                        <img src="./assets/images/logos/grammarly.svg" alt="Grammarly">
+                                    </div>
+                                    <div>
+                                        <div class="list-item-title">Grammarly Premium</div>
+                                        <div class="list-item-subtitle">Renews on June 10, 2024</div>
+                                    </div>
+                                </div>
+                                <div class="list-item-right">
+                                    <span class="badge badge-success">Active</span>
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="text-secondary" style="width:16px"><polyline points="9 18 15 12 9 6"></polyline></svg>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Recent Orders -->
+                    <div class="card">
+                        <div class="card-header">
+                            <h3 class="card-title">Recent Orders</h3>
+                            <a href="#" class="card-link">View all</a>
+                        </div>
+                        <div class="list-container">
+                            <!-- Item 1 -->
+                            <div class="list-item">
+                                <div class="list-item-left">
+                                    <div class="list-item-logo" style="background-color: #10A37F20;">
+                                        <img src="./assets/images/logos/chatgpt.svg" alt="ChatGPT">
+                                    </div>
+                                    <div>
+                                        <div class="list-item-title">ChatGPT Plus</div>
+                                        <div class="list-item-subtitle">May 20, 2024</div>
+                                    </div>
+                                </div>
+                                <div class="list-item-right">
+                                    <div class="text-secondary text-small" style="margin-right: 16px;">May 20, 2024</div>
+                                    <div class="list-item-value">NGN 5,500</div>
+                                </div>
+                            </div>
+                            
+                            <!-- Item 2 -->
+                            <div class="list-item">
+                                <div class="list-item-left">
+                                    <div class="list-item-logo" style="background-color: #00C4CC20;">
+                                        <img src="./assets/images/logos/canva.svg" alt="Canva">
+                                    </div>
+                                    <div>
+                                        <div class="list-item-title">Canva Pro</div>
+                                        <div class="list-item-subtitle">May 19, 2024</div>
+                                    </div>
+                                </div>
+                                <div class="list-item-right">
+                                    <div class="text-secondary text-small" style="margin-right: 16px;">May 19, 2024</div>
+                                    <div class="list-item-value">NGN 4,200</div>
+                                </div>
+                            </div>
+                            
+                            <!-- Item 3 -->
+                            <div class="list-item">
+                                <div class="list-item-left">
+                                    <div class="list-item-logo" style="background-color: #000000;">
+                                        <img src="./assets/images/logos/notion.svg" alt="Notion">
+                                    </div>
+                                    <div>
+                                        <div class="list-item-title">Notion Plus</div>
+                                        <div class="list-item-subtitle">May 18, 2024</div>
+                                    </div>
+                                </div>
+                                <div class="list-item-right">
+                                    <div class="text-secondary text-small" style="margin-right: 16px;">May 18, 2024</div>
+                                    <div class="list-item-value">NGN 4,000</div>
+                                </div>
+                            </div>
+                            
+                            <!-- Item 4 -->
+                            <div class="list-item">
+                                <div class="list-item-left">
+                                    <div class="list-item-logo" style="background-color: #D9775720;">
+                                        <img src="./assets/images/logos/claude.svg" alt="Claude">
+                                    </div>
+                                    <div>
+                                        <div class="list-item-title">Claude Pro</div>
+                                        <div class="list-item-subtitle">May 17, 2024</div>
+                                    </div>
+                                </div>
+                                <div class="list-item-right">
+                                    <div class="text-secondary text-small" style="margin-right: 16px;">May 17, 2024</div>
+                                    <div class="list-item-value">NGN 6,500</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Bottom Promo Banner -->
+                <div class="promo-banner mt-4">
+                    <div class="promo-content">
+                        <div class="promo-title">Unlock More with OneSol AI Hub</div>
+                        <div class="promo-subtitle">Discover premium tools to boost your productivity</div>
+                        <a href="#" class="btn promo-btn">Explore Tools</a>
+                    </div>
+                    <img src="./assets/images/onesol-dashbord-img.png" alt="Promo Illustration" class="promo-image">
+                </div>
+
+            </div>
+        </main>
+
+    </div>
+
+    <script src="./js/sidebar.js"></script>
+    <script src="./js/animations.js"></script>
+</body>
+</html>

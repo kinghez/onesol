@@ -1,0 +1,90 @@
+{% extends 'base_dashboard.html' %}
+{% load static %}
+
+{% block title %}Security Settings – OneSol AI Hub{% endblock %}
+{% block nav_security %}active{% endblock %}
+
+{% block content %}
+<div class="profile-page fade-in">
+  
+  <div class="profile-header fade-up">
+    <h1 class="page-title">Security Settings</h1>
+    <p class="page-sub">Keep your account secure and manage your password.</p>
+  </div>
+
+  <div class="profile-grid fade-up" style="animation-delay:.1s">
+    <div class="glass-card">
+      <form method="POST" action="{% url 'dashboard:security' %}">
+        {% csrf_token %}
+
+        <div class="form-group" style="margin-bottom: 24px;">
+            <h3 style="color: #fff; font-size: 16px; margin-bottom: 12px;">Change Password</h3>
+            <p style="color: #AEB5CA; font-size: 13px; margin-bottom: 24px;">Ensure your account is using a long, random password to stay secure.</p>
+        </div>
+
+        <div class="form-grid">
+          <div class="form-group">
+            <label>Current Password</label>
+            <div style="position: relative;">
+                <input type="password" name="current_password" class="form-control" placeholder="Enter current password" required id="currPass">
+                <i class="fa-regular fa-eye" style="position: absolute; right: 16px; top: 14px; color: #636A8A; cursor: pointer;" onclick="togglePass('currPass')"></i>
+            </div>
+          </div>
+          
+          <div class="form-group">
+            <label>New Password</label>
+            <div style="position: relative;">
+                <input type="password" name="new_password" class="form-control" placeholder="Enter new password" required id="newPass">
+                <i class="fa-regular fa-eye" style="position: absolute; right: 16px; top: 14px; color: #636A8A; cursor: pointer;" onclick="togglePass('newPass')"></i>
+            </div>
+          </div>
+          
+          <div class="form-group">
+            <label>Confirm New Password</label>
+            <div style="position: relative;">
+                <input type="password" name="confirm_password" class="form-control" placeholder="Confirm new password" required id="confPass">
+                <i class="fa-regular fa-eye" style="position: absolute; right: 16px; top: 14px; color: #636A8A; cursor: pointer;" onclick="togglePass('confPass')"></i>
+            </div>
+          </div>
+        </div>
+
+        <div class="form-actions">
+          <button type="submit" class="btn-primary">Update Password</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+</div>
+
+<style>
+/* Layout */
+.profile-page { max-width: 800px; margin: 0 auto; padding: 24px 16px 80px; }
+.profile-header { margin-bottom: 32px; }
+.page-title { font-size: 24px; font-weight: 700; color: #fff; margin-bottom: 6px; }
+.page-sub { color: #AEB5CA; font-size: 14px; }
+.glass-card { background: rgba(18,22,52,.92); border: 1px solid rgba(255,255,255,.08); border-radius: 16px; padding: 32px; backdrop-filter: blur(20px); }
+
+/* Form */
+.form-grid { display: grid; grid-template-columns: 1fr; gap: 20px; max-width: 500px; }
+.form-group { margin-bottom: 16px; }
+.form-group label { display: block; font-size: 13px; font-weight: 600; color: #AEB5CA; margin-bottom: 8px; }
+.form-control { width: 100%; background: rgba(255,255,255,.03); border: 1px solid rgba(255,255,255,.08); color: #fff; padding: 12px 16px; border-radius: 10px; font-size: 14px; transition: all .2s; padding-right: 40px; }
+.form-control:focus { outline: none; border-color: rgba(91,99,246,.5); background: rgba(255,255,255,.05); }
+
+.form-actions { margin-top: 32px; padding-top: 24px; border-top: 1px solid rgba(255,255,255,.05); }
+.btn-primary { background: linear-gradient(135deg,#5B63F6,#8B3DFF); color: #fff; padding: 12px 24px; border: none; border-radius: 10px; font-size: 14px; font-weight: 700; cursor: pointer; transition: transform .2s; }
+.btn-primary:hover { transform: translateY(-2px); }
+</style>
+
+<script>
+function togglePass(id) {
+    var x = document.getElementById(id);
+    if (x.type === "password") {
+        x.type = "text";
+    } else {
+        x.type = "password";
+    }
+}
+</script>
+{% endblock %}

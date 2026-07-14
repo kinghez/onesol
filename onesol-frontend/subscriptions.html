@@ -1,0 +1,274 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>OneSol AI Hub - My Subscriptions</title>
+    
+    <!-- External Dependencies -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    
+    <!-- CSS System -->
+    <link rel="stylesheet" href="./css/reset.css">
+    <link rel="stylesheet" href="./css/variables.css">
+    <link rel="stylesheet" href="./css/typography.css">
+    <link rel="stylesheet" href="./css/layout.css">
+    <link rel="stylesheet" href="./css/utilities.css">
+    
+    <!-- Components -->
+    <link rel="stylesheet" href="./components/buttons.css">
+    <link rel="stylesheet" href="./components/cards.css">
+    <link rel="stylesheet" href="./components/sidebar.css">
+    <link rel="stylesheet" href="./components/navbar.css">
+    <link rel="stylesheet" href="./components/badges.css">
+    <link rel="stylesheet" href="./components/tabs.css">
+    
+    <!-- Page Specific -->
+    <link rel="stylesheet" href="./pages/dashboard.css">
+</head>
+<body class="fade-in">
+    <div class="app-container">
+        
+        <!-- Sidebar -->
+        <aside class="sidebar-wrapper">
+            <div class="sidebar">
+                <div class="sidebar-brand">
+                    <img src="./assets/logo.png" alt="OneSol Logo" class="sidebar-logo" style="width: 32px; height: 32px; border-radius: 8px;">
+                    <span class="sidebar-text">OneSol AI Hub</span>
+                </div>
+
+                <nav class="sidebar-nav">
+                    <div class="sidebar-section-title sidebar-text">Main</div>
+                    
+                    <a href="dashboard.html" class="sidebar-item">
+                        <i class="fa-solid fa-border-all fa-fw"></i>
+                        <span class="sidebar-text">Dashboard</span>
+                    </a>
+                    
+                    <a href="subscriptions.html" class="sidebar-item active">
+                        <i class="fa-regular fa-calendar-check fa-fw"></i>
+                        <span class="sidebar-text">My Subscriptions</span>
+                    </a>
+                    
+                    <a href="#" class="sidebar-item">
+                        <i class="fa-solid fa-receipt fa-fw"></i>
+                        <span class="sidebar-text">Order History</span>
+                    </a>
+                    
+                    <a href="#" class="sidebar-item">
+                        <i class="fa-solid fa-users fa-fw"></i>
+                        <span class="sidebar-text">Referrals</span>
+                    </a>
+
+                    <a href="#" class="sidebar-item">
+                        <i class="fa-solid fa-wallet fa-fw"></i>
+                        <span class="sidebar-text">Wallet</span>
+                    </a>
+
+                    <div class="sidebar-divider"></div>
+                    
+                    <div class="sidebar-section-title sidebar-text">Account</div>
+                    
+                    <a href="#" class="sidebar-item">
+                        <i class="fa-regular fa-user fa-fw"></i>
+                        <span class="sidebar-text">Profile Settings</span>
+                    </a>
+                    
+                    <a href="#" class="sidebar-item">
+                        <i class="fa-solid fa-shield-halved fa-fw"></i>
+                        <span class="sidebar-text">Security</span>
+                    </a>
+                    
+                    <a href="#" class="sidebar-item">
+                        <i class="fa-regular fa-circle-question fa-fw"></i>
+                        <span class="sidebar-text">Support</span>
+                    </a>
+                    
+                    <a href="#" class="sidebar-item mt-4">
+                        <i class="fa-solid fa-arrow-right-from-bracket fa-fw"></i>
+                        <span class="sidebar-text">Logout</span>
+                    </a>
+                </nav>
+
+                <div class="sidebar-cta-banner">
+                    <div class="sidebar-cta-icon">
+                        <i class="fa-solid fa-gift fa-lg"></i>
+                    </div>
+                    <div class="sidebar-cta-title">Refer & Earn</div>
+                    <div class="sidebar-cta-desc">Earn NGN 2,000 for each successful referral.</div>
+                    <a href="#" class="btn btn-primary btn-block">Get Referral Link</a>
+                </div>
+            </div>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <!-- Header -->
+            <header class="navbar">
+                <div class="navbar-left">
+                    <button class="nav-icon-btn mobile-menu-btn">
+                        <i class="fa-solid fa-bars"></i>
+                    </button>
+                    <div>
+                        <h1 class="navbar-title">My Subscriptions</h1>
+                        <p class="navbar-subtitle">Manage all your active subscriptions.</p>
+                    </div>
+                </div>
+                
+                <div class="navbar-right">
+                    <button class="nav-icon-btn">
+                        <i class="fa-solid fa-magnifying-glass"></i>
+                    </button>
+                    <button class="nav-icon-btn">
+                        <i class="fa-regular fa-bell"></i>
+                    </button>
+                    <div class="user-profile">
+                        <div class="avatar flex items-center justify-center bg-transparent">
+                            <i class="fa-solid fa-circle-user" style="font-size: 36px; color: var(--text-secondary);"></i>
+                        </div>
+                        <span class="user-name">John Doe <i class="fa-solid fa-chevron-down" style="font-size: 10px;"></i></span>
+                    </div>
+                </div>
+            </header>
+
+            <!-- Dashboard Content -->
+            <div class="dashboard-content">
+                
+                <!-- Page Title Area (redundant if using navbar, but keeping for exact mockup match) -->
+                <div class="mb-4">
+                    <h2 style="font-size: 20px; font-weight: 600; color: #FFFFFF; margin-bottom: 6px;">My Subscriptions</h2>
+                    <p style="color: var(--text-secondary); font-size: 14px;">Manage all your active subscriptions.</p>
+                </div>
+
+                <!-- Tabs -->
+                <div class="tabs-container">
+                    <a href="#" class="tab active">Active (6)</a>
+                    <a href="#" class="tab">Canceled (2)</a>
+                    <a href="#" class="tab">Expired (1)</a>
+                </div>
+
+                <!-- Subscriptions List -->
+                <div class="card" style="max-width: 900px;">
+                    <div class="list-container">
+                        
+                        <!-- Item 1 -->
+                        <div class="list-item">
+                            <div class="list-item-left">
+                                <div class="list-item-logo" style="background-color: #10A37F20;">
+                                    <img src="./assets/images/logos/chatgpt.svg" alt="ChatGPT">
+                                </div>
+                                <div>
+                                    <div class="list-item-title">ChatGPT Plus</div>
+                                    <div class="list-item-subtitle">Renews on May 23, 2024</div>
+                                </div>
+                            </div>
+                            <div class="list-item-right">
+                                <div class="list-item-price">NGN 5,500 <span class="period">/month</span></div>
+                                <span class="badge badge-success">Active</span>
+                                <button class="btn-manage">Manage</button>
+                            </div>
+                        </div>
+                        
+                        <!-- Item 2 -->
+                        <div class="list-item">
+                            <div class="list-item-left">
+                                <div class="list-item-logo" style="background-color: #00C4CC20;">
+                                    <img src="./assets/images/logos/canva.svg" alt="Canva">
+                                </div>
+                                <div>
+                                    <div class="list-item-title">Canva Pro</div>
+                                    <div class="list-item-subtitle">Renews on May 30, 2024</div>
+                                </div>
+                            </div>
+                            <div class="list-item-right">
+                                <div class="list-item-price">NGN 4,200 <span class="period">/month</span></div>
+                                <span class="badge badge-success">Active</span>
+                                <button class="btn-manage">Manage</button>
+                            </div>
+                        </div>
+                        
+                        <!-- Item 3 -->
+                        <div class="list-item">
+                            <div class="list-item-left">
+                                <div class="list-item-logo" style="background-color: #000000;">
+                                    <img src="./assets/images/logos/midjourney.svg" alt="Midjourney">
+                                </div>
+                                <div>
+                                    <div class="list-item-title">Midjourney</div>
+                                    <div class="list-item-subtitle">Renews on June 2, 2024</div>
+                                </div>
+                            </div>
+                            <div class="list-item-right">
+                                <div class="list-item-price">NGN 6,800 <span class="period">/month</span></div>
+                                <span class="badge badge-success">Active</span>
+                                <button class="btn-manage">Manage</button>
+                            </div>
+                        </div>
+                        
+                        <!-- Item 4 -->
+                        <div class="list-item">
+                            <div class="list-item-left">
+                                <div class="list-item-logo" style="background-color: #15835620;">
+                                    <img src="./assets/images/logos/grammarly.svg" alt="Grammarly">
+                                </div>
+                                <div>
+                                    <div class="list-item-title">Grammarly Premium</div>
+                                    <div class="list-item-subtitle">Renews on June 10, 2024</div>
+                                </div>
+                            </div>
+                            <div class="list-item-right">
+                                <div class="list-item-price">NGN 3,200 <span class="period">/month</span></div>
+                                <span class="badge badge-success">Active</span>
+                                <button class="btn-manage">Manage</button>
+                            </div>
+                        </div>
+
+                        <!-- Item 5 -->
+                        <div class="list-item">
+                            <div class="list-item-left">
+                                <div class="list-item-logo" style="background-color: #000000;">
+                                    <img src="./assets/images/logos/notion.svg" alt="Notion">
+                                </div>
+                                <div>
+                                    <div class="list-item-title">Notion Plus</div>
+                                    <div class="list-item-subtitle">Renews on June 13, 2024</div>
+                                </div>
+                            </div>
+                            <div class="list-item-right">
+                                <div class="list-item-price">NGN 4,000 <span class="period">/month</span></div>
+                                <span class="badge badge-success">Active</span>
+                                <button class="btn-manage">Manage</button>
+                            </div>
+                        </div>
+
+                        <!-- Item 6 -->
+                        <div class="list-item">
+                            <div class="list-item-left">
+                                <div class="list-item-logo" style="background-color: #D9775720;">
+                                    <img src="./assets/images/logos/claude.svg" alt="Claude">
+                                </div>
+                                <div>
+                                    <div class="list-item-title">Claude Pro</div>
+                                    <div class="list-item-subtitle">Renews on June 17, 2024</div>
+                                </div>
+                            </div>
+                            <div class="list-item-right">
+                                <div class="list-item-price">NGN 6,500 <span class="period">/month</span></div>
+                                <span class="badge badge-success">Active</span>
+                                <button class="btn-manage">Manage</button>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+
+            </div>
+        </main>
+
+    </div>
+
+    <script src="./js/sidebar.js"></script>
+    <script src="./js/animations.js"></script>
+</body>
+</html>

@@ -1,0 +1,13 @@
+<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+      <defs>
+        <linearGradient id="jasperGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+          <stop offset="0%" stop-color="#6848FF"/>
+          <stop offset="50%" stop-color="#8D63FF"/>
+          <stop offset="100%" stop-color="#00C4CC"/>
+        </linearGradient>
+      </defs>
+      <path d="M25 65 C10 65, 10 35, 30 25 C40 15, 60 15, 70 25 C90 35, 90 65, 75 65" fill="none" stroke="url(#jasperGrad)" stroke-width="14" stroke-linecap="round"/>
+      <path d="M40 75 Q50 85, 60 75" fill="none" stroke="#FFFFFF" stroke-width="6" stroke-linecap="round"/>
+      <circle cx="35" cy="50" r="4" fill="#FFFFFF"/>
+      <circle cx="65" cy="50" r="4" fill="#FFFFFF"/>
+    </svg>

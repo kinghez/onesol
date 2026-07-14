@@ -1,0 +1,66 @@
+{% extends 'base_dashboard.html' %}
+{% load static %}
+
+{% block title %}Support – OneSol AI Hub{% endblock %}
+{% block nav_support %}active{% endblock %}
+
+{% block content %}
+<div class="profile-page fade-in">
+  
+  <div class="profile-header fade-up">
+    <h1 class="page-title">Support &amp; Help Center</h1>
+    <p class="page-sub">Need assistance? We're here to help.</p>
+  </div>
+
+  <div class="profile-grid fade-up" style="animation-delay:.1s">
+    <div class="glass-card">
+      <form method="POST" action="{% url 'dashboard:support' %}">
+        {% csrf_token %}
+
+        <div class="form-group" style="margin-bottom: 24px;">
+            <h3 style="color: #fff; font-size: 16px; margin-bottom: 12px;">Contact Support</h3>
+            <p style="color: #AEB5CA; font-size: 13px; margin-bottom: 24px;">Fill out the form below and our team will get back to you within 24 hours.</p>
+        </div>
+
+        <div class="form-grid">
+          <div class="form-group">
+            <label>Subject</label>
+            <input type="text" name="subject" class="form-control" placeholder="What is this regarding?" required>
+          </div>
+          
+          <div class="form-group">
+            <label>Message</label>
+            <textarea name="message" class="form-control" rows="5" placeholder="Describe your issue in detail..." required></textarea>
+          </div>
+        </div>
+
+        <div class="form-actions">
+          <button type="submit" class="btn-primary"><i class="fa-regular fa-paper-plane"></i> Send Message</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+</div>
+
+<style>
+/* Layout */
+.profile-page { max-width: 800px; margin: 0 auto; padding: 24px 16px 80px; }
+.profile-header { margin-bottom: 32px; }
+.page-title { font-size: 24px; font-weight: 700; color: #fff; margin-bottom: 6px; }
+.page-sub { color: #AEB5CA; font-size: 14px; }
+.glass-card { background: rgba(18,22,52,.92); border: 1px solid rgba(255,255,255,.08); border-radius: 16px; padding: 32px; backdrop-filter: blur(20px); }
+
+/* Form */
+.form-grid { display: grid; grid-template-columns: 1fr; gap: 20px; max-width: 600px; }
+.form-group { margin-bottom: 16px; }
+.form-group label { display: block; font-size: 13px; font-weight: 600; color: #AEB5CA; margin-bottom: 8px; }
+.form-control { width: 100%; background: rgba(255,255,255,.03); border: 1px solid rgba(255,255,255,.08); color: #fff; padding: 12px 16px; border-radius: 10px; font-size: 14px; transition: all .2s; font-family: inherit; }
+.form-control:focus { outline: none; border-color: rgba(91,99,246,.5); background: rgba(255,255,255,.05); }
+textarea.form-control { resize: vertical; }
+
+.form-actions { margin-top: 32px; padding-top: 24px; border-top: 1px solid rgba(255,255,255,.05); }
+.btn-primary { background: linear-gradient(135deg,#5B63F6,#8B3DFF); color: #fff; padding: 12px 24px; border: none; border-radius: 10px; font-size: 14px; font-weight: 700; cursor: pointer; transition: transform .2s; }
+.btn-primary:hover { transform: translateY(-2px); }
+</style>
+{% endblock %}

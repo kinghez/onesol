@@ -1,0 +1,10 @@
+<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+      <defs>
+        <linearGradient id="copyGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+          <stop offset="0%" stop-color="#8D63FF" stop-opacity="0.2"/>
+          <stop offset="100%" stop-color="#6848FF" stop-opacity="0.05"/>
+        </linearGradient>
+      </defs>
+      <rect x="5" y="5" width="90" height="90" rx="20" fill="url(#copyGrad)" stroke="#8D63FF" stroke-width="2" stroke-opacity="0.3"/>
+      <text x="50" y="54" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif" font-weight="700" font-size="20" fill="#FFFFFF" text-anchor="middle" dominant-baseline="middle">copy.ai</text>
+    </svg>

@@ -1,0 +1,417 @@
+[
+  {
+    "model": "products.category",
+    "pk": 1,
+    "fields": {
+      "name": "AI Chatbots",
+      "slug": "ai-chatbots",
+      "icon": "fa-robot",
+      "description": "Conversational AI tools",
+      "order": 1
+    }
+  },
+  {
+    "model": "products.category",
+    "pk": 2,
+    "fields": {
+      "name": "Writing",
+      "slug": "writing",
+      "icon": "fa-pen",
+      "description": "AI writing and content creation tools",
+      "order": 2
+    }
+  },
+  {
+    "model": "products.category",
+    "pk": 3,
+    "fields": {
+      "name": "Design",
+      "slug": "design",
+      "icon": "fa-palette",
+      "description": "AI design and image generation tools",
+      "order": 3
+    }
+  },
+  {
+    "model": "products.category",
+    "pk": 4,
+    "fields": {
+      "name": "Productivity",
+      "slug": "productivity",
+      "icon": "fa-bolt",
+      "description": "Tools to boost workflow and productivity",
+      "order": 4
+    }
+  },
+  {
+    "model": "products.category",
+    "pk": 5,
+    "fields": {
+      "name": "Video Creation",
+      "slug": "video-creation",
+      "icon": "fa-video",
+      "description": "AI video generation and editing tools",
+      "order": 5
+    }
+  },
+  {
+    "model": "products.category",
+    "pk": 6,
+    "fields": {
+      "name": "Marketing",
+      "slug": "marketing",
+      "icon": "fa-bullhorn",
+      "description": "Marketing and SEO AI tools",
+      "order": 6
+    }
+  },
+  {
+    "model": "products.category",
+    "pk": 7,
+    "fields": {
+      "name": "Development",
+      "slug": "development",
+      "icon": "fa-code",
+      "description": "Developer tools and AI APIs",
+      "order": 7
+    }
+  },
+  {
+    "model": "products.category",
+    "pk": 8,
+    "fields": {
+      "name": "Business",
+      "slug": "business",
+      "icon": "fa-briefcase",
+      "description": "Business automation and analytics",
+      "order": 8
+    }
+  },
+  {
+    "model": "products.tool",
+    "pk": 1,
+    "fields": {
+      "name": "ChatGPT Plus",
+      "slug": "chatgpt-plus",
+      "description": "Access OpenAI's most powerful AI model, GPT-4o, for unlimited conversations, advanced reasoning, image generation, and file analysis.",
+      "short_description": "Unlimited GPT-4o access with image gen, file analysis & more.",
+      "category": 1,
+      "base_price_ngn": "5500.00",
+      "is_new": false,
+      "is_popular": true,
+      "is_featured": true,
+      "is_active": true,
+      "image_url": "https://cdn.svgl.app/library/chatgpt.svg",
+      "developer": "OpenAI",
+      "rating": "4.9",
+      "review_count": 1240,
+      "users_count": "25,000+",
+      "created_at": "2026-07-14T02:23:59.759653+00:00",
+      "updated_at": "2026-07-14T02:23:59.759653+00:00"
+    }
+  },
+  {
+    "model": "products.tool",
+    "pk": 2,
+    "fields": {
+      "name": "Canva Pro",
+      "slug": "canva-pro",
+      "description": "Full access to Canva Pro with premium templates, brand kits, background remover, magic resize, and unlimited storage.",
+      "short_description": "Premium design with unlimited templates, brand kits & Magic Studio.",
+      "category": 3,
+      "base_price_ngn": "4200.00",
+      "is_new": false,
+      "is_popular": true,
+      "is_featured": true,
+      "is_active": true,
+      "image_url": "https://cdn.svgl.app/library/canva.svg",
+      "developer": "Canva",
+      "rating": "4.8",
+      "review_count": 980,
+      "users_count": "18,000+",
+      "created_at": "2026-07-14T02:23:59.759653+00:00",
+      "updated_at": "2026-07-14T02:23:59.759653+00:00"
+    }
+  },
+  {
+    "model": "products.tool",
+    "pk": 3,
+    "fields": {
+      "name": "Midjourney",
+      "slug": "midjourney",
+      "description": "Generate stunning, high-quality AI images with Midjourney. Create artwork, product mockups, and photorealistic images from text prompts.",
+      "short_description": "State-of-the-art AI image generation from text prompts.",
+      "category": 3,
+      "base_price_ngn": "6800.00",
+      "is_new": false,
+      "is_popular": true,
+      "is_featured": true,
+      "is_active": true,
+      "image_url": "https://cdn.svgl.app/library/midjourney.svg",
+      "developer": "Midjourney Inc.",
+      "rating": "4.7",
+      "review_count": 760,
+      "users_count": "12,000+",
+      "created_at": "2026-07-14T02:23:59.759653+00:00",
+      "updated_at": "2026-07-14T02:23:59.759653+00:00"
+    }
+  },
+  {
+    "model": "products.tool",
+    "pk": 4,
+    "fields": {
+      "name": "Grammarly Premium",
+      "slug": "grammarly-premium",
+      "description": "Advanced AI writing assistant with real-time grammar, style, clarity, and plagiarism checks. Perfect for professionals and students.",
+      "short_description": "AI writing assistant with grammar, clarity & plagiarism checks.",
+      "category": 2,
+      "base_price_ngn": "3200.00",
+      "is_new": false,
+      "is_popular": true,
+      "is_featured": true,
+      "is_active": true,
+      "image_url": "https://cdn.svgl.app/library/grammarly.svg",
+      "developer": "Grammarly",
+      "rating": "4.8",
+      "review_count": 890,
+      "users_count": "15,000+",
+      "created_at": "2026-07-14T02:23:59.759653+00:00",
+      "updated_at": "2026-07-14T02:23:59.759653+00:00"
+    }
+  },
+  {
+    "model": "products.tool",
+    "pk": 5,
+    "fields": {
+      "name": "Notion Plus",
+      "slug": "notion-plus",
+      "description": "Unlimited AI-powered workspace for notes, projects, databases, wikis, and collaboration. The all-in-one productivity tool.",
+      "short_description": "All-in-one AI workspace for notes, projects & collaboration.",
+      "category": 4,
+      "base_price_ngn": "4000.00",
+      "is_new": false,
+      "is_popular": true,
+      "is_featured": true,
+      "is_active": true,
+      "image_url": "https://cdn.svgl.app/library/notion.svg",
+      "developer": "Notion Labs",
+      "rating": "4.7",
+      "review_count": 620,
+      "users_count": "10,000+",
+      "created_at": "2026-07-14T02:23:59.759653+00:00",
+      "updated_at": "2026-07-14T02:23:59.759653+00:00"
+    }
+  },
+  {
+    "model": "products.tool",
+    "pk": 6,
+    "fields": {
+      "name": "Claude Pro",
+      "slug": "claude-pro",
+      "description": "Access Claude's most capable AI model with priority access, extended context window, and advanced reasoning for complex tasks.",
+      "short_description": "Anthropic's most powerful AI with 200K context window.",
+      "category": 1,
+      "base_price_ngn": "6500.00",
+      "is_new": false,
+      "is_popular": true,
+      "is_featured": true,
+      "is_active": true,
+      "image_url": "https://cdn.svgl.app/library/claude.svg",
+      "developer": "Anthropic",
+      "rating": "4.8",
+      "review_count": 540,
+      "users_count": "8,500+",
+      "created_at": "2026-07-14T02:23:59.759653+00:00",
+      "updated_at": "2026-07-14T02:23:59.759653+00:00"
+    }
+  },
+  {
+    "model": "products.tool",
+    "pk": 7,
+    "fields": {
+      "name": "Gemini Advanced",
+      "slug": "gemini-advanced",
+      "description": "Google's most capable AI model with access to Gemini Ultra. Deep research, multimodal understanding, and 1M token context.",
+      "short_description": "Google's most capable AI with 1M token context & deep research.",
+      "category": 1,
+      "base_price_ngn": "5800.00",
+      "is_new": true,
+      "is_popular": false,
+      "is_featured": true,
+      "is_active": true,
+      "image_url": "https://cdn.svgl.app/library/gemini.svg",
+      "developer": "Google",
+      "rating": "4.6",
+      "review_count": 320,
+      "users_count": "5,000+",
+      "created_at": "2026-07-14T02:23:59.759653+00:00",
+      "updated_at": "2026-07-14T02:23:59.759653+00:00"
+    }
+  },
+  {
+    "model": "products.tool",
+    "pk": 8,
+    "fields": {
+      "name": "Perplexity Pro",
+      "slug": "perplexity-pro",
+      "description": "AI-powered answer engine with real-time web search, academic sources, and unlimited Pro searches. Research at lightning speed.",
+      "short_description": "AI search engine with real-time web access & academic sources.",
+      "category": 1,
+      "base_price_ngn": "3500.00",
+      "is_new": false,
+      "is_popular": false,
+      "is_featured": false,
+      "is_active": true,
+      "image_url": "https://cdn.svgl.app/library/perplexity.svg",
+      "developer": "Perplexity AI",
+      "rating": "4.6",
+      "review_count": 280,
+      "users_count": "4,000+",
+      "created_at": "2026-07-14T02:23:59.759653+00:00",
+      "updated_at": "2026-07-14T02:23:59.759653+00:00"
+    }
+  },
+  {
+    "model": "products.subscriptionplan",
+    "pk": 1,
+    "fields": {
+      "tool": 1,
+      "name": "Monthly",
+      "duration_type": "monthly",
+      "duration_days": 30,
+      "price_ngn": "5500.00",
+      "is_best_value": false,
+      "is_active": true
+    }
+  },
+  {
+    "model": "products.subscriptionplan",
+    "pk": 2,
+    "fields": {
+      "tool": 1,
+      "name": "Yearly",
+      "duration_type": "yearly",
+      "duration_days": 365,
+      "price_ngn": "55000.00",
+      "is_best_value": true,
+      "is_active": true
+    }
+  },
+  {
+    "model": "products.subscriptionplan",
+    "pk": 3,
+    "fields": {
+      "tool": 2,
+      "name": "Monthly",
+      "duration_type": "monthly",
+      "duration_days": 30,
+      "price_ngn": "4200.00",
+      "is_best_value": false,
+      "is_active": true
+    }
+  },
+  {
+    "model": "products.subscriptionplan",
+    "pk": 4,
+    "fields": {
+      "tool": 2,
+      "name": "Yearly",
+      "duration_type": "yearly",
+      "duration_days": 365,
+      "price_ngn": "42000.00",
+      "is_best_value": true,
+      "is_active": true
+    }
+  },
+  {
+    "model": "products.subscriptionplan",
+    "pk": 5,
+    "fields": {
+      "tool": 3,
+      "name": "Monthly",
+      "duration_type": "monthly",
+      "duration_days": 30,
+      "price_ngn": "6800.00",
+      "is_best_value": false,
+      "is_active": true
+    }
+  },
+  {
+    "model": "products.subscriptionplan",
+    "pk": 6,
+    "fields": {
+      "tool": 4,
+      "name": "Monthly",
+      "duration_type": "monthly",
+      "duration_days": 30,
+      "price_ngn": "3200.00",
+      "is_best_value": false,
+      "is_active": true
+    }
+  },
+  {
+    "model": "products.subscriptionplan",
+    "pk": 7,
+    "fields": {
+      "tool": 4,
+      "name": "Yearly",
+      "duration_type": "yearly",
+      "duration_days": 365,
+      "price_ngn": "28000.00",
+      "is_best_value": true,
+      "is_active": true
+    }
+  },
+  {
+    "model": "products.subscriptionplan",
+    "pk": 8,
+    "fields": {
+      "tool": 5,
+      "name": "Monthly",
+      "duration_type": "monthly",
+      "duration_days": 30,
+      "price_ngn": "4000.00",
+      "is_best_value": false,
+      "is_active": true
+    }
+  },
+  {
+    "model": "products.subscriptionplan",
+    "pk": 9,
+    "fields": {
+      "tool": 6,
+      "name": "Monthly",
+      "duration_type": "monthly",
+      "duration_days": 30,
+      "price_ngn": "6500.00",
+      "is_best_value": false,
+      "is_active": true
+    }
+  },
+  {
+    "model": "products.subscriptionplan",
+    "pk": 10,
+    "fields": {
+      "tool": 7,
+      "name": "Monthly",
+      "duration_type": "monthly",
+      "duration_days": 30,
+      "price_ngn": "5800.00",
+      "is_best_value": false,
+      "is_active": true
+    }
+  },
+  {
+    "model": "products.subscriptionplan",
+    "pk": 11,
+    "fields": {
+      "tool": 8,
+      "name": "Monthly",
+      "duration_type": "monthly",
+      "duration_days": 30,
+      "price_ngn": "3500.00",
+      "is_best_value": false,
+      "is_active": true
+    }
+  }
+]

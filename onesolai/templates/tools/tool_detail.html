@@ -1,0 +1,114 @@
+{% extends 'base_public.html' %}
+{% load static %}
+
+{% block title %}OneSol AI Hub - Tool Details{% endblock %}
+{% block meta_description %}Get premium access to this AI &amp; SaaS tool at affordable prices.{% endblock %}
+
+{% block extra_css %}
+    <link rel="stylesheet" href="{% static 'css/tool.css' %}">
+{% endblock %}
+
+{% block content %}
+    <!-- ══════ TOOL MAIN CONTENT ══════ -->
+    <main class="tool-page-main">
+        <div class="tool-header-wrap">
+            <!-- Left: Logo & Info -->
+            <div class="th-left">
+                <div class="th-logo-box">
+                    <img id="toolLogo" src="" alt="Tool Logo">
+                </div>
+                <div class="th-info">
+                    <h1 id="toolName" class="th-title"></h1>
+                    <p class="th-dev">By <span id="toolDeveloper"></span></p>
+                    <div class="th-stats">
+                        <span class="th-rating"><i class="fa-solid fa-star" style="color: #FFD98A;"></i> <span id="toolRating"></span> <span class="th-reviews">(<span id="toolReviewsCount"></span> reviews)</span></span>
+                        <span class="th-divider">|</span>
+                        <span class="th-users"><span id="toolUsersCount"></span> Active Users</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Right: Pricing & Buttons -->
+            <div class="th-right">
+                <button class="th-wishlist-btn"><i class="fa-regular fa-heart"></i> Add to Wishlist</button>
+                <div class="th-price-box">
+                    <span class="th-price" id="toolPrice"></span> <span class="th-period">/ month</span>
+                </div>
+                <form method="POST" action="{% url 'orders:checkout' %}" class="th-checkout-form">
+                    {% csrf_token %}
+                    <input type="hidden" name="tool_slug" value="{{ tool.slug }}">
+                    
+                    {% if tool.plans.all %}
+                        <div class="th-plan-select mb-2" style="margin-bottom:12px;">
+                            <label style="display:block; font-size:12px; color:#AEB5CA; margin-bottom:4px;">Select Plan</label>
+                            <select name="plan_id" class="form-control" style="width:100%; background:rgba(255,255,255,.05); color:#fff; border:1px solid rgba(255,255,255,.1); padding:8px; border-radius:6px; font-size:13px;">
+                                {% for plan in plans %}
+                                    <option value="{{ plan.id }}">{{ plan.name }} - ₦{{ plan.price_ngn|floatformat:0 }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                    {% endif %}
+                    
+                    {% if user.is_authenticated and user.profile.wallet_balance > 0 %}
+                    <div class="th-wallet-pay mb-3" style="margin-bottom:16px;">
+                        <label class="wallet-checkbox flex items-center" style="display:flex; align-items:center; gap:8px; cursor:pointer;">
+                            <input type="checkbox" name="pay_with_wallet" value="true" style="accent-color:#5B63F6;">
+                            <span style="font-size:13px; color:#AEB5CA;">Pay with Wallet (Bal: ₦{{ user.profile.wallet_balance|floatformat:0 }})</span>
+                        </label>
+                    </div>
+                    {% endif %}
+
+                    <button type="submit" class="btn-pri-2 th-buy-btn" style="width:100%;">Buy Now</button>
+                </form>
+            </div>
+        </div>
+
+        <div class="tool-tabs-container">
+            <div class="tool-tabs">
+                <button class="tool-tab active" data-target="overview">Overview</button>
+                <button class="tool-tab" data-target="features">Features</button>
+                <button class="tool-tab" data-target="reviews">Reviews (<span id="tabReviewsCount"></span>)</button>
+                <button class="tool-tab" data-target="faqs">FAQs</button>
+                <div class="tab-indicator" id="tabIndicator"></div>
+            </div>
+        </div>
+
+        <div class="tab-contents">
+            <div class="tab-pane active" id="tab-overview">
+                <div class="overview-grid">
+                    <div class="ov-left">
+                        <h3 class="pane-title">Overview</h3>
+                        <p class="ov-desc" id="ovDesc"></p>
+                        <ul class="ov-features-list" id="ovFeatures"></ul>
+                    </div>
+                    <div class="ov-right">
+                        <h3 class="pane-title">Screenshots</h3>
+                        <div class="ss-gallery">
+                            <div class="ss-track" id="ssTrack"></div>
+                            <button class="ss-nav prev" id="ssPrev"><i class="fas fa-chevron-left"></i></button>
+                            <button class="ss-nav next" id="ssNext"><i class="fas fa-chevron-right"></i></button>
+                            <div class="ss-dots" id="ssDots"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="tab-pane" id="tab-features">
+                <h3 class="pane-title">Features &amp; Requirements</h3>
+                <div class="features-grid" id="featGrid"></div>
+            </div>
+            <div class="tab-pane" id="tab-reviews">
+                <h3 class="pane-title">Customer Reviews</h3>
+                <div class="reviews-wrap" id="revWrap"></div>
+            </div>
+            <div class="tab-pane" id="tab-faqs">
+                <h3 class="pane-title">Frequently Asked Questions</h3>
+                <div class="faqs-accordion" id="faqsList"></div>
+            </div>
+        </div>
+    </main>
+{% endblock %}
+
+{% block extra_js %}
+    <script src="{% static 'js/tools-data.js' %}"></script>
+    <script src="{% static 'js/tool.js' %}"></script>
+{% endblock %}

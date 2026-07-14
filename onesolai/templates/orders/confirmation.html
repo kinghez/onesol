@@ -1,0 +1,356 @@
+{% extends 'base_dashboard.html' %}
+{% load static %}
+
+{% block title %}Order Confirmation – OneSol AI Hub{% endblock %}
+
+{% block content %}
+<div class="conf-page">
+
+    <!-- Animated success hero -->
+    <div class="conf-hero">
+        <div class="conf-check-ring">
+            <div class="conf-check-inner">
+                <svg viewBox="0 0 52 52" class="conf-checkmark">
+                    <circle class="conf-circle" cx="26" cy="26" r="25" fill="none"/>
+                    <path class="conf-tick" fill="none" d="M14 27 l8 8 l16-16"/>
+                </svg>
+            </div>
+        </div>
+        <h1 class="conf-title">Payment Successful!</h1>
+        <p class="conf-sub">Your access details have been sent to <strong>{{ order.delivery_email }}</strong></p>
+    </div>
+
+    <!-- Order Summary Card -->
+    <div class="conf-grid">
+        <div class="conf-card glass-card">
+            <div class="conf-card-header">
+                <i class="fa-solid fa-receipt conf-icon"></i>
+                <span>Order Summary</span>
+            </div>
+            <div class="conf-order-meta">
+                <div class="conf-meta-row">
+                    <span class="conf-meta-label">Order ID</span>
+                    <span class="conf-meta-val">#{{ order.id }}</span>
+                </div>
+                <div class="conf-meta-row">
+                    <span class="conf-meta-label">Status</span>
+                    <span class="badge-success">✓ Paid</span>
+                </div>
+                <div class="conf-meta-row">
+                    <span class="conf-meta-label">Date</span>
+                    <span class="conf-meta-val">{{ order.created_at|date:"d M Y, H:i" }}</span>
+                </div>
+            </div>
+
+            <div class="conf-items">
+                {% for item in order.items.all %}
+                <div class="conf-item">
+                    {% if item.tool.image_url %}
+                    <img src="{{ item.tool.image_url }}" alt="{{ item.tool.name }}" class="conf-tool-logo">
+                    {% endif %}
+                    <div class="conf-item-info">
+                        <div class="conf-item-name">{{ item.tool.name }}</div>
+                        <div class="conf-item-plan">{{ item.plan.name|default:"Monthly Plan" }}</div>
+                    </div>
+                    <div class="conf-item-price">NGN {{ item.price_ngn|floatformat:0 }}</div>
+                </div>
+                {% endfor %}
+            </div>
+
+            <div class="conf-total">
+                <span>Total Paid</span>
+                <span class="conf-total-val">NGN {{ order.total_amount_ngn|floatformat:0 }}</span>
+            </div>
+        </div>
+
+        <!-- Access Details Card -->
+        <div class="conf-card glass-card">
+            <div class="conf-card-header">
+                <i class="fa-solid fa-key conf-icon"></i>
+                <span>Access Details</span>
+            </div>
+            {% if order.access_details %}
+            <div class="conf-access-box">
+                <pre class="conf-access-text">{{ order.access_details }}</pre>
+                <button class="conf-copy-btn" onclick="copyAccess(this)">
+                    <i class="fa-regular fa-copy"></i> Copy
+                </button>
+            </div>
+            {% else %}
+            <div class="conf-access-pending">
+                <div class="conf-pulse-dot"></div>
+                <div>
+                    <p class="conf-pending-title">Being prepared…</p>
+                    <p class="conf-pending-sub">Your access details will be emailed to <strong>{{ order.delivery_email }}</strong> within minutes. If you don't see it, check your spam folder.</p>
+                </div>
+            </div>
+            {% endif %}
+
+            <div class="conf-email-note">
+                <i class="fa-solid fa-envelope"></i>
+                A confirmation email has been sent to <strong>{{ order.delivery_email }}</strong>
+            </div>
+        </div>
+    </div>
+
+    <!-- Action buttons -->
+    <div class="conf-actions">
+        <a href="{% url 'dashboard:home' %}" class="btn btn-primary">
+            <i class="fa-solid fa-gauge"></i> Go to Dashboard
+        </a>
+        <a href="{% url 'dashboard:subscriptions' %}" class="btn btn-secondary">
+            <i class="fa-solid fa-list"></i> View Subscriptions
+        </a>
+        <a href="/tools/" class="btn btn-outline">
+            <i class="fa-solid fa-store"></i> Browse More Tools
+        </a>
+    </div>
+</div>
+
+<style>
+/* ── Confirmation Page Styles ── */
+.conf-page {
+    max-width: 860px;
+    margin: 0 auto;
+    padding: 24px 16px 60px;
+}
+
+/* Hero section */
+.conf-hero {
+    text-align: center;
+    padding: 48px 20px 36px;
+    animation: fadeUp .6s ease both;
+}
+.conf-check-ring {
+    width: 100px;
+    height: 100px;
+    border-radius: 50%;
+    background: rgba(34,197,94,.12);
+    border: 2px solid rgba(34,197,94,.3);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 24px;
+    animation: scaleIn .5s cubic-bezier(.175,.885,.32,1.275) both;
+}
+.conf-check-inner {
+    width: 72px;
+    height: 72px;
+    border-radius: 50%;
+    background: rgba(34,197,94,.18);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+.conf-checkmark { width: 40px; height: 40px; }
+.conf-circle {
+    stroke: #22c55e;
+    stroke-width: 2;
+    stroke-dasharray: 166;
+    stroke-dashoffset: 166;
+    animation: drawCircle .6s .2s ease forwards;
+}
+.conf-tick {
+    stroke: #22c55e;
+    stroke-width: 3;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+    stroke-dasharray: 48;
+    stroke-dashoffset: 48;
+    animation: drawTick .4s .8s ease forwards;
+}
+@keyframes drawCircle { to { stroke-dashoffset: 0; } }
+@keyframes drawTick   { to { stroke-dashoffset: 0; } }
+@keyframes scaleIn    { from { transform: scale(0); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+
+.conf-title {
+    font-size: 28px;
+    font-weight: 700;
+    color: #fff;
+    margin: 0 0 10px;
+    background: linear-gradient(135deg, #22c55e, #4ade80);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+.conf-sub { color: #AEB5CA; font-size: 15px; margin: 0; }
+.conf-sub strong { color: #fff; }
+
+/* Cards grid */
+.conf-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 20px;
+    margin-bottom: 32px;
+    animation: fadeUp .6s .15s ease both;
+}
+@media (min-width: 700px) { .conf-grid { grid-template-columns: 1fr 1fr; } }
+
+.glass-card {
+    background: rgba(18,22,52,.92);
+    border: 1px solid rgba(255,255,255,.08);
+    border-radius: 16px;
+    backdrop-filter: blur(20px);
+    padding: 24px;
+}
+.conf-card-header {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 15px;
+    font-weight: 600;
+    color: #fff;
+    margin-bottom: 20px;
+    padding-bottom: 14px;
+    border-bottom: 1px solid rgba(255,255,255,.07);
+}
+.conf-icon { color: #7C83FA; font-size: 16px; }
+
+/* Order meta rows */
+.conf-order-meta { display: flex; flex-direction: column; gap: 10px; margin-bottom: 20px; }
+.conf-meta-row { display: flex; justify-content: space-between; align-items: center; }
+.conf-meta-label { color: #AEB5CA; font-size: 13px; }
+.conf-meta-val { color: #fff; font-size: 13px; font-weight: 500; }
+.badge-success {
+    background: rgba(34,197,94,.15);
+    color: #4ade80;
+    border: 1px solid rgba(34,197,94,.3);
+    padding: 2px 10px;
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: 600;
+}
+
+/* Items */
+.conf-items { display: flex; flex-direction: column; gap: 12px; margin-bottom: 20px; }
+.conf-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px;
+    background: rgba(255,255,255,.04);
+    border-radius: 10px;
+}
+.conf-tool-logo { width: 36px; height: 36px; object-fit: contain; border-radius: 8px; background: rgba(255,255,255,.06); padding: 4px; }
+.conf-item-info { flex: 1; }
+.conf-item-name { font-size: 14px; font-weight: 600; color: #fff; }
+.conf-item-plan { font-size: 12px; color: #AEB5CA; margin-top: 2px; }
+.conf-item-price { font-size: 14px; font-weight: 700; color: #A78BFA; white-space: nowrap; }
+
+/* Total */
+.conf-total {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding-top: 14px;
+    border-top: 1px solid rgba(255,255,255,.07);
+    font-size: 14px;
+    color: #AEB5CA;
+}
+.conf-total-val { font-size: 18px; font-weight: 700; color: #fff; }
+
+/* Access details */
+.conf-access-box {
+    background: rgba(255,255,255,.04);
+    border: 1px solid rgba(255,255,255,.08);
+    border-radius: 10px;
+    padding: 16px;
+    margin-bottom: 16px;
+    position: relative;
+}
+.conf-access-text {
+    color: #A5F3FC;
+    font-family: 'Courier New', monospace;
+    font-size: 13px;
+    white-space: pre-wrap;
+    word-break: break-all;
+    margin: 0;
+}
+.conf-copy-btn {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    background: rgba(91,99,246,.2);
+    border: 1px solid rgba(91,99,246,.4);
+    color: #7C83FA;
+    border-radius: 6px;
+    padding: 4px 10px;
+    font-size: 12px;
+    cursor: pointer;
+    transition: all .2s;
+}
+.conf-copy-btn:hover { background: rgba(91,99,246,.35); }
+
+.conf-access-pending {
+    display: flex;
+    align-items: flex-start;
+    gap: 14px;
+    padding: 16px;
+    background: rgba(251,191,36,.06);
+    border: 1px solid rgba(251,191,36,.2);
+    border-radius: 10px;
+    margin-bottom: 16px;
+}
+.conf-pulse-dot {
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    background: #FBBF24;
+    flex-shrink: 0;
+    margin-top: 4px;
+    animation: pulse 1.5s infinite;
+}
+@keyframes pulse {
+    0%, 100% { opacity: 1; transform: scale(1); }
+    50% { opacity: .5; transform: scale(.8); }
+}
+.conf-pending-title { color: #FDE68A; font-size: 14px; font-weight: 600; margin: 0 0 4px; }
+.conf-pending-sub { color: #AEB5CA; font-size: 13px; margin: 0; }
+.conf-pending-sub strong { color: #fff; }
+
+.conf-email-note {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    color: #AEB5CA;
+    font-size: 13px;
+    margin-top: 12px;
+}
+.conf-email-note i { color: #7C83FA; }
+.conf-email-note strong { color: #fff; }
+
+/* Actions */
+.conf-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+    justify-content: center;
+    animation: fadeUp .6s .3s ease both;
+}
+.btn { display: inline-flex; align-items: center; gap: 8px; padding: 12px 24px; border-radius: 10px; font-size: 14px; font-weight: 600; cursor: pointer; text-decoration: none; transition: all .3s; border: none; }
+.btn-primary { background: linear-gradient(135deg, #5B63F6, #8B3DFF); color: #fff; box-shadow: 0 4px 20px rgba(91,99,246,.3); }
+.btn-primary:hover { transform: translateY(-3px); box-shadow: 0 8px 28px rgba(91,99,246,.45); }
+.btn-secondary { background: rgba(255,255,255,.08); color: #fff; border: 1px solid rgba(255,255,255,.12); }
+.btn-secondary:hover { background: rgba(255,255,255,.14); transform: translateY(-2px); }
+.btn-outline { background: transparent; color: #AEB5CA; border: 1px solid rgba(255,255,255,.15); }
+.btn-outline:hover { color: #fff; border-color: rgba(255,255,255,.3); transform: translateY(-2px); }
+
+@keyframes fadeUp {
+    from { opacity: 0; transform: translateY(24px); }
+    to   { opacity: 1; transform: translateY(0); }
+}
+</style>
+
+<script>
+function copyAccess(btn) {
+    var text = btn.closest('.conf-access-box').querySelector('.conf-access-text').innerText;
+    navigator.clipboard.writeText(text).then(function() {
+        btn.innerHTML = '<i class="fa-solid fa-check"></i> Copied!';
+        btn.style.color = '#4ade80';
+        setTimeout(function() {
+            btn.innerHTML = '<i class="fa-regular fa-copy"></i> Copy';
+            btn.style.color = '';
+        }, 2000);
+    });
+}
+</script>
+{% endblock %}

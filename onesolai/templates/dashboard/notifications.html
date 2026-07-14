@@ -1,0 +1,152 @@
+{% extends 'base_dashboard.html' %}
+{% load static %}
+
+{% block title %}Notifications – OneSol AI Hub{% endblock %}
+{% block nav_notifications %}active{% endblock %}
+
+{% block content %}
+<div class="notif-page fade-in">
+  
+  <div class="notif-header fade-up">
+    <div>
+      <h1 class="page-title">Notifications</h1>
+      <p class="page-sub">Stay updated on your orders, referrals, and system alerts.</p>
+    </div>
+    {% if notifications %}
+      <button class="btn-mark-all" onclick="markAllRead()">
+        <i class="fa-solid fa-check-double"></i> Mark all as read
+      </button>
+    {% endif %}
+  </div>
+
+  <div class="notif-list fade-up" style="animation-delay:.1s">
+    {% if notifications %}
+      {% for notif in notifications %}
+      <div class="notif-item glass-card {% if not notif.is_read %}unread{% endif %}" id="notif-{{ notif.id }}">
+        
+        <div class="notif-icon 
+          {% if notif.notification_type == 'system' %}bg-blue
+          {% elif notif.notification_type == 'order' %}bg-green
+          {% elif notif.notification_type == 'referral' %}bg-gold
+          {% else %}bg-purple{% endif %}">
+          
+          {% if notif.notification_type == 'system' %}<i class="fa-solid fa-bullhorn"></i>
+          {% elif notif.notification_type == 'order' %}<i class="fa-solid fa-box"></i>
+          {% elif notif.notification_type == 'referral' %}<i class="fa-solid fa-users"></i>
+          {% else %}<i class="fa-solid fa-bell"></i>{% endif %}
+        </div>
+        
+        <div class="notif-content">
+          <div class="notif-title">{{ notif.title }}</div>
+          <div class="notif-msg">{{ notif.message }}</div>
+          <div class="notif-date">{{ notif.created_at|timesince }} ago</div>
+          
+          {% if notif.action_url %}
+            <a href="{{ notif.action_url }}" class="notif-action-btn mt-2">View Details</a>
+          {% endif %}
+        </div>
+        
+        {% if not notif.is_read %}
+        <div class="notif-actions">
+          <button class="btn-read" onclick="markRead('{{ notif.id }}')" title="Mark as read">
+            <span class="unread-dot"></span>
+          </button>
+        </div>
+        {% endif %}
+        
+      </div>
+      {% endfor %}
+    {% else %}
+      <div class="empty-state glass-card">
+        <div class="empty-icon"><i class="fa-regular fa-bell-slash"></i></div>
+        <h3>No notifications</h3>
+        <p>You're all caught up! New alerts will appear here.</p>
+      </div>
+    {% endif %}
+  </div>
+
+</div>
+
+<style>
+/* Layout */
+.notif-page { max-width: 800px; margin: 0 auto; padding: 24px 16px 80px; }
+.notif-header { display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 24px; flex-wrap: wrap; gap: 12px; }
+.page-title { font-size: 24px; font-weight: 700; color: #fff; margin-bottom: 6px; }
+.page-sub { color: #AEB5CA; font-size: 14px; }
+.btn-mark-all { background: rgba(255,255,255,.05); border: 1px solid rgba(255,255,255,.1); color: #AEB5CA; padding: 8px 14px; border-radius: 8px; font-size: 13px; font-weight: 600; cursor: pointer; transition: all .2s; }
+.btn-mark-all:hover { background: rgba(255,255,255,.1); color: #fff; }
+
+/* List */
+.notif-list { display: flex; flex-direction: column; gap: 16px; }
+.glass-card { background: rgba(18,22,52,.92); border: 1px solid rgba(255,255,255,.08); border-radius: 16px; padding: 20px; backdrop-filter: blur(20px); }
+
+/* Item */
+.notif-item { display: flex; gap: 16px; transition: all .3s; position: relative; }
+.notif-item.unread { background: rgba(91,99,246,.05); border-color: rgba(91,99,246,.2); }
+.notif-item:hover { transform: translateY(-2px); box-shadow: 0 8px 24px rgba(0,0,0,.2); }
+
+.notif-icon { width: 44px; height: 44px; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 18px; flex-shrink: 0; }
+.bg-blue { background: rgba(59,130,246,.15); color: #60A5FA; }
+.bg-green { background: rgba(34,197,94,.15); color: #4ade80; }
+.bg-gold { background: rgba(251,191,36,.15); color: #FBBF24; }
+.bg-purple { background: rgba(139,61,255,.15); color: #A78BFA; }
+
+.notif-content { flex: 1; }
+.notif-title { font-size: 15px; font-weight: 700; color: #fff; margin-bottom: 4px; }
+.notif-msg { font-size: 14px; color: #AEB5CA; line-height: 1.5; margin-bottom: 8px; }
+.notif-date { font-size: 12px; color: #636A8A; }
+.notif-action-btn { display: inline-block; background: rgba(255,255,255,.05); border: 1px solid rgba(255,255,255,.1); color: #fff; padding: 6px 12px; border-radius: 6px; font-size: 12px; font-weight: 600; text-decoration: none; margin-top: 8px; }
+.notif-action-btn:hover { background: rgba(91,99,246,.2); border-color: rgba(91,99,246,.4); color: #A78BFA; }
+
+.notif-actions { padding-left: 12px; }
+.btn-read { background: none; border: none; padding: 8px; cursor: pointer; display: flex; align-items: center; justify-content: center; opacity: 0.7; transition: opacity .2s; }
+.btn-read:hover { opacity: 1; }
+.unread-dot { width: 10px; height: 10px; border-radius: 50%; background: #4ade80; box-shadow: 0 0 10px rgba(34,197,94,.4); }
+
+.empty-state { text-align: center; padding: 60px 20px; }
+.empty-icon { font-size: 48px; color: rgba(255,255,255,.05); margin-bottom: 16px; }
+.empty-state h3 { font-size: 18px; font-weight: 700; color: #fff; margin-bottom: 8px; }
+.empty-state p { font-size: 14px; color: #AEB5CA; }
+</style>
+
+<script>
+function getCsrfToken() {
+    return (document.cookie.match(/csrftoken=([^;]+)/) || [])[1] || '';
+}
+
+function markRead(id) {
+    fetch('/notifications/' + id + '/read/', {
+        method: 'POST',
+        headers: {
+            'X-CSRFToken': getCsrfToken(),
+            'Content-Type': 'application/json'
+        }
+    }).then(r => r.json()).then(data => {
+        if (data.status === 'ok') {
+            var item = document.getElementById('notif-' + id);
+            item.classList.remove('unread');
+            var btn = item.querySelector('.notif-actions');
+            if (btn) btn.remove();
+        }
+    });
+}
+
+function markAllRead() {
+    fetch('/notifications/mark-all-read/', {
+        method: 'POST',
+        headers: {
+            'X-CSRFToken': getCsrfToken(),
+            'Content-Type': 'application/json'
+        }
+    }).then(r => r.json()).then(data => {
+        if (data.status === 'ok') {
+            document.querySelectorAll('.notif-item').forEach(item => {
+                item.classList.remove('unread');
+                var btn = item.querySelector('.notif-actions');
+                if (btn) btn.remove();
+            });
+        }
+    });
+}
+</script>
+{% endblock %}

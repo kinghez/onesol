@@ -1,0 +1,245 @@
+{% extends 'base_dashboard.html' %}
+{% load static %}
+
+{% block title %}My Subscriptions – OneSol AI Hub{% endblock %}
+{% block nav_subscriptions %}active{% endblock %}
+
+{% block content %}
+<div class="subs-page fade-in">
+  
+  <div class="subs-header fade-up">
+    <div>
+      <h1 class="page-title">My Subscriptions</h1>
+      <p class="page-sub">Manage your active tool access and renewals.</p>
+    </div>
+  </div>
+
+  <div class="subs-tabs fade-up" style="animation-delay:.1s">
+    <button class="tab-btn active" onclick="switchTab('active')">
+      Active <span class="tab-badge">{{ active_count }}</span>
+    </button>
+    <button class="tab-btn" onclick="switchTab('expired')">
+      Expired <span class="tab-badge bg-dark">{{ expired_count }}</span>
+    </button>
+  </div>
+
+  <!-- Active Tab -->
+  <div id="tab-active" class="subs-tab-content fade-in" style="animation-delay:.2s; display:block;">
+    {% if active_subscriptions %}
+      <div class="subs-grid">
+        {% for item in active_subscriptions %}
+        <div class="sub-card glass-card">
+          <div class="sub-card-top">
+            <div class="sub-icon-wrap">
+              {% if item.tool.image_url %}
+                <img src="{{ item.tool.image_url }}" alt="{{ item.tool.name }}" class="sub-tool-icon" onerror="this.style.display='none'">
+              {% else %}
+                <div class="sub-icon-fallback">{{ item.tool.name|first|upper }}</div>
+              {% endif %}
+            </div>
+            
+            <!-- Expiry Ring -->
+            <div class="expiry-ring-wrap" title="{{ item.days_remaining }} days remaining">
+              <svg class="expiry-ring" viewBox="0 0 36 36">
+                <path class="ring-bg" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" />
+                <path class="ring-fill 
+                  {% if item.days_remaining > 7 %}ring-safe
+                  {% elif item.days_remaining > 3 %}ring-warn
+                  {% else %}ring-danger{% endif %}"
+                  stroke-dasharray="{{ item.progress_percent }}, 100"
+                  d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" />
+              </svg>
+              <div class="expiry-ring-text">{{ item.days_remaining }}d</div>
+            </div>
+          </div>
+          
+          <div class="sub-info">
+            <h3 class="sub-name">{{ item.tool.name|default:"Unknown Tool" }}</h3>
+            <p class="sub-plan">{{ item.plan.name|default:"Monthly Subscription" }}</p>
+          </div>
+          
+          <div class="sub-meta">
+            <div class="meta-col">
+              <span class="meta-label">Expires On</span>
+              <span class="meta-val">{% if item.expires_at %}{{ item.expires_at|date:"d M Y" }}{% else %}Never{% endif %}</span>
+            </div>
+            <div class="meta-col text-right">
+              <span class="meta-label">Status</span>
+              <span class="meta-val text-green">Active</span>
+            </div>
+          </div>
+          
+          <div class="sub-actions">
+            <button class="btn-sub-action" onclick="viewAccess('{{ item.order.id }}')">
+              <i class="fa-solid fa-key"></i> View Access Details
+            </button>
+          </div>
+        </div>
+        {% endfor %}
+      </div>
+    {% else %}
+      <div class="empty-state glass-card">
+        <div class="empty-icon"><i class="fa-solid fa-box-open"></i></div>
+        <h3>No active subscriptions</h3>
+        <p>You don't have any active tool subscriptions right now.</p>
+        <a href="{% url 'tools:tools_list' %}" class="btn-primary mt-3">Browse AI Tools</a>
+      </div>
+    {% endif %}
+  </div>
+
+  <!-- Expired Tab -->
+  <div id="tab-expired" class="subs-tab-content fade-in" style="display:none;">
+    {% if expired_subscriptions %}
+      <div class="subs-grid">
+        {% for item in expired_subscriptions %}
+        <div class="sub-card glass-card expired-card">
+          <div class="sub-card-top">
+            <div class="sub-icon-wrap grayscale">
+              {% if item.tool.image_url %}
+                <img src="{{ item.tool.image_url }}" alt="{{ item.tool.name }}" class="sub-tool-icon" onerror="this.style.display='none'">
+              {% endif %}
+            </div>
+            <div class="status-pill status-failed">Expired</div>
+          </div>
+          
+          <div class="sub-info">
+            <h3 class="sub-name">{{ item.tool.name|default:"Unknown Tool" }}</h3>
+            <p class="sub-plan">{{ item.plan.name|default:"Monthly Subscription" }}</p>
+          </div>
+          
+          <div class="sub-meta">
+            <div class="meta-col">
+              <span class="meta-label">Expired On</span>
+              <span class="meta-val text-muted">{{ item.expires_at|date:"d M Y" }}</span>
+            </div>
+          </div>
+          
+          <div class="sub-actions">
+            <a href="{% if item.tool %}/tools/{{ item.tool.slug }}/{% else %}#{% endif %}" class="btn-sub-action renew-btn">
+              <i class="fa-solid fa-arrows-rotate"></i> Renew Subscription
+            </a>
+          </div>
+        </div>
+        {% endfor %}
+      </div>
+    {% else %}
+      <div class="empty-state glass-card">
+        <div class="empty-icon" style="color:rgba(255,255,255,.05)"><i class="fa-solid fa-clock-rotate-left"></i></div>
+        <h3>No expired subscriptions</h3>
+        <p>All your past subscriptions will appear here when they expire.</p>
+      </div>
+    {% endif %}
+  </div>
+
+</div>
+
+<!-- Access Modal (Reusing order details logic) -->
+<div class="modal-backdrop" id="accessModal" style="display:none;">
+  <div class="modal-box order-modal-box">
+    <button class="modal-close" onclick="closeAccessModal()">&times;</button>
+    <div id="accessModalBody"></div>
+  </div>
+</div>
+
+<style>
+/* Page Layout */
+.subs-page { max-width: 1000px; margin: 0 auto; padding: 24px 16px 80px; }
+.subs-header { margin-bottom: 24px; }
+.page-title { font-size: 24px; font-weight: 700; color: #fff; margin-bottom: 6px; }
+.page-sub { color: #AEB5CA; font-size: 14px; }
+
+/* Tabs */
+.subs-tabs { display: flex; gap: 12px; margin-bottom: 24px; border-bottom: 1px solid rgba(255,255,255,.08); padding-bottom: 12px; }
+.tab-btn { background: transparent; border: none; color: #636A8A; font-size: 15px; font-weight: 600; padding: 8px 12px; cursor: pointer; transition: all .2s; display: flex; align-items: center; gap: 8px; position: relative; }
+.tab-btn:hover { color: #AEB5CA; }
+.tab-btn.active { color: #fff; }
+.tab-btn.active::after { content: ''; position: absolute; bottom: -13px; left: 0; right: 0; height: 2px; background: #7C83FA; border-radius: 2px 2px 0 0; }
+.tab-badge { background: rgba(91,99,246,.2); color: #A78BFA; font-size: 11px; padding: 2px 8px; border-radius: 20px; }
+.tab-badge.bg-dark { background: rgba(255,255,255,.1); color: #AEB5CA; }
+
+/* Grid & Cards */
+.subs-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 20px; }
+.glass-card { background: rgba(18,22,52,.92); border: 1px solid rgba(255,255,255,.08); border-radius: 16px; padding: 20px; backdrop-filter: blur(20px); transition: transform .2s, box-shadow .2s; }
+.glass-card:hover { transform: translateY(-4px); box-shadow: 0 12px 32px rgba(0,0,0,.25); }
+
+.sub-card-top { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 16px; }
+.sub-icon-wrap { width: 48px; height: 48px; background: linear-gradient(135deg,rgba(91,99,246,.15),rgba(139,61,255,.15)); border-radius: 12px; display: flex; align-items: center; justify-content: center; overflow: hidden; }
+.sub-tool-icon { width: 32px; height: 32px; object-fit: contain; }
+.sub-icon-fallback { font-size: 20px; font-weight: 700; color: #A78BFA; }
+
+/* Expiry Ring */
+.expiry-ring-wrap { position: relative; width: 44px; height: 44px; }
+.expiry-ring { width: 100%; height: 100%; transform: rotate(-90deg); }
+.ring-bg { fill: none; stroke: rgba(255,255,255,.1); stroke-width: 3.8; }
+.ring-fill { fill: none; stroke-width: 3.8; stroke-linecap: round; transition: stroke-dasharray .5s ease; }
+.ring-safe { stroke: #4ade80; }
+.ring-warn { stroke: #FBBF24; }
+.ring-danger { stroke: #f87171; }
+.expiry-ring-text { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); font-size: 11px; font-weight: 700; color: #fff; }
+
+.sub-info { margin-bottom: 20px; border-bottom: 1px solid rgba(255,255,255,.05); padding-bottom: 16px; }
+.sub-name { font-size: 18px; font-weight: 700; color: #fff; margin: 0 0 4px; }
+.sub-plan { font-size: 13px; color: #AEB5CA; margin: 0; }
+
+.sub-meta { display: flex; justify-content: space-between; margin-bottom: 20px; }
+.meta-col { display: flex; flex-direction: column; gap: 4px; }
+.text-right { text-align: right; }
+.meta-label { font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: .5px; color: #636A8A; }
+.meta-val { font-size: 13px; font-weight: 600; color: #fff; }
+.text-green { color: #4ade80; }
+.text-muted { color: #636A8A; }
+
+.sub-actions { margin-top: auto; }
+.btn-sub-action { width: 100%; display: flex; align-items: center; justify-content: center; gap: 8px; padding: 12px; background: rgba(91,99,246,.1); border: 1px solid rgba(91,99,246,.3); color: #7C83FA; border-radius: 10px; font-size: 14px; font-weight: 600; cursor: pointer; transition: all .2s; text-decoration: none; }
+.btn-sub-action:hover { background: rgba(91,99,246,.2); color: #fff; }
+
+/* Expired specific */
+.expired-card { opacity: 0.8; }
+.expired-card:hover { opacity: 1; }
+.grayscale { filter: grayscale(100%); opacity: 0.5; }
+.renew-btn { background: rgba(255,255,255,.05); border-color: rgba(255,255,255,.1); color: #fff; }
+.renew-btn:hover { background: rgba(255,255,255,.1); border-color: rgba(255,255,255,.2); }
+.status-pill { padding: 4px 10px; border-radius: 20px; font-size: 11px; font-weight: 700; }
+.status-failed { background: rgba(239,68,68,.12); color: #f87171; border: 1px solid rgba(239,68,68,.2); }
+
+.empty-state { text-align: center; padding: 60px 20px; }
+.empty-icon { font-size: 48px; color: rgba(91,99,246,.2); margin-bottom: 16px; }
+.empty-state h3 { font-size: 18px; font-weight: 700; color: #fff; margin-bottom: 8px; }
+.empty-state p { font-size: 14px; color: #AEB5CA; }
+.btn-primary { display: inline-block; background: linear-gradient(135deg,#5B63F6,#8B3DFF); color: #fff; padding: 10px 20px; border-radius: 8px; font-weight: 600; text-decoration: none; transition: transform .2s; }
+.btn-primary:hover { transform: translateY(-2px); }
+
+/* Modal */
+.order-modal-box { max-width: 600px; padding: 24px; }
+</style>
+
+<script>
+function switchTab(tab) {
+  document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+  document.querySelectorAll('.subs-tab-content').forEach(el => el.style.display = 'none');
+  
+  event.currentTarget.classList.add('active');
+  document.getElementById('tab-' + tab).style.display = 'block';
+}
+
+function viewAccess(orderId) {
+  var modal = document.getElementById('accessModal');
+  var body = document.getElementById('accessModalBody');
+  modal.style.display = 'flex';
+  document.body.style.overflow = 'hidden';
+  body.innerHTML = '<div style="text-align:center;padding:40px;color:#7C83FA;"><i class="fa-solid fa-circle-notch fa-spin"></i> Loading...</div>';
+  
+  fetch('/dashboard/orders/' + orderId + '/')
+    .then(r => r.text())
+    .then(html => { body.innerHTML = html; })
+    .catch(err => { body.innerHTML = '<div class="empty-state"><p class="text-danger">Failed to load details.</p></div>'; });
+}
+function closeAccessModal() {
+  document.getElementById('accessModal').style.display = 'none';
+  document.body.style.overflow = '';
+}
+document.getElementById('accessModal').addEventListener('click', function(e) {
+  if (e.target === this) closeAccessModal();
+});
+</script>
+{% endblock %}

@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="OneSol AI Hub - Premium Tool Details">
+    <title>OneSol AI Hub - Tool Details</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="css/tool.css">
+</head>
+
+<body>
+
+    <!-- BG gradient -->
+    <div class="bg-base"></div>
+
+    <!-- Ambient glows -->
+    <div class="amb-glows">
+        <div class="amb amb-purple"></div>
+        <div class="amb amb-blue"></div>
+        <div class="amb amb-gold-tr"></div>
+        <div class="amb amb-gold-bl"></div>
+    </div>
+
+    <!-- Left angular ribbons -->
+    <div class="ribbons">
+        <div class="rib rib-1"></div>
+        <div class="rib rib-2"></div>
+        <div class="rib rib-3"></div>
+        <div class="rib rib-4"></div>
+    </div>
+
+    <!-- Particle + grid canvas -->
+    <canvas id="bgCanvas"></canvas>
+
+    <!-- ══════ NAVBAR ══════ -->
+    <nav class="nav" id="nav">
+        <div class="nav-inner">
+            <a href="index.html" class="nav-brand">
+                <img src="assets/logo.png" alt="OneSol" class="nav-logo-img">
+                <div class="nav-logo-txt">
+                    <span class="nav-logo-name">OneSol</span>
+                    <span class="nav-logo-sub">AI Hub</span>
+                </div>
+            </a>
+            <ul class="nav-links" id="navLinks">
+                <li><a href="index.html" class="nav-a">Home</a></li>
+                <li><a href="tools.html" class="nav-a">Tools</a></li>
+                <li><a href="#" class="nav-a">Pricing</a></li>
+                <li><a href="#" class="nav-a">Features</a></li>
+                <li><a href="#" class="nav-a">About Us</a></li>
+            </ul>
+            <div class="nav-right">
+                <div class="nav-currency">
+                    <span>NGN</span>
+                    <img src="assets/images/flags/ng.svg" alt="NG" class="nav-flag">
+                </div>
+                <a href="login.html" class="nav-sign">Sign In</a>
+                <a href="signup.html" class="nav-get">Get Started</a>
+                <button class="nav-mob" id="navMob" aria-label="Toggle Menu">
+                    <span></span><span></span><span></span>
+                </button>
+            </div>
+        </div>
+    </nav>
+
+    <!-- ══════ TOOL MAIN CONTENT ══════ -->
+    <main class="tool-page-main">
+        <div class="tool-header-wrap">
+            <!-- Left: Logo & Info -->
+            <div class="th-left">
+                <div class="th-logo-box">
+                    <img id="toolLogo" src="" alt="Tool Logo">
+                </div>
+                <div class="th-info">
+                    <h1 id="toolName" class="th-title"></h1>
+                    <p class="th-dev">By <span id="toolDeveloper"></span></p>
+                    <div class="th-stats">
+                        <span class="th-rating"><i class="fa-solid fa-star" style="color: #FFD98A;"></i> <span id="toolRating"></span> <span class="th-reviews">(<span id="toolReviewsCount"></span> reviews)</span></span>
+                        <span class="th-divider">|</span>
+                        <span class="th-users"><span id="toolUsersCount"></span> Active Users</span>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Right: Pricing & Buttons -->
+            <div class="th-right">
+                <button class="th-wishlist-btn"><i class="fa-regular fa-heart"></i> Add to Wishlist</button>
+                <div class="th-price-box">
+                    <span class="th-price" id="toolPrice"></span> <span class="th-period">/ month</span>
+                </div>
+                <button class="btn-pri-2 th-buy-btn">Buy Now</button>
+            </div>
+        </div>
+        
+        <div class="tool-tabs-container">
+            <div class="tool-tabs">
+                <button class="tool-tab active" data-target="overview">Overview</button>
+                <button class="tool-tab" data-target="features">Features</button>
+                <button class="tool-tab" data-target="reviews">Reviews (<span id="tabReviewsCount"></span>)</button>
+                <button class="tool-tab" data-target="faqs">FAQs</button>
+                <div class="tab-indicator" id="tabIndicator"></div>
+            </div>
+        </div>
+
+        <div class="tab-contents">
+            <div class="tab-pane active" id="tab-overview">
+                <div class="overview-grid">
+                    <div class="ov-left">
+                        <h3 class="pane-title">Overview</h3>
+                        <p class="ov-desc" id="ovDesc"></p>
+                        <ul class="ov-features-list" id="ovFeatures"></ul>
+                    </div>
+                    <div class="ov-right">
+                        <h3 class="pane-title">Screenshots</h3>
+                        <div class="ss-gallery">
+                            <div class="ss-track" id="ssTrack"></div>
+                            <button class="ss-nav prev" id="ssPrev"><i class="fas fa-chevron-left"></i></button>
+                            <button class="ss-nav next" id="ssNext"><i class="fas fa-chevron-right"></i></button>
+                            <div class="ss-dots" id="ssDots"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="tab-pane" id="tab-features">
+                <h3 class="pane-title">Features & Requirements</h3>
+                <div class="features-grid" id="featGrid"></div>
+            </div>
+            <div class="tab-pane" id="tab-reviews">
+                <h3 class="pane-title">Customer Reviews</h3>
+                <div class="reviews-wrap" id="revWrap"></div>
+            </div>
+            <div class="tab-pane" id="tab-faqs">
+                <h3 class="pane-title">Frequently Asked Questions</h3>
+                <div class="faqs-accordion" id="faqsList"></div>
+            </div>
+        </div>
+    </main>
+
+    <!-- ══════ FOOTER ══════ -->
+    <footer class="footer">
+        <div class="footer-wrap">
+            <!-- Col 1: Brand & Socials -->
+            <div class="footer-col brand-col">
+                <a href="#" class="footer-brand">
+                    <img src="assets/logo.png" alt="OneSol" class="footer-logo-img">
+                    <div class="footer-logo-txt">
+                        <span class="footer-logo-name">OneSol</span>
+                        <span class="footer-logo-sub">AI Hub</span>
+                    </div>
+                </a>
+                <p class="footer-desc">
+                    Get instant access to premium<br>
+                    AI & SaaS tools in Africa.
+                </p>
+                <div class="footer-socials">
+                    <a href="#" class="social-btn" style="color: #1877F2; font-size: 18px;"><i
+                            class="fa-brands fa-facebook-f"></i></a>
+                    <a href="#" class="social-btn" style="color: #FFFFFF; font-size: 18px;"><i
+                            class="fa-brands fa-x-twitter"></i></a>
+                    <a href="#" class="social-btn" style="color: #E4405F; font-size: 18px;"><i
+                            class="fa-brands fa-instagram"></i></a>
+                    <a href="#" class="social-btn" style="color: #0A66C2; font-size: 18px;"><i
+                            class="fa-brands fa-linkedin-in"></i></a>
+                </div>
+            </div>
+
+            <!-- Col 2: Quick Links -->
+            <div class="footer-col">
+                <h4 class="footer-title">Quick Links</h4>
+                <a href="#" class="footer-link">Home</a>
+                <a href="#" class="footer-link">Tools</a>
+                <a href="#" class="footer-link">Categories</a>
+                <a href="#" class="footer-link">Pricing</a>
+            </div>
+
+            <!-- Col 3: Company -->
+            <div class="footer-col">
+                <h4 class="footer-title">Company</h4>
+                <a href="#" class="footer-link">About Us</a>
+                <a href="#" class="footer-link">How It Works</a>
+                <a href="#" class="footer-link">Support</a>
+                <a href="#" class="footer-link">Contact Us</a>
+            </div>
+
+            <!-- Col 4: Legal -->
+            <div class="footer-col">
+                <h4 class="footer-title">Legal</h4>
+                <a href="#" class="footer-link">Terms of Service</a>
+                <a href="#" class="footer-link">Privacy Policy</a>
+                <a href="#" class="footer-link">Refund Policy</a>
+            </div>
+
+            <!-- Col 5: Payment Partners -->
+            <div class="footer-col payment-col">
+                <h4 class="footer-title">Payment Partners</h4>
+                <div class="payment-grid">
+                    <img src="assets/images/logos/paystack.svg" alt="Paystack" class="payment-logo">
+                    <img src="assets/images/logos/flutterwave.svg" alt="Flutterwave" class="payment-logo">
+                    <img src="assets/images/logos/ssl_secure.svg" alt="SSL Secure" class="payment-logo">
+                    <img src="assets/images/logos/pci_compliant.svg" alt="PCI Compliant" class="payment-logo">
+                </div>
+            </div>
+
+            <!-- Col 6: Newsletter -->
+            <div class="footer-col news-col">
+                <h4 class="footer-title">Stay Updated</h4>
+                <p class="footer-desc">Subscribe to get updates and exclusive offers.</p>
+                <form class="newsletter-form" onsubmit="event.preventDefault();">
+                    <input type="email" class="news-input" placeholder="Enter your email" required>
+                    <button type="submit" class="news-btn">Subscribe</button>
+                </form>
+            </div>
+        </div>
+
+        <div class="footer-bottom">
+            <p>© 2026 OneSol AI Hub. All rights reserved.</p>
+        </div>
+    </footer>
+
+    <script src="js/tools-data.js"></script>
+    <script src="script.js"></script>
+    <script src="js/tool.js"></script>
+</body>
+
+</html>

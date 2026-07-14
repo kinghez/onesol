@@ -1,0 +1,11 @@
+<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+      <defs>
+        <linearGradient id="sunoGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+          <stop offset="0%" stop-color="#F4C84B"/>
+          <stop offset="100%" stop-color="#E7A93B"/>
+        </linearGradient>
+      </defs>
+      <path d="M45 45 Q35 25, 25 35 Q15 45, 25 55 L35 55 L35 65 C35 75, 25 75, 25 75" fill="none" stroke="url(#sunoGrad)" stroke-width="10" stroke-linecap="round"/>
+      <circle cx="20" cy="75" r="5" fill="url(#sunoGrad)"/>
+      <text x="45" y="60" font-family="Arial, sans-serif" font-weight="bold" font-size="28" fill="url(#sunoGrad)">Suno</text>
+    </svg>

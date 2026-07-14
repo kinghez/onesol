@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Action Required: Subscription Renewing Soon</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { background: #0A0E27; font-family: Arial, Helvetica, sans-serif; color: #E2E8F0; }
+  .wrapper { max-width: 600px; margin: 0 auto; padding: 20px; }
+  .header { background: linear-gradient(135deg, #0F1535, #1a1f4a); border-radius: 16px 16px 0 0; padding: 36px 32px; text-align: center; border-bottom: 1px solid rgba(251,191,36,.3); }
+  .logo { display: inline-flex; align-items: center; gap: 10px; margin-bottom: 20px; }
+  .logo-dot { width: 36px; height: 36px; background: linear-gradient(135deg,#5B63F6,#8B3DFF); border-radius: 8px; }
+  .logo-text { font-size: 20px; font-weight: 700; color: #fff; }
+  .warn-icon { width: 64px; height: 64px; background: rgba(251,191,36,.15); border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 20px; font-size: 28px; line-height: 1; }
+  .email-title { font-size: 24px; font-weight: 700; color: #fff; margin-bottom: 8px; }
+  .email-sub { color: #AEB5CA; font-size: 14px; }
+  .body { background: #111530; padding: 32px; }
+  .greeting { font-size: 16px; color: #E2E8F0; margin-bottom: 24px; }
+  .tool-row { display: flex; align-items: center; gap: 14px; padding: 14px; background: rgba(251,191,36,.06); border: 1px solid rgba(251,191,36,.25); border-radius: 10px; margin-bottom: 24px; }
+  .tool-name { font-size: 16px; font-weight: 700; color: #fff; }
+  .tool-plan { font-size: 13px; color: #FDE68A; margin-top: 3px; }
+  .tool-expiry { margin-left: auto; text-align: right; }
+  .expiry-lbl { font-size: 11px; color: #AEB5CA; text-transform: uppercase; }
+  .expiry-val { font-size: 14px; font-weight: 700; color: #FBBF24; }
+  .cta-btn { display: block; text-align: center; background: linear-gradient(135deg,#5B63F6,#8B3DFF); color: #fff; text-decoration: none; padding: 14px 28px; border-radius: 10px; font-size: 15px; font-weight: 700; margin: 28px 0; }
+  .divider { height: 1px; background: rgba(255,255,255,.07); margin: 24px 0; }
+  .support-note { font-size: 13px; color: #AEB5CA; line-height: 1.6; }
+  .footer { background: #0A0E27; border-radius: 0 0 16px 16px; padding: 24px 32px; text-align: center; }
+  .footer-text { font-size: 12px; color: #636A8A; line-height: 1.8; }
+</style>
+</head>
+<body>
+<div class="wrapper">
+  <div class="header">
+    <div class="logo">
+      <div class="logo-dot"></div>
+      <span class="logo-text">{{ site_name }}</span>
+    </div>
+    <div class="warn-icon">⏳</div>
+    <div class="email-title">Subscription Expiring Soon</div>
+    <p class="email-sub">Action required to maintain your access</p>
+  </div>
+
+  <div class="body">
+    <p class="greeting">Hi <strong>{{ user.first_name|default:user.email }}</strong>,</p>
+    <p style="color:#AEB5CA;font-size:14px;margin-bottom:24px;line-height:1.6;">
+      This is a quick reminder that your subscription to <strong>{{ item.tool.name }}</strong> will expire in <strong>{{ days_remaining }} day{{ days_remaining|pluralize }}</strong>.
+    </p>
+
+    <div class="tool-row">
+      <div>
+        <div class="tool-name">{{ item.tool.name }}</div>
+        <div class="tool-plan">{{ item.plan.name|default:"Monthly Subscription" }}</div>
+      </div>
+      <div class="tool-expiry">
+        <div class="expiry-lbl">Expires On</div>
+        <div class="expiry-val">{{ item.expires_at|date:"d M Y" }}</div>
+      </div>
+    </div>
+
+    <p style="color:#AEB5CA;font-size:14px;line-height:1.6;">
+      To avoid any interruption to your service, please renew your subscription before the expiry date.
+    </p>
+
+    <a href="{{ site_url }}/tools/{{ item.tool.slug }}/" class="cta-btn">Renew Subscription Now →</a>
+
+    <div class="divider"></div>
+    <p class="support-note">
+      If you have already renewed, please ignore this email. Need help? Contact us at {{ support_email }}.
+    </p>
+  </div>
+
+  <div class="footer">
+    <p class="footer-text">
+      © {% now "Y" %} {{ site_name }}. All rights reserved.<br>
+      <a href="{{ site_url }}" style="color:#7C83FA;text-decoration:none;">{{ site_url }}</a>
+    </p>
+  </div>
+</div>
+</body>
+</html>

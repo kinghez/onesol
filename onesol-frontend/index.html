@@ -1,0 +1,414 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="OneSol AI Hub - Access Affordable, Powerful AI & SaaS Tools in Africa.">
+    <title>OneSol AI Hub - Affordable AI & SaaS Tools in Africa</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <link rel="stylesheet" href="styles.css">
+</head>
+
+<body>
+
+    <!-- BG gradient -->
+    <div class="bg-base"></div>
+
+    <!-- Ambient glows -->
+    <div class="amb-glows">
+        <div class="amb amb-purple"></div>
+        <div class="amb amb-blue"></div>
+        <div class="amb amb-gold-tr"></div>
+        <div class="amb amb-gold-bl"></div>
+    </div>
+
+    <!-- Left angular ribbons -->
+    <div class="ribbons">
+        <div class="rib rib-1"></div>
+        <div class="rib rib-2"></div>
+        <div class="rib rib-3"></div>
+        <div class="rib rib-4"></div>
+    </div>
+
+    <!-- Particle + grid canvas -->
+    <canvas id="bgCanvas"></canvas>
+
+    <!-- ══════ NAVBAR ══════ -->
+    <nav class="nav" id="nav">
+        <div class="nav-inner">
+            <a href="#" class="nav-brand">
+                <img src="assets/logo.png" alt="OneSol" class="nav-logo-img">
+                <div class="nav-logo-txt">
+                    <span class="nav-logo-name">OneSol</span>
+                    <span class="nav-logo-sub">AI Hub</span>
+                </div>
+            </a>
+            <ul class="nav-links" id="navLinks">
+                <li><a href="index.html" class="nav-a active">Home</a></li>
+                <li><a href="tools.html" class="nav-a">Tools</a></li>
+                <li><a href="#" class="nav-a">Pricing</a></li>
+                <li><a href="#" class="nav-a">Features</a></li>
+                <li><a href="#" class="nav-a">About Us</a></li>
+            </ul>
+            <div class="nav-right">
+                <div class="nav-currency">
+                    <span>NGN</span>
+                    <img src="https://flagcdn.com/w20/ng.png" alt="NG" class="nav-flag">
+                </div>
+                <a href="login.html" class="nav-sign">Sign In</a>
+                <a href="signup.html" class="nav-get">Get Started</a>
+            </div>
+            <button class="nav-mob" id="navMob" aria-label="Menu">
+                <span></span><span></span><span></span>
+            </button>
+        </div>
+    </nav>
+
+    <!-- ══════ HERO ══════ -->
+    <section class="hero" id="heroCarousel">
+        <div class="hero-carousel-track" id="heroTrack">
+
+            <!-- Slide 1 -->
+            <div class="hero-slide active">
+                <div class="hero-wrap">
+                    <div class="hero-left">
+                        <h1 class="hero-h1">
+                            <span class="hero-line1">Premium AI &amp; SaaS</span>
+                            <span class="hero-line2">Tools. <em class="hero-gold-2">Affordable</em> for</span>
+                            <span class="hero-line3">Everyone in Africa.</span>
+                        </h1>
+                        <p class="hero-p hero-p2">Get access to 100+ premium AI and SaaS tools<br>at the best prices.
+                            Pay in your local currency<br>and get instant access.</p>
+
+                        <div class="h2-features">
+                            <div class="h2-feat">
+                                <div class="h2-ico"><i class="fa-solid fa-wallet"></i></div>
+                                <span class="h2-txt">Local Currency<br>Payments</span>
+                            </div>
+                            <div class="h2-feat">
+                                <div class="h2-ico"><i class="fa-solid fa-bolt"></i></div>
+                                <span class="h2-txt">Instant<br>Delivery</span>
+                            </div>
+                            <div class="h2-feat">
+                                <div class="h2-ico"><i class="fa-solid fa-shield-halved"></i></div>
+                                <span class="h2-txt">Secure<br>Checkout</span>
+                            </div>
+                            <div class="h2-feat">
+                                <div class="h2-ico"><i class="fa-solid fa-headset"></i></div>
+                                <span class="h2-txt">24/7<br>Support</span>
+                            </div>
+                        </div>
+
+                        <div class="hero-btns hero2-btns">
+                            <a href="#" class="btn-pri-2">Browse Tools</a>
+                            <a href="#" class="btn-sec-2">How It Works</a>
+                        </div>
+                    </div>
+                    <div class="hero-right">
+                        <div class="hero-illustration-2">
+                            <img src="hero-image2.png" alt="Premium AI Tools" class="hero-img-2">
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Slide 2 -->
+            <div class="hero-slide">
+                <div class="hero-wrap">
+                    <div class="hero-left">
+                        <h1 class="hero-h1">
+                            <span class="hero-line1">Unlock the Power of AI.</span>
+                            <span class="hero-line2">Access Affordable, <em class="hero-gold">Powerful</em></span>
+                            <span class="hero-line3">AI &amp; SaaS Tools in Africa.</span>
+                        </h1>
+                        <p class="hero-p">Automate, Create, and Scale with OneSol AI Hub.<br>Direct access with instant
+                            local payments.</p>
+                        <div class="hero-btns">
+                            <a href="#" class="btn-pri"><i class="fas fa-compass"></i> Explore Our AI Tools</a>
+                            <a href="#" class="btn-sec">Learn More</a>
+                        </div>
+                    </div>
+                    <div class="hero-right">
+                        <div class="hero-illustration" id="heroIllust" data-parallax>
+                            <!-- Glow layers behind the PNG -->
+                            <div class="hero-glow hero-glow-1"></div>
+                            <div class="hero-glow hero-glow-2"></div>
+                            <div class="hero-glow hero-glow-3"></div>
+                            <!-- Platform light beneath -->
+                            <div class="hero-platform-light"></div>
+                            <!-- The production PNG -->
+                            <img src="assets/images/hero-ai-platform.png"
+                                alt="OneSol AI Hub platform integrating AI tools" class="hero-image" />
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
+        <!-- Carousel Controls -->
+        <button class="hero-nav prev" id="heroPrev" aria-label="Previous Slide"><i
+                class="fas fa-chevron-left"></i></button>
+        <button class="hero-nav next" id="heroNext" aria-label="Next Slide"><i
+                class="fas fa-chevron-right"></i></button>
+
+        <div class="hero-dots" id="heroDots">
+            <span class="h-dot active" data-index="0"></span>
+            <span class="h-dot" data-index="1"></span>
+        </div>
+    </section>
+
+    <!-- ══════ TRUST + FEATURES ══════ -->
+    <section class="trust-features" id="trustFeatures">
+        <div class="tf-wrap">
+
+            <!-- Trust Bar -->
+            <div class="trust-bar">
+                <span class="trust-text">Trusted by <strong>1,000+</strong> users across Africa</span>
+                <div class="trust-avatars">
+                    <img src="https://api.dicebear.com/9.x/notionists/svg?seed=Felix&backgroundColor=b6e3f4" alt="User"
+                        class="trust-av">
+                    <img src="https://api.dicebear.com/9.x/notionists/svg?seed=Aneka&backgroundColor=ffd5dc" alt="User"
+                        class="trust-av">
+                    <img src="https://api.dicebear.com/9.x/notionists/svg?seed=Jameson&backgroundColor=c0aede"
+                        alt="User" class="trust-av">
+                    <img src="https://api.dicebear.com/9.x/notionists/svg?seed=Aiden&backgroundColor=ffdfbf" alt="User"
+                        class="trust-av">
+                </div>
+                <div class="trust-rating">
+                    <span class="trust-stars">★★★★★</span>
+                    <span class="trust-score">4.9/5</span>
+                </div>
+                <span class="trust-text">from <strong>500+</strong> reviews</span>
+            </div>
+
+            <!-- Feature Card -->
+            <div class="feat-card">
+                <div class="feat-grid">
+
+                    <!-- Affordable Pricing -->
+                    <div class="feat-item">
+                        <div class="feat-ico">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="#8E6CFF" stroke-width="1.8"
+                                stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
+                                <line x1="12" y1="8" x2="12" y2="16" />
+                                <path
+                                    d="M9 11c0-.8.7-1.5 1.5-1.5h3c.8 0 1.5.7 1.5 1.5s-.7 1.5-1.5 1.5h-3C9.7 12.5 9 13.2 9 14s.7 1.5 1.5 1.5h3c.8 0 1.5-.7 1.5-1.5" />
+                            </svg>
+                        </div>
+                        <div class="feat-content">
+                            <h3 class="feat-title">Affordable Pricing</h3>
+                            <p class="feat-desc">Best prices in Africa with local currency payments.</p>
+                        </div>
+                    </div>
+
+                    <div class="feat-divider"></div>
+
+                    <!-- Instant Access -->
+                    <div class="feat-item">
+                        <div class="feat-ico">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="#8E6CFF" stroke-width="1.8"
+                                stroke-linecap="round" stroke-linejoin="round">
+                                <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2" />
+                            </svg>
+                        </div>
+                        <div class="feat-content">
+                            <h3 class="feat-title">Instant Access</h3>
+                            <p class="feat-desc">Get your tools instantly after payment.</p>
+                        </div>
+                    </div>
+
+                    <div class="feat-divider"></div>
+
+                    <!-- Secure Payments -->
+                    <div class="feat-item">
+                        <div class="feat-ico">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="#8E6CFF" stroke-width="1.8"
+                                stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
+                                <polyline points="9 12 11 14 15 10" />
+                            </svg>
+                        </div>
+                        <div class="feat-content">
+                            <h3 class="feat-title">Secure Payments</h3>
+                            <p class="feat-desc">Pay securely with Paystack or Flutterwave.</p>
+                        </div>
+                    </div>
+
+                    <div class="feat-divider"></div>
+
+                    <!-- 24/7 Support -->
+                    <div class="feat-item">
+                        <div class="feat-ico">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="#8E6CFF" stroke-width="1.8"
+                                stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M18 16v2a1 1 0 0 1-1 1H7a1 1 0 0 1-1-1v-2" />
+                                <path d="M6 11V7a6 6 0 1 1 12 0v4" />
+                                <path d="M4 12h2a1 1 0 0 1 1 1v3a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1v-3a1 1 0 0 1 1-1z" />
+                                <path d="M20 12h-2a1 1 0 0 0-1 1v3a1 1 0 0 0 1 1h2a1 1 0 0 0 1-1v-3a1 1 0 0 0-1-1z" />
+                            </svg>
+                        </div>
+                        <div class="feat-content">
+                            <h3 class="feat-title">24/7 Support</h3>
+                            <p class="feat-desc">We're here to help you every step of the way.</p>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+
+        </div>
+    </section>
+
+    <!-- ══════ TOP TOOLS SECTION ══════ -->
+    <section class="top-tools" id="topTools">
+        <div class="tt-wrap">
+            <div class="tt-header">
+                <h2 class="tt-title">Top &amp; Best Selling Tools</h2>
+                <a href="tools.html" class="tt-view-all">View all tools <i class="fas fa-arrow-right"></i></a>
+            </div>
+
+            <div class="tt-grid-wrapper">
+                <button class="tt-nav-btn prev"><i class="fas fa-chevron-left"></i></button>
+                <div class="tt-grid" id="topToolsGrid">
+                    <!-- Cards injected via JS -->
+                </div>
+
+                <!-- Floating right navigation button -->
+                <button class="tt-nav-btn next"><i class="fas fa-chevron-right"></i></button>
+            </div>
+        </div>
+    </section>
+
+    <!-- ══════ POPULAR THIS WEEK SECTION ══════ -->
+    <section class="popular-week" id="popularWeek">
+        <div class="pw-wrap">
+            <div class="pw-header">
+                <span class="pw-icon">🔥</span>
+                <h2 class="pw-title">Popular This Week</h2>
+            </div>
+
+            <div class="pw-tabs-container">
+                <div class="pw-tabs" id="pwTabs">
+                    <button class="pw-tab active" data-filter="all">All</button>
+                    <button class="pw-tab" data-filter="AI Chatbots">AI Chatbots</button>
+                    <button class="pw-tab" data-filter="Writing">Writing</button>
+                    <button class="pw-tab" data-filter="Design">Design</button>
+                    <button class="pw-tab" data-filter="Productivity">Productivity</button>
+                    <button class="pw-tab" data-filter="Marketing">Marketing</button>
+                    <button class="pw-tab" data-filter="Video Creation">Video Creation</button>
+                    <button class="pw-tab" data-filter="Audio & Video Editor">Audio Editor</button>
+                    <button class="pw-tab" data-filter="AI Voice Generation">Voice</button>
+                    <button class="pw-tab" data-filter="AI Music Generation">Music</button>
+                </div>
+            </div>
+
+            <div class="tt-grid-wrapper">
+                <button class="tt-nav-btn prev"><i class="fas fa-chevron-left"></i></button>
+                <div class="tt-grid" id="pwGrid">
+                    <!-- Cards injected via JS -->
+                </div>
+                <!-- Floating right navigation button -->
+                <button class="tt-nav-btn next"><i class="fas fa-chevron-right"></i></button>
+            </div>
+
+            <div class="pw-browse">
+                <button onclick="window.location.href='tools.html'" class="pw-browse-btn">Browse All Tools <i
+                        class="fas fa-arrow-right"></i></button>
+            </div>
+        </div>
+    </section>
+
+    <!-- ══════ FOOTER ══════ -->
+    <footer class="footer">
+        <div class="footer-wrap">
+
+            <!-- Col 1: Brand & Socials -->
+            <div class="footer-col brand-col">
+                <a href="#" class="footer-brand">
+                    <img src="assets/logo.png" alt="OneSol" class="footer-logo-img">
+                    <div class="footer-logo-txt">
+                        <span class="footer-logo-name">OneSol</span>
+                        <span class="footer-logo-sub">AI Hub</span>
+                    </div>
+                </a>
+                <p class="footer-desc">
+                    Your #1 marketplace for premium<br>
+                    AI & SaaS tools in Africa.
+                </p>
+                <div class="footer-socials">
+                    <a href="#" class="social-btn" style="color: #1877F2; font-size: 18px;"><i
+                            class="fa-brands fa-facebook-f"></i></a>
+                    <a href="#" class="social-btn" style="color: #FFFFFF; font-size: 18px;"><i
+                            class="fa-brands fa-x-twitter"></i></a>
+                    <a href="#" class="social-btn" style="color: #E4405F; font-size: 18px;"><i
+                            class="fa-brands fa-instagram"></i></a>
+                    <a href="#" class="social-btn" style="color: #0A66C2; font-size: 18px;"><i
+                            class="fa-brands fa-linkedin-in"></i></a>
+                </div>
+            </div>
+
+            <!-- Col 2: Quick Links -->
+            <div class="footer-col">
+                <h4 class="footer-title">Quick Links</h4>
+                <a href="#" class="footer-link">Home</a>
+                <a href="#" class="footer-link">Tools</a>
+                <a href="#" class="footer-link">Categories</a>
+                <a href="#" class="footer-link">Pricing</a>
+            </div>
+
+            <!-- Col 3: Company -->
+            <div class="footer-col">
+                <h4 class="footer-title">Company</h4>
+                <a href="#" class="footer-link">About Us</a>
+                <a href="#" class="footer-link">How It Works</a>
+                <a href="#" class="footer-link">Support</a>
+                <a href="#" class="footer-link">Contact Us</a>
+            </div>
+
+            <!-- Col 4: Legal -->
+            <div class="footer-col">
+                <h4 class="footer-title">Legal</h4>
+                <a href="#" class="footer-link">Terms of Service</a>
+                <a href="#" class="footer-link">Privacy Policy</a>
+                <a href="#" class="footer-link">Refund Policy</a>
+            </div>
+
+            <!-- Col 5: Payment Partners -->
+            <div class="footer-col payment-col">
+                <h4 class="footer-title">Payment Partners</h4>
+                <div class="payment-grid">
+                    <img src="assets/images/logos/paystack.svg" alt="Paystack" class="payment-logo">
+                    <img src="assets/images/logos/flutterwave.svg" alt="Flutterwave" class="payment-logo">
+                    <img src="assets/images/logos/ssl_secure.svg" alt="SSL Secure" class="payment-logo">
+                    <img src="assets/images/logos/pci_compliant.svg" alt="PCI Compliant" class="payment-logo">
+                </div>
+            </div>
+
+            <!-- Col 6: Newsletter -->
+            <div class="footer-col news-col">
+                <h4 class="footer-title">Stay Updated</h4>
+                <p class="footer-desc">Subscribe to get updates and exclusive offers.</p>
+                <form class="newsletter-form" onsubmit="event.preventDefault();">
+                    <input type="email" class="news-input" placeholder="Enter your email" required>
+                    <button type="submit" class="news-btn">Subscribe</button>
+                </form>
+            </div>
+
+        </div>
+
+        <div class="footer-bottom">
+            <p>© 2026 OneSol AI Hub. All rights reserved.</p>
+        </div>
+    </footer>
+
+    <script src="script.js"></script>
+</body>
+
+</html>

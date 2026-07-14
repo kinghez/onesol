@@ -1,0 +1,166 @@
+{% extends 'base_dashboard.html' %}
+{% load static %}
+
+{% block title %}Order History – OneSol AI Hub{% endblock %}
+{% block nav_orders %}active{% endblock %}
+
+{% block content %}
+<div class="orders-page fade-in">
+  
+  <div class="orders-header fade-up">
+    <div>
+      <h1 class="page-title">Order History</h1>
+      <p class="page-sub">View and manage your past purchases and subscriptions.</p>
+    </div>
+  </div>
+
+  <div class="orders-filters fade-up" style="animation-delay:.1s">
+    <a href="?status=all" class="filter-tab {% if current_status == 'all' %}active{% endif %}">All Orders</a>
+    <a href="?status=paid" class="filter-tab {% if current_status == 'paid' %}active{% endif %}">Paid</a>
+    <a href="?status=pending" class="filter-tab {% if current_status == 'pending' %}active{% endif %}">Pending</a>
+    <a href="?status=failed" class="filter-tab {% if current_status == 'failed' %}active{% endif %}">Failed</a>
+  </div>
+
+  <div class="orders-list-card glass-card fade-up" style="animation-delay:.2s">
+    {% if has_orders %}
+      {% if orders %}
+        <div class="table-responsive">
+          <table class="orders-table">
+            <thead>
+              <tr>
+                <th>Order ID</th>
+                <th>Date</th>
+                <th>Amount (NGN)</th>
+                <th>Status</th>
+                <th>Delivery</th>
+                <th>Action</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for order in orders %}
+              <tr class="order-row">
+                <td class="col-id">#{{ order.id }}</td>
+                <td class="col-date">{{ order.created_at|date:"d M Y, H:i" }}</td>
+                <td class="col-amount font-mono">₦{{ order.total_amount_ngn|floatformat:0 }}</td>
+                <td class="col-status">
+                  <span class="status-pill status-{{ order.status }}">{{ order.status|title }}</span>
+                </td>
+                <td class="col-delivery">
+                  {% if order.status == 'paid' %}
+                    <span class="status-pill delivery-{{ order.delivery_status }}">{{ order.delivery_status|title }}</span>
+                  {% else %}
+                    <span class="text-muted">—</span>
+                  {% endif %}
+                </td>
+                <td class="col-action">
+                  <button class="btn-view" onclick="viewOrderDetails('{{ order.id }}')">Details</button>
+                </td>
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      {% else %}
+        <div class="empty-state">
+          <div class="empty-icon"><i class="fa-solid fa-filter-circle-xmark"></i></div>
+          <h3>No matching orders</h3>
+          <p>You have no orders matching the '{{ current_status }}' filter.</p>
+        </div>
+      {% endif %}
+    {% else %}
+      <div class="empty-state">
+        <div class="empty-icon"><i class="fa-solid fa-receipt"></i></div>
+        <h3>No orders yet</h3>
+        <p>When you purchase tools, they will appear here.</p>
+        <a href="{% url 'tools:tools_list' %}" class="btn-primary mt-3">Browse Tools</a>
+      </div>
+    {% endif %}
+  </div>
+</div>
+
+<!-- Order Detail Modal -->
+<div class="modal-backdrop" id="orderModal" style="display:none;">
+  <div class="modal-box order-modal-box">
+    <button class="modal-close" onclick="closeOrderModal()">&times;</button>
+    <div id="orderModalBody">
+      <div class="spinner-box"><i class="fa-solid fa-circle-notch fa-spin"></i> Loading...</div>
+    </div>
+  </div>
+</div>
+
+<style>
+/* Page Layout */
+.orders-page { max-width: 1000px; margin: 0 auto; padding: 24px 16px 80px; }
+.orders-header { margin-bottom: 24px; }
+.page-title { font-size: 24px; font-weight: 700; color: #fff; margin-bottom: 6px; }
+.page-sub { color: #AEB5CA; font-size: 14px; }
+
+/* Filter Tabs */
+.orders-filters { display: flex; gap: 8px; margin-bottom: 24px; overflow-x: auto; padding-bottom: 4px; }
+.orders-filters::-webkit-scrollbar { height: 4px; }
+.orders-filters::-webkit-scrollbar-thumb { background: rgba(255,255,255,.1); border-radius: 4px; }
+.filter-tab {
+  padding: 8px 16px; border-radius: 20px; font-size: 13px; font-weight: 600;
+  color: #AEB5CA; background: rgba(255,255,255,.05); border: 1px solid rgba(255,255,255,.08);
+  text-decoration: none; transition: all .2s; white-space: nowrap;
+}
+.filter-tab:hover { background: rgba(255,255,255,.1); color: #fff; }
+.filter-tab.active { background: linear-gradient(135deg,rgba(91,99,246,.2),rgba(139,61,255,.2)); border-color: rgba(91,99,246,.4); color: #A78BFA; }
+
+/* Table */
+.glass-card { background: rgba(18,22,52,.92); border: 1px solid rgba(255,255,255,.08); border-radius: 16px; padding: 24px; backdrop-filter: blur(20px); }
+.table-responsive { overflow-x: auto; }
+.orders-table { width: 100%; border-collapse: collapse; min-width: 700px; }
+.orders-table th { text-align: left; padding: 12px 16px; font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; color: #636A8A; border-bottom: 1px solid rgba(255,255,255,.08); }
+.orders-table td { padding: 16px; border-bottom: 1px solid rgba(255,255,255,.05); color: #fff; font-size: 14px; }
+.order-row:hover td { background: rgba(255,255,255,.02); }
+.order-row:last-child td { border-bottom: none; }
+.col-id { font-weight: 600; color: #7C83FA; }
+.col-date { color: #AEB5CA; font-size: 13px; }
+.col-amount { font-weight: 700; }
+.text-muted { color: #636A8A; }
+
+/* Pills */
+.status-pill { padding: 4px 10px; border-radius: 20px; font-size: 11px; font-weight: 700; display: inline-block; }
+.status-paid, .delivery-sent { background: rgba(34,197,94,.15); color: #4ade80; border: 1px solid rgba(34,197,94,.2); }
+.status-pending, .delivery-pending { background: rgba(251,191,36,.12); color: #FBBF24; border: 1px solid rgba(251,191,36,.2); }
+.status-failed, .delivery-failed { background: rgba(239,68,68,.12); color: #f87171; border: 1px solid rgba(239,68,68,.2); }
+.status-refunded { background: rgba(99,102,241,.12); color: #818CF8; border: 1px solid rgba(99,102,241,.2); }
+.status-cancelled { background: rgba(156,163,175,.12); color: #9CA3AF; border: 1px solid rgba(156,163,175,.2); }
+
+.btn-view { background: rgba(255,255,255,.06); border: 1px solid rgba(255,255,255,.12); color: #fff; padding: 6px 12px; border-radius: 6px; font-size: 12px; font-weight: 600; cursor: pointer; transition: all .2s; }
+.btn-view:hover { background: rgba(91,99,246,.2); border-color: rgba(91,99,246,.4); color: #A78BFA; }
+.btn-primary { display: inline-block; background: linear-gradient(135deg,#5B63F6,#8B3DFF); color: #fff; padding: 10px 20px; border-radius: 8px; font-weight: 600; text-decoration: none; }
+
+.empty-state { text-align: center; padding: 60px 20px; }
+.empty-icon { font-size: 48px; color: rgba(255,255,255,.05); margin-bottom: 16px; }
+.empty-state h3 { font-size: 18px; font-weight: 700; color: #fff; margin-bottom: 8px; }
+.empty-state p { font-size: 14px; color: #AEB5CA; }
+
+/* Modal */
+.order-modal-box { max-width: 600px; padding: 24px; }
+.spinner-box { text-align: center; padding: 40px; color: #7C83FA; font-size: 18px; font-weight: 600; }
+</style>
+
+<script>
+function viewOrderDetails(orderId) {
+  var modal = document.getElementById('orderModal');
+  var body = document.getElementById('orderModalBody');
+  modal.style.display = 'flex';
+  document.body.style.overflow = 'hidden';
+  body.innerHTML = '<div class="spinner-box"><i class="fa-solid fa-circle-notch fa-spin"></i> Loading...</div>';
+  
+  fetch('/dashboard/orders/' + orderId + '/')
+    .then(r => r.text())
+    .then(html => { body.innerHTML = html; })
+    .catch(err => { body.innerHTML = '<div class="empty-state"><p class="text-danger">Failed to load order details.</p></div>'; });
+}
+function closeOrderModal() {
+  document.getElementById('orderModal').style.display = 'none';
+  document.body.style.overflow = '';
+}
+document.getElementById('orderModal').addEventListener('click', function(e) {
+  if (e.target === this) closeOrderModal();
+});
+</script>
+{% endblock %}

@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Your Access is Ready – {{ site_name }}</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { background: #0A0E27; font-family: Arial, Helvetica, sans-serif; color: #E2E8F0; }
+  .wrapper { max-width: 600px; margin: 0 auto; padding: 20px; }
+  .header { background: linear-gradient(135deg, #0F1535, #1a1f4a); border-radius: 16px 16px 0 0; padding: 36px 32px; text-align: center; border-bottom: 1px solid rgba(91,99,246,.3); }
+  .logo { display: inline-flex; align-items: center; gap: 10px; margin-bottom: 20px; }
+  .logo-dot { width: 36px; height: 36px; background: linear-gradient(135deg,#5B63F6,#8B3DFF); border-radius: 8px; }
+  .logo-text { font-size: 20px; font-weight: 700; color: #fff; }
+  .check-icon { width: 64px; height: 64px; background: rgba(34,197,94,.15); border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 20px; font-size: 28px; line-height: 1; }
+  .email-title { font-size: 24px; font-weight: 700; color: #fff; margin-bottom: 8px; }
+  .email-sub { color: #AEB5CA; font-size: 14px; }
+  .body { background: #111530; padding: 32px; }
+  .greeting { font-size: 16px; color: #E2E8F0; margin-bottom: 24px; }
+  .section-label { font-size: 11px; font-weight: 700; letter-spacing: 1.5px; color: #7C83FA; text-transform: uppercase; margin-bottom: 10px; }
+  .order-card { background: rgba(255,255,255,.04); border: 1px solid rgba(255,255,255,.08); border-radius: 12px; padding: 20px; margin-bottom: 20px; }
+  .order-row { display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid rgba(255,255,255,.06); font-size: 14px; }
+  .order-row:last-child { border-bottom: none; }
+  .row-label { color: #AEB5CA; }
+  .row-val { color: #fff; font-weight: 600; }
+  .row-val.green { color: #4ade80; }
+  .tool-row { display: flex; align-items: center; gap: 14px; padding: 14px; background: rgba(91,99,246,.08); border: 1px solid rgba(91,99,246,.2); border-radius: 10px; margin-bottom: 20px; }
+  .tool-name { font-size: 16px; font-weight: 700; color: #fff; }
+  .tool-plan { font-size: 13px; color: #AEB5CA; margin-top: 3px; }
+  .tool-price { margin-left: auto; font-size: 16px; font-weight: 700; color: #A78BFA; }
+  .access-box { background: rgba(0,0,0,.3); border: 1px solid rgba(91,99,246,.3); border-radius: 10px; padding: 16px; font-family: monospace; color: #A5F3FC; font-size: 13px; white-space: pre-wrap; word-break: break-all; }
+  .access-pending { background: rgba(251,191,36,.06); border: 1px solid rgba(251,191,36,.25); border-radius: 10px; padding: 16px; color: #FDE68A; font-size: 14px; }
+  .cta-btn { display: block; text-align: center; background: linear-gradient(135deg,#5B63F6,#8B3DFF); color: #fff; text-decoration: none; padding: 14px 28px; border-radius: 10px; font-size: 15px; font-weight: 700; margin: 28px 0; }
+  .divider { height: 1px; background: rgba(255,255,255,.07); margin: 24px 0; }
+  .support-note { font-size: 13px; color: #AEB5CA; line-height: 1.6; }
+  .support-note a { color: #7C83FA; text-decoration: none; }
+  .footer { background: #0A0E27; border-radius: 0 0 16px 16px; padding: 24px 32px; text-align: center; }
+  .footer-text { font-size: 12px; color: #636A8A; line-height: 1.8; }
+  .footer-text a { color: #7C83FA; text-decoration: none; }
+  .social-links { display: flex; justify-content: center; gap: 16px; margin-bottom: 16px; }
+  .social-link { width: 32px; height: 32px; background: rgba(255,255,255,.06); border-radius: 6px; display: flex; align-items: center; justify-content: center; text-decoration: none; font-size: 14px; }
+</style>
+</head>
+<body>
+<div class="wrapper">
+  <div class="header">
+    <div class="logo">
+      <div class="logo-dot"></div>
+      <span class="logo-text">{{ site_name }}</span>
+    </div>
+    <div class="check-icon">✅</div>
+    <div class="email-title">Your access is ready!</div>
+    <p class="email-sub">Payment confirmed for Order #{{ order.id }}</p>
+  </div>
+
+  <div class="body">
+    <p class="greeting">Hi <strong>{{ user.first_name|default:user.email }}</strong>,</p>
+    <p style="color:#AEB5CA;font-size:14px;margin-bottom:24px;">
+      Great news — your payment has been confirmed and your tool access is ready. Here's a summary of your order:
+    </p>
+
+    <!-- Tool Item -->
+    <div class="section-label">What you purchased</div>
+    {% for item in items %}
+    <div class="tool-row">
+      <div>
+        <div class="tool-name">{{ item.tool.name }}</div>
+        <div class="tool-plan">{{ item.plan.name|default:"Monthly Subscription" }}</div>
+      </div>
+      <div class="tool-price">NGN {{ item.price_ngn|floatformat:0 }}</div>
+    </div>
+    {% endfor %}
+
+    <!-- Order Details -->
+    <div class="section-label">Order details</div>
+    <div class="order-card">
+      <div class="order-row">
+        <span class="row-label">Order ID</span>
+        <span class="row-val">#{{ order.id }}</span>
+      </div>
+      <div class="order-row">
+        <span class="row-label">Payment Status</span>
+        <span class="row-val green">✓ Paid</span>
+      </div>
+      <div class="order-row">
+        <span class="row-label">Amount</span>
+        <span class="row-val">NGN {{ order.total_amount_ngn|floatformat:0 }}</span>
+      </div>
+      <div class="order-row">
+        <span class="row-label">Date</span>
+        <span class="row-val">{{ order.created_at|date:"d M Y, H:i" }}</span>
+      </div>
+    </div>
+
+    <!-- Access Details -->
+    <div class="section-label">Access details</div>
+    {% if order.access_details %}
+    <div class="access-box">{{ order.access_details }}</div>
+    {% else %}
+    <div class="access-pending">
+      ⏳ Your access details are being prepared by our team and will arrive in a separate email within a few minutes.
+      If you need immediate help, reply to this email or contact us at <a href="mailto:{{ support_email }}">{{ support_email }}</a>.
+    </div>
+    {% endif %}
+
+    <a href="{{ site_url }}/dashboard/" class="cta-btn">Go to My Dashboard →</a>
+
+    <div class="divider"></div>
+    <p class="support-note">
+      Need help? Reply to this email or contact us at
+      <a href="mailto:{{ support_email }}">{{ support_email }}</a>.<br>
+      Thank you for choosing {{ site_name }} — your gateway to Africa's best AI tools.
+    </p>
+  </div>
+
+  <div class="footer">
+    <p class="footer-text">
+      © {{ order.created_at|date:"Y" }} {{ site_name }}. All rights reserved.<br>
+      <a href="{{ site_url }}">{{ site_url }}</a>
+    </p>
+  </div>
+</div>
+</body>
+</html>

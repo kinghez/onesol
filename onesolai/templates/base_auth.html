@@ -1,0 +1,60 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}OneSol AI Hub{% endblock %}</title>
+
+    <!-- External Dependencies -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+
+    <!-- CSS System -->
+    <link rel="stylesheet" href="{% static 'css/reset.css' %}">
+    <link rel="stylesheet" href="{% static 'css/variables.css' %}">
+    <link rel="stylesheet" href="{% static 'css/typography.css' %}">
+    <link rel="stylesheet" href="{% static 'css/utilities.css' %}">
+
+    <!-- Components -->
+    <link rel="stylesheet" href="{% static 'components/buttons.css' %}">
+    <link rel="stylesheet" href="{% static 'components/forms.css' %}">
+
+    <!-- Page Specific -->
+    <link rel="stylesheet" href="{% static 'pages/auth.css' %}">
+
+    <!-- Homepage Background Styles -->
+    <link rel="stylesheet" href="{% static 'css/styles.css' %}">
+
+    {% block extra_css %}{% endblock %}
+</head>
+<body class="fade-in">
+
+    <!-- BG gradient -->
+    <div class="bg-base"></div>
+
+    <!-- Ambient glows -->
+    <div class="amb-glows">
+        <div class="amb amb-purple"></div>
+        <div class="amb amb-blue"></div>
+        <div class="amb amb-gold-tr"></div>
+        <div class="amb amb-gold-bl"></div>
+    </div>
+
+    <!-- Left angular ribbons -->
+    <div class="ribbons">
+        <div class="rib rib-1"></div>
+        <div class="rib rib-2"></div>
+        <div class="rib rib-3"></div>
+        <div class="rib rib-4"></div>
+    </div>
+
+    <!-- Particle + grid canvas -->
+    <canvas id="bgCanvas"></canvas>
+
+    {% block content %}{% endblock %}
+
+    <script src="{% static 'js/script.js' %}"></script>
+    {% block extra_js %}{% endblock %}
+</body>
+</html>

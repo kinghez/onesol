@@ -1,0 +1,197 @@
+{% extends 'base_dashboard.html' %}
+{% load static %}
+
+{% block title %}OneSol AI Hub - Dashboard{% endblock %}
+
+{% block nav_dashboard %}active{% endblock %}
+
+{% block page_title %}Welcome back, {{ user.get_short_name|default:"there" }}{% endblock %}
+{% block page_title_emoji %}👋{% endblock %}
+{% block page_subtitle %}Here's what's happening with your account today.{% endblock %}
+
+{% block content %}
+
+    <!-- Stats Grid -->
+    <div class="dashboard-grid">
+        <div class="card stat-card">
+            <div class="stat-title">
+                <div class="stat-icon" style="width: 20px; height: 20px; margin: 0;">
+                    <i class="fa-solid fa-lock" style="font-size: 10px;"></i>
+                </div>
+                Active Subscriptions
+            </div>
+            <div class="stat-number mb-2">{{ active_subscriptions_count|default:"0" }}</div>
+            <a href="{% url 'dashboard:subscriptions' %}" class="card-link">View all &rarr;</a>
+        </div>
+
+        <div class="card stat-card">
+            <div class="stat-title">
+                <div class="stat-icon" style="width: 20px; height: 20px; margin: 0;">
+                    <i class="fa-solid fa-box-open" style="font-size: 10px;"></i>
+                </div>
+                Total Orders
+            </div>
+            <div class="stat-number mb-2">{{ total_orders_count|default:"0" }}</div>
+            <a href="{% url 'dashboard:order_history' %}" class="card-link">View all &rarr;</a>
+        </div>
+
+        <div class="card stat-card">
+            <div class="stat-title">
+                <div class="stat-icon" style="width: 20px; height: 20px; margin: 0; background-color: rgba(16, 185, 129, 0.1); color: #10B981;">
+                    <i class="fa-solid fa-coins" style="font-size: 10px;"></i>
+                </div>
+                Referral Earnings
+            </div>
+            <div class="stat-number mb-2" style="font-size: 28px; line-height: 1.35;">NGN {{ referral_earnings|default:"0" }}</div>
+            <a href="{% url 'dashboard:referrals' %}" class="card-link">View all &rarr;</a>
+        </div>
+
+        <div class="card stat-card">
+            <div class="stat-title">
+                <div class="stat-icon" style="width: 20px; height: 20px; margin: 0; background-color: rgba(16, 185, 129, 0.1); color: #10B981;">
+                    <i class="fa-solid fa-wallet" style="font-size: 10px;"></i>
+                </div>
+                Wallet Balance
+            </div>
+            <div class="stat-number mb-2" style="font-size: 28px; line-height: 1.35;">NGN {{ wallet_balance|default:"0.00" }}</div>
+            <a href="{% url 'dashboard:wallet' %}" class="card-link">Top up wallet &rarr;</a>
+        </div>
+    </div>
+
+    <!-- Middle Content Grid -->
+    <div class="dashboard-bottom-grid">
+
+        <!-- Active Subscriptions -->
+        <div class="card">
+            <div class="card-header">
+                <h3 class="card-title">Active Subscriptions</h3>
+                <a href="{% url 'dashboard:subscriptions' %}" class="card-link">View all</a>
+            </div>
+            <div class="list-container">
+                {% for order_item in recent_subscriptions %}
+                <div class="list-item">
+                    <div class="list-item-left">
+                        <div class="list-item-logo">
+                            {% if order_item.tool.image_url %}
+                                <img src="{{ order_item.tool.image_url }}" alt="{{ order_item.tool.name }}">
+                            {% else %}
+                                <i class="fa-solid fa-robot"></i>
+                            {% endif %}
+                        </div>
+                        <div>
+                            <div class="list-item-title">{{ order_item.tool.name }}</div>
+                            <div class="list-item-subtitle">{{ order_item.plan.name }}</div>
+                        </div>
+                    </div>
+                    <div class="list-item-right">
+                        <span class="badge badge-success">Active</span>
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="text-secondary" style="width:16px"><polyline points="9 18 15 12 9 6"></polyline></svg>
+                    </div>
+                </div>
+                {% empty %}
+                <!-- Demo data while backend is not connected -->
+                <div class="list-item">
+                    <div class="list-item-left">
+                        <div class="list-item-logo" style="background-color: #10A37F20;">
+                            <img src="{% static 'assets/images/logos/chatgpt.svg' %}" alt="ChatGPT">
+                        </div>
+                        <div>
+                            <div class="list-item-title">ChatGPT Plus</div>
+                            <div class="list-item-subtitle">Renews on May 23, 2024</div>
+                        </div>
+                    </div>
+                    <div class="list-item-right">
+                        <span class="badge badge-success">Active</span>
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="text-secondary" style="width:16px"><polyline points="9 18 15 12 9 6"></polyline></svg>
+                    </div>
+                </div>
+                <div class="list-item">
+                    <div class="list-item-left">
+                        <div class="list-item-logo" style="background-color: #00C4CC20;">
+                            <img src="{% static 'assets/images/logos/canva.svg' %}" alt="Canva">
+                        </div>
+                        <div>
+                            <div class="list-item-title">Canva Pro</div>
+                            <div class="list-item-subtitle">Renews on May 30, 2024</div>
+                        </div>
+                    </div>
+                    <div class="list-item-right">
+                        <span class="badge badge-success">Active</span>
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="text-secondary" style="width:16px"><polyline points="9 18 15 12 9 6"></polyline></svg>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+
+        <!-- Recent Orders -->
+        <div class="card">
+            <div class="card-header">
+                <h3 class="card-title">Recent Orders</h3>
+                <a href="{% url 'dashboard:order_history' %}" class="card-link">View all</a>
+            </div>
+            <div class="list-container">
+                {% for order in recent_orders %}
+                <div class="list-item">
+                    <div class="list-item-left">
+                        <div class="list-item-logo">
+                            <i class="fa-solid fa-box"></i>
+                        </div>
+                        <div>
+                            <div class="list-item-title">Order #{{ order.id }}</div>
+                            <div class="list-item-subtitle">{{ order.created_at|date:"M d, Y" }}</div>
+                        </div>
+                    </div>
+                    <div class="list-item-right">
+                        <div class="text-secondary text-small" style="margin-right: 16px;">{{ order.created_at|date:"M d, Y" }}</div>
+                        <div class="list-item-value">NGN {{ order.total_amount_ngn }}</div>
+                    </div>
+                </div>
+                {% empty %}
+                <!-- Demo data -->
+                <div class="list-item">
+                    <div class="list-item-left">
+                        <div class="list-item-logo" style="background-color: #10A37F20;">
+                            <img src="{% static 'assets/images/logos/chatgpt.svg' %}" alt="ChatGPT">
+                        </div>
+                        <div>
+                            <div class="list-item-title">ChatGPT Plus</div>
+                            <div class="list-item-subtitle">May 20, 2024</div>
+                        </div>
+                    </div>
+                    <div class="list-item-right">
+                        <div class="text-secondary text-small" style="margin-right: 16px;">May 20, 2024</div>
+                        <div class="list-item-value">NGN 5,500</div>
+                    </div>
+                </div>
+                <div class="list-item">
+                    <div class="list-item-left">
+                        <div class="list-item-logo" style="background-color: #00C4CC20;">
+                            <img src="{% static 'assets/images/logos/canva.svg' %}" alt="Canva">
+                        </div>
+                        <div>
+                            <div class="list-item-title">Canva Pro</div>
+                            <div class="list-item-subtitle">May 19, 2024</div>
+                        </div>
+                    </div>
+                    <div class="list-item-right">
+                        <div class="text-secondary text-small" style="margin-right: 16px;">May 19, 2024</div>
+                        <div class="list-item-value">NGN 4,200</div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+
+    <!-- Bottom Promo Banner -->
+    <div class="promo-banner mt-4">
+        <div class="promo-content">
+            <div class="promo-title">Unlock More with OneSol AI Hub</div>
+            <div class="promo-subtitle">Discover premium tools to boost your productivity</div>
+            <a href="{% url 'tools:tools_list' %}" class="btn promo-btn">Explore Tools</a>
+        </div>
+        <img src="{% static 'assets/images/onesol-dashbord-img.png' %}" alt="Promo Illustration" class="promo-image">
+    </div>
+
+{% endblock %}

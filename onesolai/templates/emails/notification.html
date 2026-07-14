@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>{{ title }}</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { background: #0A0E27; font-family: Arial, Helvetica, sans-serif; color: #E2E8F0; }
+  .wrapper { max-width: 600px; margin: 0 auto; padding: 20px; }
+  .header { background: linear-gradient(135deg, #0F1535, #1a1f4a); border-radius: 16px 16px 0 0; padding: 36px 32px; text-align: center; border-bottom: 1px solid rgba(91,99,246,.3); }
+  .logo { display: inline-flex; align-items: center; gap: 10px; margin-bottom: 20px; }
+  .logo-dot { width: 36px; height: 36px; background: linear-gradient(135deg,#5B63F6,#8B3DFF); border-radius: 8px; }
+  .logo-text { font-size: 20px; font-weight: 700; color: #fff; }
+  .icon-wrap { width: 64px; height: 64px; background: rgba(91,99,246,.15); border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 20px; font-size: 28px; line-height: 1; color: #7C83FA; }
+  .email-title { font-size: 24px; font-weight: 700; color: #fff; margin-bottom: 8px; }
+  .body { background: #111530; padding: 32px; }
+  .greeting { font-size: 16px; color: #E2E8F0; margin-bottom: 24px; }
+  .content { font-size: 15px; color: #AEB5CA; line-height: 1.6; margin-bottom: 24px; white-space: pre-wrap; }
+  .cta-btn { display: block; text-align: center; background: linear-gradient(135deg,#5B63F6,#8B3DFF); color: #fff; text-decoration: none; padding: 14px 28px; border-radius: 10px; font-size: 15px; font-weight: 700; margin: 28px 0; }
+  .footer { background: #0A0E27; border-radius: 0 0 16px 16px; padding: 24px 32px; text-align: center; }
+  .footer-text { font-size: 12px; color: #636A8A; line-height: 1.8; }
+</style>
+</head>
+<body>
+<div class="wrapper">
+  <div class="header">
+    <div class="logo">
+      <div class="logo-dot"></div>
+      <span class="logo-text">{{ site_name }}</span>
+    </div>
+    <div class="icon-wrap">🔔</div>
+    <div class="email-title">{{ title }}</div>
+  </div>
+
+  <div class="body">
+    <p class="greeting">Hi <strong>{{ user.first_name|default:user.email }}</strong>,</p>
+    
+    <div class="content">{{ message }}</div>
+
+    {% if action_url %}
+    <a href="{{ action_url }}" class="cta-btn">View Details →</a>
+    {% endif %}
+  </div>
+
+  <div class="footer">
+    <p class="footer-text">
+      © {% now "Y" %} {{ site_name }}. All rights reserved.<br>
+      <a href="{{ site_url }}" style="color:#7C83FA;text-decoration:none;">{{ site_url }}</a>
+    </p>
+  </div>
+</div>
+</body>
+</html>
