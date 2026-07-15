@@ -38,3 +38,13 @@ def unread_count(request):
     """Get the unread notification count via AJAX."""
     count = request.user.notifications.filter(is_read=False).count()
     return JsonResponse({'count': count})
+
+
+@login_required(login_url='/auth/login/')
+def delete_notification(request, notif_id):
+    """Delete a single notification via AJAX."""
+    if request.method == 'POST':
+        notif = get_object_or_404(Notification, id=notif_id, user=request.user)
+        notif.delete()
+        return JsonResponse({'status': 'ok'})
+    return JsonResponse({'status': 'error'}, status=400)

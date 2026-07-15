@@ -167,7 +167,11 @@
 .empty-state p { font-size: 14px; color: #AEB5CA; }
 
 /* Modal */
-.topup-modal { max-width: 400px; padding: 32px 24px; }
+.modal-backdrop { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.7); backdrop-filter: blur(8px); z-index: 9999; display: flex; align-items: center; justify-content: center; }
+.modal-box { background: #0f132e; border: 1px solid rgba(255,255,255,0.1); border-radius: 20px; position: relative; box-shadow: 0 24px 48px rgba(0,0,0,0.5); }
+.modal-close { position: absolute; top: 16px; right: 20px; background: transparent; border: none; color: #AEB5CA; font-size: 28px; cursor: pointer; transition: 0.2s; line-height: 1; }
+.modal-close:hover { color: #fff; transform: scale(1.1); }
+.topup-modal { max-width: 400px; width: 90%; padding: 32px 24px; }
 .modal-header { text-align: center; margin-bottom: 24px; }
 .modal-icon { width: 56px; height: 56px; background: linear-gradient(135deg, rgba(91,99,246,.2), rgba(139,61,255,.2)); border-radius: 16px; display: flex; align-items: center; justify-content: center; font-size: 24px; color: #A78BFA; margin: 0 auto 16px; }
 .modal-header h2 { font-size: 20px; font-weight: 700; color: #fff; margin-bottom: 4px; }

@@ -76,3 +76,26 @@ class NotificationAdmin(admin.ModelAdmin):
             else:
                 obj.user = form.cleaned_data.get('user')
         super().save_model(request, obj, form, change)
+
+
+from .models import BroadcastMessage
+
+@admin.register(BroadcastMessage)
+class BroadcastMessageAdmin(admin.ModelAdmin):
+    list_display = ('subject', 'send_email', 'send_in_app', 'created_at')
+    readonly_fields = ('created_at',)
+
+    def save_model(self, request, obj, form, change):
+        super().save_model(request, obj, form, change)
+        if not change:  # Only blast on creation
+            from core.email_utils import send_alert
+            users = User.objects.all()
+            for user in users:
+                send_alert(
+                    user=user,
+                    title=obj.subject,
+                    message=obj.message,
+                    notification_type='promotion',
+                    send_email=obj.send_email
+                )
+            self.message_user(request, f"Broadcast queued for {users.count()} users.")

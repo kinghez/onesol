@@ -128,7 +128,11 @@
                     </button>
                     <button class="nav-icon-btn" onclick="window.location.href='{% url 'notifications:list' %}'" style="position:relative;">
                         <i class="fa-regular fa-bell"></i>
-                        <span id="notif-badge" style="display:none;position:absolute;top:6px;right:6px;width:8px;height:8px;background:#f87171;border-radius:50%;box-shadow:0 0 0 2px #0f1535;"></span>
+                        {% if unread_notifications_count > 0 %}
+                        <span id="notif-badge" style="position:absolute;top:0;right:0;background:#f87171;color:white;font-size:10px;font-weight:bold;border-radius:10px;padding:2px 6px;line-height:1;box-shadow:0 0 0 2px #0f1535;">
+                            {{ unread_notifications_count }}
+                        </span>
+                        {% endif %}
                     </button>
                     <div class="user-profile">
                         <div class="avatar flex items-center justify-center bg-transparent">

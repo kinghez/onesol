@@ -88,7 +88,7 @@ def checkout_view(request):
             
             # Trigger delivery
             trigger_delivery(order)
-            credit_referral_commission(order.user)
+            credit_referral_commission(order)
             
             messages.success(request, f"Payment successful! You purchased {tool.name} using your wallet.")
             return redirect(reverse('orders:confirmation', args=[order.id]))
@@ -135,7 +135,7 @@ def checkout_view(request):
         order.status = 'failed'
         order.save(update_fields=['status'])
         messages.error(request, f'Payment initialization failed: {e}')
-        return redirect(reverse('products:tool_detail', kwargs={'slug': tool_slug}))
+        return redirect(reverse('tools:tool_detail', kwargs={'slug': tool_slug}))
 
 
 # ─────────────────────────────────────────────────────────────

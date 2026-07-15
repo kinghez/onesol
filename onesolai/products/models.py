@@ -79,3 +79,56 @@ class SubscriptionPlan(models.Model):
 
     def __str__(self):
         return f"{self.tool.name} – {self.name} (NGN {self.price_ngn})"
+
+
+class ToolScreenshot(models.Model):
+    tool = models.ForeignKey(Tool, related_name='screenshots', on_delete=models.CASCADE)
+    image_url = models.URLField(help_text="URL to the screenshot image")
+    caption = models.CharField(max_length=200, blank=True)
+    order = models.PositiveIntegerField(default=0)
+
+    class Meta:
+        ordering = ['order']
+
+    def __str__(self):
+        return f"Screenshot for {self.tool.name}"
+
+
+class ToolFeature(models.Model):
+    tool = models.ForeignKey(Tool, related_name='features', on_delete=models.CASCADE)
+    title = models.CharField(max_length=200, help_text="e.g. Priority access to GPT-4")
+    description = models.TextField(blank=True, help_text="Optional longer description")
+    order = models.PositiveIntegerField(default=0)
+
+    class Meta:
+        ordering = ['order']
+
+    def __str__(self):
+        return self.title
+
+
+class ToolFAQ(models.Model):
+    tool = models.ForeignKey(Tool, related_name='faqs', on_delete=models.CASCADE)
+    question = models.CharField(max_length=300)
+    answer = models.TextField()
+    order = models.PositiveIntegerField(default=0)
+
+    class Meta:
+        ordering = ['order']
+
+    def __str__(self):
+        return self.question
+
+
+class ToolReview(models.Model):
+    tool = models.ForeignKey(Tool, related_name='reviews', on_delete=models.CASCADE)
+    user_name = models.CharField(max_length=100)
+    rating = models.PositiveIntegerField(default=5, help_text="1 to 5 stars")
+    comment = models.TextField()
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ['-created_at']
+
+    def __str__(self):
+        return f"{self.rating} star review by {self.user_name} for {self.tool.name}"

@@ -43,6 +43,7 @@ def tools_list(request):
         'active_category': active_category,
         'sort': sort,
         'q': q,
+        'hide_header_footer': request.user.is_authenticated,
     }
     return render(request, 'tools/tools.html', context)
 
@@ -50,7 +51,9 @@ def tools_list(request):
 def tool_detail(request, slug):
     """Render a single tool's detail page."""
     tool = get_object_or_404(
-        Tool.objects.filter(is_active=True).select_related('category').prefetch_related('plans'),
+        Tool.objects.filter(is_active=True)
+        .select_related('category')
+        .prefetch_related('plans', 'screenshots', 'features', 'faqs', 'reviews'),
         slug=slug
     )
     context = {
@@ -59,6 +62,7 @@ def tool_detail(request, slug):
         'related_tools': Tool.objects.filter(
             category=tool.category, is_active=True
         ).exclude(pk=tool.pk)[:4],
+        'hide_header_footer': request.user.is_authenticated,
     }
     return render(request, 'tools/tool_detail.html', context)
 

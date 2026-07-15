@@ -9,6 +9,13 @@
 {% block content %}
     <!-- ══════ ALL TOOLS PAGE ══════ -->
     <main class="all-tools-page">
+        {% if hide_header_footer %}
+        <div style="margin: 0 auto; max-width: 1200px; padding: 24px 24px 0;">
+            <a href="{% url 'dashboard:home' %}" style="display:inline-flex;align-items:center;gap:8px;color:#AEB5CA;text-decoration:none;font-size:14px;background:rgba(255,255,255,0.05);padding:8px 16px;border-radius:20px;transition:all 0.3s;">
+                <i class="fa-solid fa-arrow-left"></i> Back to Dashboard
+            </a>
+        </div>
+        {% endif %}
         <div class="at-top">
             <div class="at-badge">Get Started</div>
             <h1 class="at-title">All Tools</h1>

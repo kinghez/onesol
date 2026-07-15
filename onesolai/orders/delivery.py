@@ -69,29 +69,54 @@ def trigger_delivery(order):
 def credit_referral_commission(order):
     """
     If the buyer was referred, credit the referrer's earnings balance.
-    Called only on first successful purchase by the referred user.
+    Respects the admin settings for frequency (first vs every) and type (fixed vs %).
     """
     try:
-        from accounts.models import Referral
+        from accounts.models import Referral, WalletTransaction
         from core.models import SiteSettings
+        from decimal import Decimal
 
         # Check if buyer has a referral record
-        referral = Referral.objects.select_related('referrer__profile').get(
-            referred_user=order.user,
-            status='pending',
-        )
+        referral = Referral.objects.select_related('referrer__profile').filter(
+            referred_user=order.user
+        ).first()
+
+        if not referral:
+            return
+
         cfg = SiteSettings.get()
-        commission = cfg.referral_commission_ngn
+        
+        # Frequency Check
+        if cfg.referral_reward_frequency == 'first_purchase' and referral.status == 'rewarded':
+            return  # They already got paid for the first purchase
+
+        # Calculation Check
+        if cfg.referral_commission_type == 'percentage':
+            commission = (cfg.referral_commission_percentage / Decimal('100.00')) * order.total_amount_ngn
+        else:
+            commission = cfg.referral_commission_ngn
 
         # Credit referrer's earnings
         referrer_profile = referral.referrer.profile
         referrer_profile.earnings += commission
         referrer_profile.save(update_fields=['earnings'])
 
-        # Update referral status
+        # Update referral status and cumulative amount
         referral.status = 'rewarded'
-        referral.reward_amount_ngn = commission
+        if not referral.reward_amount_ngn:
+            referral.reward_amount_ngn = commission
+        else:
+            referral.reward_amount_ngn += commission
         referral.save(update_fields=['status', 'reward_amount_ngn'])
+
+        # Record wallet transaction for the referrer
+        WalletTransaction.objects.create(
+            user=referral.referrer,
+            transaction_type='referral_credit',
+            amount_ngn=commission,
+            reference=f"REF_ORDER_{order.id}",
+            description=f"Referral commission from {order.user.email}"
+        )
 
         # Link order to referrer
         order.referred_by = referral.referrer
@@ -102,12 +127,11 @@ def credit_referral_commission(order):
         Notification.objects.create(
             user=referral.referrer,
             title="Referral Commission Earned!",
-            message=f"You earned NGN {commission:,.2f} from a successful referral.",
+            message=f"You earned NGN {commission:,.2f} from a successful referral purchase.",
             notification_type='referral',
             action_url="/dashboard/referrals/"
         )
 
-    except Referral.DoesNotExist:
-        pass  # Not a referred user – no action needed
-    except Exception:
+    except Exception as e:
+        print(f"Error in credit_referral_commission: {e}")
         pass  # Never crash the payment confirmation flow

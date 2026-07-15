@@ -11,19 +11,32 @@
 {% block content %}
     <!-- ══════ TOOL MAIN CONTENT ══════ -->
     <main class="tool-page-main">
+        {% if hide_header_footer %}
+        <div style="margin-bottom: 24px;">
+            <a href="{% url 'dashboard:home' %}" style="display:inline-flex;align-items:center;gap:8px;color:#AEB5CA;text-decoration:none;font-size:14px;background:rgba(255,255,255,0.05);padding:8px 16px;border-radius:20px;transition:all 0.3s;">
+                <i class="fa-solid fa-arrow-left"></i> Back to Dashboard
+            </a>
+        </div>
+        {% endif %}
         <div class="tool-header-wrap">
             <!-- Left: Logo & Info -->
             <div class="th-left">
                 <div class="th-logo-box">
-                    <img id="toolLogo" src="" alt="Tool Logo">
+                    {% if tool.image_url %}
+                        <img id="toolLogo" src="{{ tool.image_url }}" alt="{{ tool.name }} Logo">
+                    {% else %}
+                        <div style="width:100%;height:100%;display:flex;align-items:center;justify-content:center;background:#2a2f4c;border-radius:18px;color:#fff;font-size:32px;font-weight:700;">
+                            {{ tool.name|make_list|first|upper }}
+                        </div>
+                    {% endif %}
                 </div>
                 <div class="th-info">
-                    <h1 id="toolName" class="th-title"></h1>
-                    <p class="th-dev">By <span id="toolDeveloper"></span></p>
+                    <h1 class="th-title">{{ tool.name }}</h1>
+                    <p class="th-dev">By <span>{{ tool.developer|default:"OneSol" }}</span></p>
                     <div class="th-stats">
-                        <span class="th-rating"><i class="fa-solid fa-star" style="color: #FFD98A;"></i> <span id="toolRating"></span> <span class="th-reviews">(<span id="toolReviewsCount"></span> reviews)</span></span>
+                        <span class="th-rating"><i class="fa-solid fa-star" style="color: #FFD98A;"></i> <span>{{ tool.rating }}</span> <span class="th-reviews">({{ tool.review_count|default:"0" }} reviews)</span></span>
                         <span class="th-divider">|</span>
-                        <span class="th-users"><span id="toolUsersCount"></span> Active Users</span>
+                        <span class="th-users"><span>{{ tool.users_count|default:"10k+" }}</span> Active Users</span>
                     </div>
                 </div>
             </div>
@@ -32,7 +45,7 @@
             <div class="th-right">
                 <button class="th-wishlist-btn"><i class="fa-regular fa-heart"></i> Add to Wishlist</button>
                 <div class="th-price-box">
-                    <span class="th-price" id="toolPrice"></span> <span class="th-period">/ month</span>
+                    <span class="th-price">NGN {{ tool.base_price_ngn|floatformat:0 }}</span> <span class="th-period">/ month</span>
                 </div>
                 <form method="POST" action="{% url 'orders:checkout' %}" class="th-checkout-form">
                     {% csrf_token %}
@@ -57,8 +70,11 @@
                         </label>
                     </div>
                     {% endif %}
-
-                    <button type="submit" class="btn-pri-2 th-buy-btn" style="width:100%;">Buy Now</button>
+                    {% if user.is_authenticated %}
+                        <button type="submit" class="btn-pri-2 th-buy-btn" style="width:100%;">Pay Now</button>
+                    {% else %}
+                        <a href="{% url 'accounts:login' %}?next={{ request.path }}" class="btn-pri-2 th-buy-btn" style="width:100%; display:flex; justify-content:center; align-items:center; text-decoration:none;">Log in to Pay</a>
+                    {% endif %}
                 </form>
             </div>
         </div>
@@ -67,7 +83,7 @@
             <div class="tool-tabs">
                 <button class="tool-tab active" data-target="overview">Overview</button>
                 <button class="tool-tab" data-target="features">Features</button>
-                <button class="tool-tab" data-target="reviews">Reviews (<span id="tabReviewsCount"></span>)</button>
+                <button class="tool-tab" data-target="reviews">Reviews ({{ tool.reviews.count }})</button>
                 <button class="tool-tab" data-target="faqs">FAQs</button>
                 <div class="tab-indicator" id="tabIndicator"></div>
             </div>
@@ -78,37 +94,88 @@
                 <div class="overview-grid">
                     <div class="ov-left">
                         <h3 class="pane-title">Overview</h3>
-                        <p class="ov-desc" id="ovDesc"></p>
-                        <ul class="ov-features-list" id="ovFeatures"></ul>
+                        <p class="ov-desc">{{ tool.description }}</p>
+                        <ul class="ov-features-list">
+                            {% for feature in tool.features.all|slice:":5" %}
+                                <li><i class="fa-solid fa-check"></i> {{ feature.title }}</li>
+                            {% empty %}
+                                <li><i class="fa-solid fa-check"></i> Premium Access</li>
+                            {% endfor %}
+                        </ul>
                     </div>
                     <div class="ov-right">
                         <h3 class="pane-title">Screenshots</h3>
                         <div class="ss-gallery">
-                            <div class="ss-track" id="ssTrack"></div>
+                            <div class="ss-track" id="ssTrack">
+                                {% for ss in tool.screenshots.all %}
+                                    <img src="{{ ss.image_url }}" alt="Screenshot">
+                                {% empty %}
+                                    <div style="width:100%;height:100%;display:flex;align-items:center;justify-content:center;background:#1e233b;border-radius:12px;color:#AEB5CA;">No screenshots available</div>
+                                {% endfor %}
+                            </div>
+                            {% if tool.screenshots.count > 1 %}
                             <button class="ss-nav prev" id="ssPrev"><i class="fas fa-chevron-left"></i></button>
                             <button class="ss-nav next" id="ssNext"><i class="fas fa-chevron-right"></i></button>
                             <div class="ss-dots" id="ssDots"></div>
+                            {% endif %}
                         </div>
                     </div>
                 </div>
             </div>
             <div class="tab-pane" id="tab-features">
                 <h3 class="pane-title">Features &amp; Requirements</h3>
-                <div class="features-grid" id="featGrid"></div>
+                <div class="features-grid">
+                    {% for feature in tool.features.all %}
+                        <div class="feat-card">
+                            <div class="feat-icon"><i class="fa-solid fa-bolt"></i></div>
+                            <div class="feat-info">
+                                <h4>{{ feature.title }}</h4>
+                                <p>{{ feature.description }}</p>
+                            </div>
+                        </div>
+                    {% empty %}
+                        <p style="color:#AEB5CA;">More features to be announced.</p>
+                    {% endfor %}
+                </div>
             </div>
             <div class="tab-pane" id="tab-reviews">
                 <h3 class="pane-title">Customer Reviews</h3>
-                <div class="reviews-wrap" id="revWrap"></div>
+                <div class="reviews-wrap">
+                    {% for review in tool.reviews.all %}
+                        <div class="rev-card">
+                            <div class="rev-header">
+                                <div class="rev-avatar">{{ review.user_name|make_list|first|upper }}</div>
+                                <div>
+                                    <h4 class="rev-name">{{ review.user_name }}</h4>
+                                    <div class="rev-stars">
+                                        <i class="fa-solid fa-star"></i> {{ review.rating }}.0
+                                    </div>
+                                </div>
+                            </div>
+                            <p class="rev-text">{{ review.comment }}</p>
+                        </div>
+                    {% empty %}
+                        <p style="color:#AEB5CA;">No reviews yet. Be the first to review!</p>
+                    {% endfor %}
+                </div>
             </div>
             <div class="tab-pane" id="tab-faqs">
                 <h3 class="pane-title">Frequently Asked Questions</h3>
-                <div class="faqs-accordion" id="faqsList"></div>
+                <div class="faqs-accordion">
+                    {% for faq in tool.faqs.all %}
+                        <div class="faq-item">
+                            <button class="faq-btn">{{ faq.question }} <i class="fas fa-chevron-down"></i></button>
+                            <div class="faq-content"><p>{{ faq.answer }}</p></div>
+                        </div>
+                    {% empty %}
+                        <p style="color:#AEB5CA;">No FAQs available for this tool.</p>
+                    {% endfor %}
+                </div>
             </div>
         </div>
     </main>
 {% endblock %}
 
 {% block extra_js %}
-    <script src="{% static 'js/tools-data.js' %}"></script>
     <script src="{% static 'js/tool.js' %}"></script>
 {% endblock %}

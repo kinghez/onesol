@@ -50,6 +50,16 @@
           </div>
           
           <div class="form-group">
+            <label>Phone Number <span style="color:#AEB5CA;font-weight:normal;">(Optional)</span></label>
+            <input type="text" name="phone_number" class="form-control" value="{{ user.profile.phone_number|default:'' }}" placeholder="+234...">
+          </div>
+
+          <div class="form-group">
+            <label>Country</label>
+            <input type="text" name="country_preference" id="country_preference" class="form-control" value="{{ user.profile.country_preference|default:'' }}" placeholder="e.g. Nigeria">
+          </div>
+          
+          <div class="form-group">
             <label>Email Address</label>
             <input type="email" class="form-control" value="{{ user.email }}" disabled title="Email cannot be changed">
             <small class="text-muted mt-1">To change your email, please contact support.</small>
@@ -57,9 +67,9 @@
           
           <div class="form-group">
             <label>Currency Preference</label>
-            <select name="currency_preference" class="form-control">
+            <select name="currency_preference" id="currency_preference" class="form-control">
               {% for cur in currencies %}
-                <option value="{{ cur }}" {% if user.profile.currency_preference == cur %}selected{% endif %}>{{ cur }}</option>
+                <option value="{{ cur.code }}" {% if user.profile.currency_preference == cur.code %}selected{% endif %}>{{ cur.code }} - {{ cur.name }}</option>
               {% endfor %}
             </select>
           </div>
@@ -73,6 +83,34 @@
   </div>
 
 </div>
+
+<script>
+  document.addEventListener("DOMContentLoaded", function() {
+    var countryInput = document.getElementById('country_preference');
+    var currencySelect = document.getElementById('currency_preference');
+    
+    // Auto-detect if country is not set yet
+    if (!countryInput.value) {
+      fetch('https://ipapi.co/json/')
+        .then(response => response.json())
+        .then(data => {
+            if (data.country_name) {
+                countryInput.value = data.country_name;
+            }
+            if (data.currency) {
+                // Check if currency exists in dropdown
+                var options = Array.from(currencySelect.options).map(opt => opt.value);
+                if (options.includes(data.currency)) {
+                    currencySelect.value = data.currency;
+                }
+            }
+        })
+        .catch(err => console.error("GeoIP detection failed:", err));
+    }
+  });
+</script>
+
+
 
 <style>
 /* Layout */
@@ -100,6 +138,7 @@
 .form-control { width: 100%; background: rgba(255,255,255,.03); border: 1px solid rgba(255,255,255,.08); color: #fff; padding: 12px 16px; border-radius: 10px; font-size: 14px; transition: all .2s; }
 .form-control:focus { outline: none; border-color: rgba(91,99,246,.5); background: rgba(255,255,255,.05); }
 .form-control:disabled { opacity: 0.6; cursor: not-allowed; }
+select.form-control option { background-color: #1a1f3c; color: #fff; }
 .text-muted { color: #636A8A; font-size: 11px; display: block; }
 
 .form-actions { margin-top: 32px; padding-top: 24px; border-top: 1px solid rgba(255,255,255,.05); text-align: right; }

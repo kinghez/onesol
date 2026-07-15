@@ -400,17 +400,10 @@ document.addEventListener('DOMContentLoaded', function () {
     }
 
     // ─────────────────────────────────────────────────────
-    // Global: buyNow(slug) – POST to /orders/checkout/
+    // Global: buyNow(slug) – Redirect to Tool Detail Page
     // ─────────────────────────────────────────────────────
     window.buyNow = function(toolSlug) {
-        var csrf = (document.cookie.match(/csrftoken=([^;]+)/) || [])[1] || '';
-        if (!csrf) { window.location.href = '/tools/' + toolSlug + '/'; return; }
-        var form = document.createElement('form');
-        form.method = 'POST'; form.action = '/orders/checkout/'; form.style.display = 'none';
-        var ci = document.createElement('input'); ci.type = 'hidden'; ci.name = 'csrfmiddlewaretoken'; ci.value = csrf;
-        var si = document.createElement('input'); si.type = 'hidden'; si.name = 'tool_slug'; si.value = toolSlug;
-        form.appendChild(ci); form.appendChild(si);
-        document.body.appendChild(form); form.submit();
+        window.location.href = '/tools/' + toolSlug + '/';
     };
 
     window.createToolCard = function(tool, count, extraStyle) {
@@ -538,15 +531,15 @@ document.addEventListener('DOMContentLoaded', function () {
     const allToolsGrid = document.getElementById('allToolsGrid');
     if (allToolsGrid) {
         const allToolsData = [
-            { name: "ChatGPT Plus", desc: "AI Chatbot", price: "5,500", rating: "4.8", badge: "Popular", icon: "assets/images/logos/chatgpt.svg" },
-            { name: "Midjourney", desc: "AI Image Generation", price: "6,800", rating: "4.9", badge: "Best Seller", icon: "assets/images/logos/midjourney.svg" },
-            { name: "Canva Pro", desc: "Design", price: "4,200", rating: "4.8", badge: "Popular", icon: "assets/images/logos/canva.svg" },
-            { name: "Grammarly Premium", desc: "Writing Assistant", price: "3,200", rating: "4.7", badge: null, icon: "assets/images/logos/grammarly.svg" },
-            { name: "Notion Plus", desc: "Productivity", price: "4,000", rating: "4.7", badge: null, icon: "assets/images/logos/notion.svg" },
-            { name: "Claude Pro", desc: "AI Assistant", price: "6,500", rating: "4.9", badge: "New", icon: "assets/images/logos/claude.svg" },
-            { name: "Copy.ai", desc: "Copywriting", price: "3,000", rating: "4.6", badge: "Popular", icon: "assets/images/logos/copyai.svg" },
-            { name: "Jasper", desc: "AI Content", price: "4,500", rating: "4.8", badge: "Popular", icon: "assets/images/logos/jasper.svg" },
-            { name: "Adobe Firefly", desc: "AI Design", price: "4,200", rating: "4.7", badge: "New", icon: "assets/images/logos/adobefirefly.svg" }
+            { slug: "chatgpt-plus", name: "ChatGPT Plus", desc: "AI Chatbot", price: "5500", rating: "4.8", badge: "Popular", icon: "/static/assets/images/logos/chatgpt.svg" },
+            { slug: "midjourney", name: "Midjourney", desc: "AI Image Generation", price: "6800", rating: "4.9", badge: "Best Seller", icon: "/static/assets/images/logos/midjourney.svg" },
+            { slug: "canva-pro", name: "Canva Pro", desc: "Design", price: "4200", rating: "4.8", badge: "Popular", icon: "/static/assets/images/logos/canva.svg" },
+            { slug: "grammarly-premium", name: "Grammarly Premium", desc: "Writing Assistant", price: "3200", rating: "4.7", badge: null, icon: "/static/assets/images/logos/grammarly.svg" },
+            { slug: "notion-plus", name: "Notion Plus", desc: "Productivity", price: "4000", rating: "4.7", badge: null, icon: "/static/assets/images/logos/notion.svg" },
+            { slug: "claude-pro", name: "Claude Pro", desc: "AI Assistant", price: "6500", rating: "4.9", badge: "New", icon: "/static/assets/images/logos/claude.svg" },
+            { slug: "copyai", name: "Copy.ai", desc: "Copywriting", price: "3000", rating: "4.6", badge: "Popular", icon: "/static/assets/images/logos/copyai.svg" },
+            { slug: "jasper", name: "Jasper", desc: "AI Content", price: "4500", rating: "4.8", badge: "Popular", icon: "/static/assets/images/logos/jasper.svg" },
+            { slug: "adobe-firefly", name: "Adobe Firefly", desc: "AI Design", price: "4200", rating: "4.7", badge: "New", icon: "/static/assets/images/logos/adobefirefly.svg" }
         ];
 
         let html = '';

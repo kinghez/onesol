@@ -11,3 +11,77 @@
         padding: 24px 20px;
     }
 }
+
+/* Premium Dashboard Card Styling */
+.dashboard-grid .stat-card {
+    position: relative;
+    overflow: hidden;
+    border: 1px solid rgba(255,255,255,0.1);
+    color: #fff;
+}
+
+.dashboard-grid .stat-card .stat-title,
+.dashboard-grid .stat-card .stat-number,
+.dashboard-grid .stat-card .card-link {
+    color: #fff !important;
+}
+
+.dashboard-grid .stat-card .stat-icon {
+    background: rgba(255,255,255,0.2) !important;
+    color: #fff !important;
+}
+
+.dashboard-grid .stat-card::before {
+    content: '';
+    position: absolute;
+    right: -20px;
+    top: -20px;
+    width: 120px;
+    height: 120px;
+    background: radial-gradient(circle, rgba(255,255,255,.2) 0%, transparent 70%);
+    border-radius: 50%;
+    pointer-events: none;
+}
+
+/* Card 1: Purple to Pink */
+.dashboard-grid .stat-card:nth-child(1) {
+    background: linear-gradient(135deg, rgba(139,61,255,0.4), rgba(255,61,139,0.4));
+    border-color: rgba(139,61,255, 0.5);
+}
+
+/* Card 2: Emerald to Cyan */
+.dashboard-grid .stat-card:nth-child(2) {
+    background: linear-gradient(135deg, rgba(16,185,129,0.4), rgba(0,196,204,0.4));
+    border-color: rgba(16,185,129, 0.5);
+}
+
+/* Card 3: Orange to Rose */
+.dashboard-grid .stat-card:nth-child(3) {
+    background: linear-gradient(135deg, rgba(245,158,11,0.4), rgba(225,29,72,0.4));
+    border-color: rgba(245,158,11, 0.5);
+}
+
+/* Card 4: Blue to Indigo */
+.dashboard-grid .stat-card:nth-child(4) {
+    background: linear-gradient(135deg, rgba(59,130,246,0.4), rgba(91,99,246,0.4));
+    border-color: rgba(59,130,246, 0.5);
+}
+
+/* Other Dashboard Cards (Bottom Grid) */
+.dashboard-bottom-grid .card {
+    position: relative;
+    overflow: hidden;
+    background: linear-gradient(135deg, rgba(25, 30, 55, 0.6), rgba(15, 20, 35, 0.8));
+    border: 1px solid rgba(255,255,255,0.05);
+}
+.dashboard-bottom-grid .card::before {
+    content: '';
+    position: absolute;
+    left: -50px;
+    bottom: -50px;
+    width: 200px;
+    height: 200px;
+    background: radial-gradient(circle, rgba(255,255,255,.03) 0%, transparent 70%);
+    border-radius: 50%;
+    pointer-events: none;
+}

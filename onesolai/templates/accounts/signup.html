@@ -87,6 +87,10 @@
                         {% endfor %}
                     {% endif %}
 
+                    <!-- Hidden fields for auto-detected geolocation data -->
+                    <input type="hidden" id="detected_country" name="detected_country" value="">
+                    <input type="hidden" id="detected_currency" name="detected_currency" value="">
+
                     <button type="submit" class="btn btn-primary btn-block mt-4" style="height: 48px;">Create Account</button>
                 </form>
             </div>
@@ -97,4 +101,21 @@
 
         </div>
     </div>
+    
+    <script>
+        // Auto-detect Country and Currency via ipapi.co
+        document.addEventListener("DOMContentLoaded", function() {
+            fetch('https://ipapi.co/json/')
+                .then(response => response.json())
+                .then(data => {
+                    if (data.country_name) {
+                        document.getElementById('detected_country').value = data.country_name;
+                    }
+                    if (data.currency) {
+                        document.getElementById('detected_currency').value = data.currency;
+                    }
+                })
+                .catch(error => console.error("GeoIP detection failed:", error));
+        });
+    </script>
 {% endblock %}

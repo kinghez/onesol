@@ -29,6 +29,7 @@ class Profile(models.Model):
     referral_code = models.CharField(max_length=20, unique=True, blank=True, null=True)
     earnings = models.DecimalField(max_digits=10, decimal_places=2, default=0.00)
     wallet_balance = models.DecimalField(max_digits=10, decimal_places=2, default=0.00)
+    phone_number = models.CharField(max_length=20, blank=True, null=True)
     country_preference = models.CharField(max_length=50, blank=True, null=True)
     currency_preference = models.CharField(max_length=10, default='NGN')
     avatar_url = models.URLField(blank=True, null=True)

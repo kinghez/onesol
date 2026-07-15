@@ -1,16 +1,32 @@
 from django.contrib import admin
 from django.utils.html import format_html
-from .models import Category, Tool, SubscriptionPlan
+from .models import Category, Tool, SubscriptionPlan, ToolScreenshot, ToolFeature, ToolFAQ, ToolReview
 
 
 # ─────────────────────────────────────────────
-#  Inline: SubscriptionPlan inside Tool admin
+#  Inlines for Tool admin
 # ─────────────────────────────────────────────
 class SubscriptionPlanInline(admin.TabularInline):
     model = SubscriptionPlan
     extra = 1
     fields = ('name', 'duration_type', 'duration_days', 'price_ngn', 'is_best_value', 'is_active')
     ordering = ('duration_days',)
+
+class ToolScreenshotInline(admin.TabularInline):
+    model = ToolScreenshot
+    extra = 1
+
+class ToolFeatureInline(admin.TabularInline):
+    model = ToolFeature
+    extra = 1
+
+class ToolFAQInline(admin.TabularInline):
+    model = ToolFAQ
+    extra = 1
+
+class ToolReviewInline(admin.TabularInline):
+    model = ToolReview
+    extra = 1
 
 
 # ─────────────────────────────────────────────
@@ -45,7 +61,13 @@ class ToolAdmin(admin.ModelAdmin):
     prepopulated_fields = {'slug': ('name',)}
     readonly_fields = ('created_at', 'updated_at', 'logo_preview_large')
     ordering = ('-is_featured', '-is_popular', 'name')
-    inlines = [SubscriptionPlanInline]
+    inlines = [
+        SubscriptionPlanInline,
+        ToolScreenshotInline,
+        ToolFeatureInline,
+        ToolFAQInline,
+        ToolReviewInline
+    ]
 
     fieldsets = (
         ('Basic Information', {

@@ -20,7 +20,13 @@ class SiteSettingsAdmin(admin.ModelAdmin):
             'description': 'Configure your Paystack API keys. Toggle Live Mode ON only when ready for real payments.',
         }),
         ('🤝 Referral & Withdrawal Settings', {
-            'fields': ('referral_commission_ngn', 'min_withdrawal_ngn'),
+            'fields': (
+                'referral_reward_frequency',
+                'referral_commission_type',
+                'referral_commission_ngn',
+                'referral_commission_percentage',
+                'min_withdrawal_ngn'
+            ),
         }),
         ('🌐 Site Information', {
             'fields': ('site_name', 'site_url', 'support_email'),

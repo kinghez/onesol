@@ -40,6 +40,7 @@
     <canvas id="bgCanvas"></canvas>
 
     <!-- ══════ NAVBAR ══════ -->
+    {% if not hide_header_footer %}
     <nav class="nav" id="nav">
         <div class="nav-inner">
             <a href="{% url 'home' %}" class="nav-brand">
@@ -57,23 +58,30 @@
                 <li><a href="#" class="nav-a">About Us</a></li>
             </ul>
             <div class="nav-right">
-                <div class="nav-currency" id="navCurrency">
-                    <span id="navCurrencyCode">NGN</span>
-                    <img src="https://flagcdn.com/w20/ng.png" alt="NG" class="nav-flag" id="navCurrencyFlag">
+                <div class="nav-currency" id="navCurrency" style="display: flex; align-items: center; gap: 8px;">
+                    <span id="navCurrencyCode">{% if user.is_authenticated %}{{ user.profile.currency_preference }}{% else %}NGN{% endif %}</span>
+                    <img src="https://flagcdn.com/w20/ng.png" alt="Flag" class="nav-flag" id="navCurrencyFlag" style="display: none;">
                 </div>
-                <a href="{% url 'accounts:login' %}" class="nav-sign">Sign In</a>
-                <a href="{% url 'accounts:signup' %}" class="nav-get">Get Started</a>
+                {% if user.is_authenticated %}
+                    <a href="{% url 'accounts:logout' %}" class="nav-sign">Logout</a>
+                    <a href="{% url 'dashboard:home' %}" class="nav-get">Dashboard</a>
+                {% else %}
+                    <a href="{% url 'accounts:login' %}" class="nav-sign">Sign In</a>
+                    <a href="{% url 'accounts:signup' %}" class="nav-get">Get Started</a>
+                {% endif %}
             </div>
             <button class="nav-mob" id="navMob" aria-label="Menu">
                 <span></span><span></span><span></span>
             </button>
         </div>
     </nav>
+    {% endif %}
 
     <!-- ══════ PAGE CONTENT ══════ -->
     {% block content %}{% endblock %}
 
     <!-- ══════ FOOTER ══════ -->
+    {% if not hide_header_footer %}
     <footer class="footer">
         <div class="footer-wrap">
 
@@ -151,8 +159,44 @@
             <p>&copy; 2026 OneSol AI Hub. All rights reserved.</p>
         </div>
     </footer>
+    {% endif %}
 
     <script src="{% static 'js/script.js' %}"></script>
+    <script>
+        document.addEventListener("DOMContentLoaded", function() {
+            var currencyCodeSpan = document.getElementById('navCurrencyCode');
+            var flagImg = document.getElementById('navCurrencyFlag');
+            if(currencyCodeSpan && flagImg) {
+                var isAuth = {% if user.is_authenticated %}true{% else %}false{% endif %};
+                if (!isAuth) {
+                    fetch('https://ipapi.co/json/')
+                        .then(response => response.json())
+                        .then(data => {
+                            if (data.currency) {
+                                currencyCodeSpan.textContent = data.currency;
+                            }
+                            if (data.country_code) {
+                                flagImg.src = `https://flagcdn.com/w20/${data.country_code.toLowerCase()}.png`;
+                                flagImg.style.display = 'block';
+                            }
+                        })
+                        .catch(err => console.error(err));
+                } else {
+                    // For auth users, they already have currencyCodeSpan set by Django.
+                    // We just fetch the flag based on their IP to show the correct local flag.
+                    fetch('https://ipapi.co/json/')
+                        .then(response => response.json())
+                        .then(data => {
+                            if (data.country_code) {
+                                flagImg.src = `https://flagcdn.com/w20/${data.country_code.toLowerCase()}.png`;
+                                flagImg.style.display = 'block';
+                            }
+                        })
+                        .catch(err => console.error(err));
+                }
+            }
+        });
+    </script>
     {% block extra_js %}{% endblock %}
 </body>
 

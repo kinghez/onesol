@@ -84,6 +84,15 @@ def signup_view(request):
             )
             # Profile is auto-created by post_save signal in models.py
             profile = user.profile
+            
+            # Save detected location/currency if provided
+            detected_country = request.POST.get('detected_country', '').strip()
+            detected_currency = request.POST.get('detected_currency', '').strip()
+            if detected_country:
+                profile.country_preference = detected_country
+            if detected_currency:
+                profile.currency_preference = detected_currency
+            profile.save()
 
             # Handle referral
             if referrer_profile:
@@ -93,6 +102,15 @@ def signup_view(request):
                     referred_user=user,
                     status='pending',
                 )
+
+            # Send Welcome Email and In-App Notification
+            from core.email_utils import send_alert
+            send_alert(
+                user=user,
+                title="Welcome to OneSol AI Hub!",
+                message="Thank you for joining OneSol AI Hub. Explore our premium AI and SaaS tools at unbeatable prices today!",
+                notification_type='system'
+            )
 
             login(request, user)
             messages.success(request, f'Welcome to OneSol AI Hub, {first_name}!')

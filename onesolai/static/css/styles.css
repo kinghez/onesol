@@ -778,8 +778,8 @@ img{max-width:100%;height:auto;display:block}
 .tt-card{
     position:relative;
     border-radius:18px;
-    background:#171C2B;
-    border:1px solid rgba(255,255,255,.08);
+    background: linear-gradient(135deg, rgba(91,99,246,.15), rgba(139,61,255,.15));
+    border:1px solid rgba(139,61,255,.3);
     box-shadow:0 12px 30px rgba(0,0,0,.15);
     padding:24px;
     overflow:hidden;
@@ -789,10 +789,22 @@ img{max-width:100%;height:auto;display:block}
     flex-direction:column;
 }
 
+.tt-card::before {
+    content: '';
+    position: absolute;
+    right: -30px;
+    top: -30px;
+    width: 150px;
+    height: 150px;
+    background: radial-gradient(circle, rgba(255,255,255,.08) 0%, transparent 70%);
+    border-radius: 50%;
+    pointer-events: none;
+}
+
 .tt-card:hover{
     transform:translateY(-4px);
-    box-shadow:0 18px 40px rgba(0,0,0,.25);
-    border-color:rgba(255,255,255,.14);
+    box-shadow:0 18px 40px rgba(139,61,255,.25);
+    border-color:rgba(139,61,255,.6);
 }
 
 .tt-card-header{
@@ -1247,7 +1259,7 @@ img{max-width:100%;height:auto;display:block}
 }
 
 .at-grid { display:grid; grid-template-columns: repeat(3, 1fr); gap: 22px; }
-.at-grid .tt-card { background: #171C2B; flex: auto; min-width: auto; }
+.at-grid .tt-card { flex: auto; min-width: auto; }
 
 /* =============================================
    TOOL LOGO SIZE – large enough to show brand clearly

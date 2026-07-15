@@ -22,8 +22,18 @@ class SiteSettings(models.Model):
     transaction_fee_percent = models.DecimalField(max_digits=5, decimal_places=2, default=1.50,
         help_text='% fee added to each transaction (e.g. 1.50 = 1.5%)')
     # Referral
+    referral_commission_type = models.CharField(max_length=20, default='fixed', choices=[
+        ('fixed', 'Fixed Amount'),
+        ('percentage', 'Percentage of Sale'),
+    ], help_text="Type of commission paid out to the referrer.")
+    referral_commission_percentage = models.DecimalField(max_digits=5, decimal_places=2, default=10.00,
+        help_text='% commission if "Percentage" is selected above (e.g. 10.00 = 10%)')
     referral_commission_ngn = models.DecimalField(max_digits=10, decimal_places=2, default=2000.00,
-        help_text='Fixed NGN commission credited to referrer when their referral makes first purchase')
+        help_text='Fixed NGN commission if "Fixed Amount" is selected above.')
+    referral_reward_frequency = models.CharField(max_length=30, default='every_purchase', choices=[
+        ('first_purchase', 'Only on First Purchase'),
+        ('every_purchase', 'On Every Subscription Purchase'),
+    ], help_text="How often should the referrer get paid for a referred user's purchases?")
     min_withdrawal_ngn = models.DecimalField(max_digits=10, decimal_places=2, default=5000.00,
         help_text='Minimum NGN balance required to submit a withdrawal request')
     # Support email
