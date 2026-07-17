@@ -42,7 +42,7 @@
                 </div>
                 Referral Earnings
             </div>
-            <div class="stat-number mb-2" style="font-size: 28px; line-height: 1.35;">NGN {{ referral_earnings|default:"0" }}</div>
+            <div class="stat-number mb-2">NGN {{ referral_earnings|default:"0" }}</div>
             <a href="{% url 'dashboard:referrals' %}" class="card-link">View all &rarr;</a>
         </div>
 
@@ -53,7 +53,7 @@
                 </div>
                 Wallet Balance
             </div>
-            <div class="stat-number mb-2" style="font-size: 28px; line-height: 1.35;">NGN {{ wallet_balance|default:"0.00" }}</div>
+            <div class="stat-number mb-2">NGN {{ wallet_balance|default:"0.00" }}</div>
             <a href="{% url 'dashboard:wallet' %}" class="card-link">Top up wallet &rarr;</a>
         </div>
     </div>
@@ -143,7 +143,7 @@
                         </div>
                     </div>
                     <div class="list-item-right">
-                        <div class="text-secondary text-small" style="margin-right: 16px;">{{ order.created_at|date:"M d, Y" }}</div>
+                        <div class="text-secondary text-small hide-on-mobile" style="margin-right: 16px;">{{ order.created_at|date:"M d, Y" }}</div>
                         <div class="list-item-value">NGN {{ order.total_amount_ngn }}</div>
                     </div>
                 </div>

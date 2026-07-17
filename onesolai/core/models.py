@@ -56,3 +56,35 @@ class SiteSettings(models.Model):
         """Always returns the singleton instance, creating it if it doesn't exist."""
         obj, _ = cls.objects.get_or_create(pk=1)
         return obj
+
+
+class HeroSlide(models.Model):
+    title_line_1 = models.CharField(max_length=100, blank=True)
+    title_line_2_start = models.CharField(max_length=100, blank=True)
+    title_line_2_highlight = models.CharField(max_length=100, blank=True)
+    title_line_2_end = models.CharField(max_length=100, blank=True)
+    title_line_3 = models.CharField(max_length=100, blank=True)
+    
+    description = models.TextField(blank=True, help_text="HTML allowed (e.g. <br>)")
+    
+    image = models.ImageField(upload_to='hero_images/', blank=True, null=True)
+    
+    primary_button_text = models.CharField(max_length=50, blank=True)
+    primary_button_url = models.CharField(max_length=255, blank=True)
+    primary_button_icon = models.CharField(max_length=50, blank=True, help_text="e.g. fas fa-compass")
+    
+    secondary_button_text = models.CharField(max_length=50, blank=True)
+    secondary_button_url = models.CharField(max_length=255, blank=True)
+    
+    show_features_block = models.BooleanField(default=False, help_text="Show the features block (Local currency, Instant delivery, etc) below description.")
+    
+    is_active = models.BooleanField(default=True)
+    order = models.IntegerField(default=0)
+
+    class Meta:
+        ordering = ['order']
+        verbose_name = 'Hero Slide'
+        verbose_name_plural = 'Hero Slides'
+
+    def __str__(self):
+        return self.title_line_1 or f"Hero Slide {self.id}"

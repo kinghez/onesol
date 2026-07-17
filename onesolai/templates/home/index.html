@@ -12,87 +12,90 @@
     <section class="hero" id="heroCarousel">
         <div class="hero-carousel-track" id="heroTrack">
 
-            <!-- Slide 1 -->
-            <div class="hero-slide active">
-                <div class="hero-wrap">
-                    <div class="hero-left">
-                        <h1 class="hero-h1">
-                            <span class="hero-line1">Premium AI &amp; SaaS</span>
-                            <span class="hero-line2">Tools. <em class="hero-gold-2">Affordable</em> for</span>
-                            <span class="hero-line3">Everyone in Africa.</span>
-                        </h1>
-                        <p class="hero-p hero-p2">Get access to 100+ premium AI and SaaS tools<br>at the best prices.
-                            Pay in your local currency<br>and get instant access.</p>
+            {% if hero_slides %}
+                {% for slide in hero_slides %}
+                <div class="hero-slide {% if forloop.first %}active{% endif %}">
+                    <div class="hero-wrap">
+                        <div class="hero-left">
+                            <h1 class="hero-h1">
+                                <span class="hero-line1">{{ slide.title_line_1 }}</span>
+                                <span class="hero-line2">{{ slide.title_line_2_start }} <em class="{% if forloop.first %}hero-gold-2{% else %}hero-gold{% endif %}">{{ slide.title_line_2_highlight }}</em> {{ slide.title_line_2_end }}</span>
+                                <span class="hero-line3">{{ slide.title_line_3 }}</span>
+                            </h1>
+                            <p class="hero-p {% if forloop.first %}hero-p2{% endif %}">{{ slide.description|safe }}</p>
 
-                        <div class="h2-features">
-                            <div class="h2-feat">
-                                <div class="h2-ico"><i class="fa-solid fa-wallet"></i></div>
-                                <span class="h2-txt">Local Currency<br>Payments</span>
+                            {% if slide.show_features_block %}
+                            <div class="h2-features">
+                                <div class="h2-feat">
+                                    <div class="h2-ico"><i class="fa-solid fa-wallet"></i></div>
+                                    <span class="h2-txt">Local Currency<br>Payments</span>
+                                </div>
+                                <div class="h2-feat">
+                                    <div class="h2-ico"><i class="fa-solid fa-bolt"></i></div>
+                                    <span class="h2-txt">Instant<br>Delivery</span>
+                                </div>
+                                <div class="h2-feat">
+                                    <div class="h2-ico"><i class="fa-solid fa-shield-halved"></i></div>
+                                    <span class="h2-txt">Secure<br>Checkout</span>
+                                </div>
+                                <div class="h2-feat">
+                                    <div class="h2-ico"><i class="fa-solid fa-headset"></i></div>
+                                    <span class="h2-txt">24/7<br>Support</span>
+                                </div>
                             </div>
-                            <div class="h2-feat">
-                                <div class="h2-ico"><i class="fa-solid fa-bolt"></i></div>
-                                <span class="h2-txt">Instant<br>Delivery</span>
-                            </div>
-                            <div class="h2-feat">
-                                <div class="h2-ico"><i class="fa-solid fa-shield-halved"></i></div>
-                                <span class="h2-txt">Secure<br>Checkout</span>
-                            </div>
-                            <div class="h2-feat">
-                                <div class="h2-ico"><i class="fa-solid fa-headset"></i></div>
-                                <span class="h2-txt">24/7<br>Support</span>
+                            {% endif %}
+
+                            <div class="hero-btns {% if forloop.first %}hero2-btns{% endif %}">
+                                {% if slide.primary_button_text %}
+                                <a href="{{ slide.primary_button_url }}" class="{% if forloop.first %}btn-pri-2{% else %}btn-pri{% endif %}">
+                                    {% if slide.primary_button_icon %}<i class="{{ slide.primary_button_icon }}"></i> {% endif %}{{ slide.primary_button_text }}
+                                </a>
+                                {% endif %}
+                                {% if slide.secondary_button_text %}
+                                <a href="{{ slide.secondary_button_url }}" class="{% if forloop.first %}btn-sec-2{% else %}btn-sec{% endif %}">{{ slide.secondary_button_text }}</a>
+                                {% endif %}
                             </div>
                         </div>
-
-                        <div class="hero-btns hero2-btns">
-                            <a href="{% url 'tools:tools_list' %}" class="btn-pri-2">Browse Tools</a>
-                            <a href="#" class="btn-sec-2">How It Works</a>
-                        </div>
-                    </div>
-                    <div class="hero-right">
-                        <div class="hero-illustration-2">
-                            <img src="{% static 'assets/hero-image2.png' %}" alt="Premium AI Tools" class="hero-img-2">
+                        <div class="hero-right">
+                            <div class="{% if forloop.first %}hero-illustration-2{% else %}hero-illustration{% endif %}" {% if not forloop.first %}id="heroIllust" data-parallax{% endif %}>
+                                {% if not forloop.first %}
+                                <div class="hero-glow hero-glow-1"></div>
+                                <div class="hero-glow hero-glow-2"></div>
+                                <div class="hero-glow hero-glow-3"></div>
+                                <div class="hero-platform-light"></div>
+                                {% endif %}
+                                {% if slide.image %}
+                                <img src="{{ slide.image.url }}" alt="{{ slide.title_line_1 }}" class="{% if forloop.first %}hero-img-2{% else %}hero-image{% endif %}">
+                                {% endif %}
+                            </div>
                         </div>
                     </div>
                 </div>
-            </div>
-
-            <!-- Slide 2 -->
-            <div class="hero-slide">
-                <div class="hero-wrap">
-                    <div class="hero-left">
-                        <h1 class="hero-h1">
-                            <span class="hero-line1">Unlock the Power of AI.</span>
-                            <span class="hero-line2">Access Affordable, <em class="hero-gold">Powerful</em></span>
-                            <span class="hero-line3">AI &amp; SaaS Tools in Africa.</span>
-                        </h1>
-                        <p class="hero-p">Automate, Create, and Scale with OneSol AI Hub.<br>Direct access with instant local payments.</p>
-                        <div class="hero-btns">
-                            <a href="{% url 'tools:tools_list' %}" class="btn-pri"><i class="fas fa-compass"></i> Explore Our AI Tools</a>
-                            <a href="#" class="btn-sec">Learn More</a>
-                        </div>
-                    </div>
-                    <div class="hero-right">
-                        <div class="hero-illustration" id="heroIllust" data-parallax>
-                            <div class="hero-glow hero-glow-1"></div>
-                            <div class="hero-glow hero-glow-2"></div>
-                            <div class="hero-glow hero-glow-3"></div>
-                            <div class="hero-platform-light"></div>
-                            <img src="{% static 'assets/images/hero-ai-platform.png' %}"
-                                alt="OneSol AI Hub platform integrating AI tools" class="hero-image" />
+                {% endfor %}
+            {% else %}
+                <!-- Fallback empty state -->
+                <div class="hero-slide active">
+                    <div class="hero-wrap">
+                        <div class="hero-left">
+                            <h1 class="hero-h1">No Slides Configured</h1>
+                            <p class="hero-p">Please add Hero Slides in the admin panel.</p>
                         </div>
                     </div>
                 </div>
-            </div>
+            {% endif %}
 
         </div>
 
         <!-- Carousel Controls -->
+        {% if hero_slides|length > 1 %}
         <button class="hero-nav prev" id="heroPrev" aria-label="Previous Slide"><i class="fas fa-chevron-left"></i></button>
         <button class="hero-nav next" id="heroNext" aria-label="Next Slide"><i class="fas fa-chevron-right"></i></button>
+        {% endif %}
 
         <div class="hero-dots" id="heroDots">
-            <span class="h-dot active" data-index="0"></span>
-            <span class="h-dot" data-index="1"></span>
+            {% for slide in hero_slides %}
+            <span class="h-dot {% if forloop.first %}active{% endif %}" data-index="{{ forloop.counter0 }}"></span>
+            {% endfor %}
         </div>
     </section>
 

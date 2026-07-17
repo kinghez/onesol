@@ -99,3 +99,5 @@ class BroadcastMessageAdmin(admin.ModelAdmin):
                     send_email=obj.send_email
                 )
             self.message_user(request, f"Broadcast queued for {users.count()} users.")
+
+

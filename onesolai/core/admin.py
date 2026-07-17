@@ -7,7 +7,16 @@ admin.site.site_header = "OneSol AI Hub – Admin"
 admin.site.site_title = "OneSol Admin"
 admin.site.index_title = "Site Management Dashboard"
 
-from .models import SiteSettings
+from .models import SiteSettings, HeroSlide
+
+
+@admin.register(HeroSlide)
+class HeroSlideAdmin(admin.ModelAdmin):
+    list_display = ('__str__', 'is_active', 'order')
+    list_editable = ('is_active', 'order')
+    list_filter = ('is_active',)
+    search_fields = ('title_line_1', 'title_line_2_highlight', 'description')
+    ordering = ('order',)
 
 
 @admin.register(SiteSettings)

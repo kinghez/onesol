@@ -38,6 +38,13 @@ class Tool(models.Model):
     rating = models.DecimalField(max_digits=3, decimal_places=1, default=4.5)
     review_count = models.PositiveIntegerField(default=0)
     users_count = models.CharField(max_length=50, blank=True, help_text="Display string e.g. '12,000+'")
+    
+    # Tab visibility controls
+    show_overview_tab = models.BooleanField(default=True, help_text="Show the Overview tab on the product page")
+    show_features_tab = models.BooleanField(default=True, help_text="Show the Features tab on the product page")
+    show_reviews_tab = models.BooleanField(default=True, help_text="Show the Reviews tab on the product page")
+    show_faqs_tab = models.BooleanField(default=True, help_text="Show the FAQs tab on the product page")
+
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 

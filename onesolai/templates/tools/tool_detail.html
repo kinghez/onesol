@@ -5,7 +5,7 @@
 {% block meta_description %}Get premium access to this AI &amp; SaaS tool at affordable prices.{% endblock %}
 
 {% block extra_css %}
-    <link rel="stylesheet" href="{% static 'css/tool.css' %}">
+    <link rel="stylesheet" href="{% static 'css/tool.css' %}?v=3">
 {% endblock %}
 
 {% block content %}
@@ -81,15 +81,16 @@
 
         <div class="tool-tabs-container">
             <div class="tool-tabs">
-                <button class="tool-tab active" data-target="overview">Overview</button>
-                <button class="tool-tab" data-target="features">Features</button>
-                <button class="tool-tab" data-target="reviews">Reviews ({{ tool.reviews.count }})</button>
-                <button class="tool-tab" data-target="faqs">FAQs</button>
+                {% if tool.show_overview_tab %}<button class="tool-tab active" data-target="overview">Overview</button>{% endif %}
+                {% if tool.show_features_tab %}<button class="tool-tab" data-target="features">Features</button>{% endif %}
+                {% if tool.show_reviews_tab %}<button class="tool-tab" data-target="reviews">Reviews ({{ tool.reviews.count }})</button>{% endif %}
+                {% if tool.show_faqs_tab %}<button class="tool-tab" data-target="faqs">FAQs</button>{% endif %}
                 <div class="tab-indicator" id="tabIndicator"></div>
             </div>
         </div>
 
         <div class="tab-contents">
+            {% if tool.show_overview_tab %}
             <div class="tab-pane active" id="tab-overview">
                 <div class="overview-grid">
                     <div class="ov-left">
@@ -122,6 +123,8 @@
                     </div>
                 </div>
             </div>
+            {% endif %}
+            {% if tool.show_features_tab %}
             <div class="tab-pane" id="tab-features">
                 <h3 class="pane-title">Features &amp; Requirements</h3>
                 <div class="features-grid">
@@ -138,6 +141,8 @@
                     {% endfor %}
                 </div>
             </div>
+            {% endif %}
+            {% if tool.show_reviews_tab %}
             <div class="tab-pane" id="tab-reviews">
                 <h3 class="pane-title">Customer Reviews</h3>
                 <div class="reviews-wrap">
@@ -159,6 +164,8 @@
                     {% endfor %}
                 </div>
             </div>
+            {% endif %}
+            {% if tool.show_faqs_tab %}
             <div class="tab-pane" id="tab-faqs">
                 <h3 class="pane-title">Frequently Asked Questions</h3>
                 <div class="faqs-accordion">
@@ -172,10 +179,11 @@
                     {% endfor %}
                 </div>
             </div>
+            {% endif %}
         </div>
     </main>
 {% endblock %}
 
 {% block extra_js %}
-    <script src="{% static 'js/tool.js' %}"></script>
+    <script src="{% static 'js/tool.js' %}?v=3"></script>
 {% endblock %}

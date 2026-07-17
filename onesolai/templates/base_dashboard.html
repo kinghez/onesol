@@ -11,22 +11,22 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
 
     <!-- CSS System -->
-    <link rel="stylesheet" href="{% static 'css/reset.css' %}">
-    <link rel="stylesheet" href="{% static 'css/variables.css' %}">
-    <link rel="stylesheet" href="{% static 'css/typography.css' %}">
-    <link rel="stylesheet" href="{% static 'css/layout.css' %}">
-    <link rel="stylesheet" href="{% static 'css/utilities.css' %}">
+    <link rel="stylesheet" href="{% static 'css/reset.css' %}?v=4">
+    <link rel="stylesheet" href="{% static 'css/variables.css' %}?v=4">
+    <link rel="stylesheet" href="{% static 'css/typography.css' %}?v=4">
+    <link rel="stylesheet" href="{% static 'css/layout.css' %}?v=4">
+    <link rel="stylesheet" href="{% static 'css/utilities.css' %}?v=4">
 
     <!-- Components -->
-    <link rel="stylesheet" href="{% static 'components/buttons.css' %}">
-    <link rel="stylesheet" href="{% static 'components/cards.css' %}">
-    <link rel="stylesheet" href="{% static 'components/sidebar.css' %}">
-    <link rel="stylesheet" href="{% static 'components/navbar.css' %}">
-    <link rel="stylesheet" href="{% static 'components/badges.css' %}">
+    <link rel="stylesheet" href="{% static 'components/buttons.css' %}?v=4">
+    <link rel="stylesheet" href="{% static 'components/cards.css' %}?v=4">
+    <link rel="stylesheet" href="{% static 'components/sidebar.css' %}?v=4">
+    <link rel="stylesheet" href="{% static 'components/navbar.css' %}?v=4">
+    <link rel="stylesheet" href="{% static 'components/badges.css' %}?v=4">
     {% block extra_css %}{% endblock %}
 
     <!-- Page Specific -->
-    <link rel="stylesheet" href="{% static 'pages/dashboard.css' %}">
+    <link rel="stylesheet" href="{% static 'pages/dashboard.css' %}?v=4">
 </head>
 <body class="fade-in">
     <div class="app-container">
@@ -123,8 +123,8 @@
                 </div>
 
                 <div class="navbar-right">
-                    <button class="nav-icon-btn">
-                        <i class="fa-solid fa-magnifying-glass"></i>
+                    <button class="nav-icon-btn" onclick="window.location.href='{% url 'tools:tools_list' %}'">
+                        <i class="fa-regular fa-heart"></i>
                     </button>
                     <button class="nav-icon-btn" onclick="window.location.href='{% url 'notifications:list' %}'" style="position:relative;">
                         <i class="fa-regular fa-bell"></i>

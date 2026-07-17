@@ -89,7 +89,7 @@
         transform: translateX(0);
     }
     .dashboard-grid {
-        grid-template-columns: 1fr;
+        grid-template-columns: repeat(2, 1fr);
     }
     .dashboard-bottom-grid {
         grid-template-columns: 1fr;

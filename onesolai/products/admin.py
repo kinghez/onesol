@@ -85,6 +85,9 @@ class ToolAdmin(admin.ModelAdmin):
         ('Status Flags', {
             'fields': ('is_active', 'is_featured', 'is_popular', 'is_new')
         }),
+        ('Tab Visibility Controls', {
+            'fields': ('show_overview_tab', 'show_features_tab', 'show_reviews_tab', 'show_faqs_tab')
+        }),
         ('Timestamps', {
             'fields': ('created_at', 'updated_at'),
             'classes': ('collapse',)

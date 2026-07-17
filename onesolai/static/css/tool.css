@@ -517,29 +517,64 @@
 
 @media (max-width: 768px) {
     .tool-page-main {
-        padding: calc(var(--nav-h) + 20px) 20px 60px;
+        padding: calc(var(--nav-h) + 20px) 16px 60px;
+    }
+    .th-left {
+        flex-direction: column;
+        align-items: center;
+        text-align: center;
+        gap: 16px;
+        width: 100%;
     }
     .th-logo-box {
-        width: 120px;
-        height: 120px;
+        width: 100px;
+        height: 100px;
+        margin: 0 auto;
+    }
+    .th-info {
+        align-items: center;
     }
     .th-title {
-        font-size: 36px;
+        font-size: 28px;
+    }
+    .th-dev {
+        font-size: 16px;
+    }
+    .th-stats {
+        flex-wrap: wrap;
+        justify-content: center;
+        gap: 8px;
+    }
+    .th-divider {
+        display: none;
     }
     .th-right {
         flex-direction: column;
-    }
-    .th-buy-btn {
+        align-items: stretch;
         width: 100%;
+    }
+    .th-price-box {
+        justify-content: center;
+    }
+    .th-price {
+        font-size: 28px;
+    }
+    .th-period {
+        font-size: 14px;
+    }
+    .th-buy-btn, .th-wishlist-btn {
+        width: 100%;
+        justify-content: center;
     }
     .tool-tabs {
         overflow-x: auto;
         white-space: nowrap;
-        gap: 24px;
+        gap: 20px;
         padding-bottom: 8px;
     }
     .tool-tab {
-        padding: 16px 0;
+        padding: 12px 0;
+        font-size: 14px;
     }
     .features-grid {
         grid-template-columns: 1fr;

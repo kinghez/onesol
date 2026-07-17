@@ -233,112 +233,137 @@ document.addEventListener('DOMContentLoaded', function () {
     var heroCarousel = document.getElementById('heroCarousel');
     var heroTrack = document.getElementById('heroTrack');
     var heroSlides = document.querySelectorAll('.hero-slide');
-    if (heroCarousel && heroTrack && heroSlides.length > 1) {
-        var currentIndex = 0;
+    if (heroCarousel && heroTrack && heroSlides.length > 0) {
         var totalSlides = heroSlides.length;
-        var heroDots = document.querySelectorAll('.h-dot');
-        var autoplayInterval;
-        
-        var updateCarousel = function(index) {
-            currentIndex = index;
-            if (currentIndex < 0) currentIndex = totalSlides - 1;
-            if (currentIndex >= totalSlides) currentIndex = 0;
+        heroTrack.style.width = (totalSlides * 100) + '%';
+        heroSlides.forEach(function(s) { s.style.width = (100 / totalSlides) + '%'; });
+
+        if (totalSlides > 1) {
+            var currentIndex = 0;
+            var heroDots = document.querySelectorAll('.h-dot');
+            var autoplayInterval;
             
-            heroTrack.style.transform = 'translateX(-' + (currentIndex * (100 / totalSlides)) + '%)';
-            
-            heroSlides.forEach(function(s, i) {
-                s.classList.toggle('active', i === currentIndex);
-                if (heroDots[i]) heroDots[i].classList.toggle('active', i === currentIndex);
+            var updateCarousel = function(index) {
+                currentIndex = index;
+                if (currentIndex < 0) currentIndex = totalSlides - 1;
+                if (currentIndex >= totalSlides) currentIndex = 0;
+                
+                heroTrack.style.transform = 'translateX(-' + (currentIndex * (100 / totalSlides)) + '%)';
+                
+                heroSlides.forEach(function(s, i) {
+                    s.classList.toggle('active', i === currentIndex);
+                    if (heroDots[i]) heroDots[i].classList.toggle('active', i === currentIndex);
+                });
+            };
+
+            var nextSlide = function() { updateCarousel(currentIndex + 1); };
+            var prevSlide = function() { updateCarousel(currentIndex - 1); };
+
+            var prevBtn = document.getElementById('heroPrev');
+            var nextBtn = document.getElementById('heroNext');
+            if (prevBtn) prevBtn.addEventListener('click', prevSlide);
+            if (nextBtn) nextBtn.addEventListener('click', nextSlide);
+
+            heroDots.forEach(function(dot) {
+                dot.addEventListener('click', function() {
+                    updateCarousel(parseInt(this.getAttribute('data-index')));
+                });
             });
-        };
 
-        var nextSlide = function() { updateCarousel(currentIndex + 1); };
-        var prevSlide = function() { updateCarousel(currentIndex - 1); };
+            var startAutoplay = function() {
+                clearInterval(autoplayInterval);
+                autoplayInterval = setInterval(nextSlide, 6000);
+            };
+            var stopAutoplay = function() { clearInterval(autoplayInterval); };
 
-        var prevBtn = document.getElementById('heroPrev');
-        var nextBtn = document.getElementById('heroNext');
-        if (prevBtn) prevBtn.addEventListener('click', prevSlide);
-        if (nextBtn) nextBtn.addEventListener('click', nextSlide);
-
-        heroDots.forEach(function(dot) {
-            dot.addEventListener('click', function() {
-                updateCarousel(parseInt(this.getAttribute('data-index')));
-            });
-        });
-
-        var startAutoplay = function() {
-            clearInterval(autoplayInterval);
-            autoplayInterval = setInterval(nextSlide, 6000);
-        };
-        var stopAutoplay = function() { clearInterval(autoplayInterval); };
-
-        startAutoplay();
-        heroCarousel.addEventListener('mouseenter', stopAutoplay);
-        heroCarousel.addEventListener('mouseleave', startAutoplay);
-
-        document.addEventListener('keydown', function(e) {
-            if (window.scrollY < window.innerHeight) {
-                if (e.key === 'ArrowLeft') prevSlide();
-                if (e.key === 'ArrowRight') nextSlide();
-            }
-        });
-
-        var isDragging = false;
-        var startPos = 0;
-        var currentTranslate = 0;
-        var prevTranslate = 0;
-        var animationID;
-
-        var getPositionX = function(e) { return e.type.includes('mouse') ? e.pageX : e.touches[0].clientX; };
-
-        var setSliderPosition = function() { heroTrack.style.transform = 'translateX(' + currentTranslate + 'px)'; };
-
-        var animation = function() {
-            setSliderPosition();
-            if (isDragging) requestAnimationFrame(animation);
-        };
-
-        var touchStart = function(e) {
-            isDragging = true;
-            startPos = getPositionX(e);
-            prevTranslate = -currentIndex * (heroTrack.clientWidth / totalSlides);
-            animationID = requestAnimationFrame(animation);
-            heroTrack.style.transition = 'none';
-            stopAutoplay();
-        };
-
-        var touchMove = function(e) {
-            if (isDragging) {
-                var currentPosition = getPositionX(e);
-                currentTranslate = prevTranslate + currentPosition - startPos;
-            }
-        };
-
-        var touchEnd = function() {
-            isDragging = false;
-            cancelAnimationFrame(animationID);
-            heroTrack.style.transition = 'transform 600ms ease';
-
-            var movedBy = currentTranslate - prevTranslate;
-            
-            if (movedBy < -100 && currentIndex < totalSlides - 1) currentIndex += 1;
-            else if (movedBy > 100 && currentIndex > 0) currentIndex -= 1;
-            else if (movedBy < -100 && currentIndex === totalSlides - 1) currentIndex = 0;
-            else if (movedBy > 100 && currentIndex === 0) currentIndex = totalSlides - 1;
-            
-            updateCarousel(currentIndex);
             startAutoplay();
-        };
+            heroCarousel.addEventListener('mouseenter', stopAutoplay);
+            heroCarousel.addEventListener('mouseleave', startAutoplay);
 
-        heroTrack.addEventListener('mousedown', touchStart);
-        heroTrack.addEventListener('mousemove', touchMove);
-        heroTrack.addEventListener('mouseup', touchEnd);
-        heroTrack.addEventListener('mouseleave', function() { if (isDragging) touchEnd(); });
+            document.addEventListener('keydown', function(e) {
+                if (window.scrollY < window.innerHeight) {
+                    if (e.key === 'ArrowLeft') prevSlide();
+                    if (e.key === 'ArrowRight') nextSlide();
+                }
+            });
 
-        heroTrack.addEventListener('touchstart', touchStart, {passive: true});
-        heroTrack.addEventListener('touchmove', touchMove, {passive: true});
-        heroTrack.addEventListener('touchend', touchEnd);
+            // Touch support
+            var isDragging = false;
+            var startPos = 0;
+            var currentTranslate = 0;
+            var prevTranslate = 0;
+            var animationID;
+
+            var getPositionX = function(e) { return e.type.includes('mouse') ? e.pageX : e.touches[0].clientX; };
+            
+            var setSliderPosition = function() { heroTrack.style.transform = 'translateX(' + currentTranslate + 'px)'; };
+            
+            var animation = function() {
+                setSliderPosition();
+                if (isDragging) requestAnimationFrame(animation);
+            };
+
+            var getPositionY = function(e) { return e.type.includes('mouse') ? e.pageY : e.touches[0].clientY; };
+            
+            var isScrolling;
+            var startY;
+
+            var touchStart = function(e) {
+                isDragging = true;
+                isScrolling = undefined;
+                startPos = getPositionX(e);
+                startY = getPositionY(e);
+                prevTranslate = -currentIndex * (heroTrack.clientWidth / totalSlides);
+                animationID = requestAnimationFrame(animation);
+                heroTrack.style.transition = 'none';
+                stopAutoplay();
+            };
+
+            var touchMove = function(e) {
+                if (isDragging) {
+                    var currentPosition = getPositionX(e);
+                    var currentY = getPositionY(e);
+                    
+                    if (typeof isScrolling === 'undefined') {
+                        isScrolling = Math.abs(currentY - startY) > Math.abs(currentPosition - startPos);
+                    }
+                    
+                    if (isScrolling) {
+                        isDragging = false;
+                        return;
+                    }
+                    
+                    currentTranslate = prevTranslate + currentPosition - startPos;
+                }
+            };
+
+            var touchEnd = function() {
+                isDragging = false;
+                cancelAnimationFrame(animationID);
+                heroTrack.style.transition = 'transform 600ms ease';
+
+                var movedBy = currentTranslate - prevTranslate;
+                
+                if (movedBy < -100 && currentIndex < totalSlides - 1) currentIndex += 1;
+                else if (movedBy > 100 && currentIndex > 0) currentIndex -= 1;
+                else if (movedBy < -100 && currentIndex === totalSlides - 1) currentIndex = 0;
+                else if (movedBy > 100 && currentIndex === 0) currentIndex = totalSlides - 1;
+                
+                updateCarousel(currentIndex);
+                startAutoplay();
+            };
+
+            heroTrack.addEventListener('mousedown', touchStart);
+            heroTrack.addEventListener('mousemove', touchMove);
+            heroTrack.addEventListener('mouseup', touchEnd);
+            heroTrack.addEventListener('mouseleave', function() { if (isDragging) touchEnd(); });
+
+            heroTrack.addEventListener('touchstart', touchStart, {passive: true});
+            heroTrack.addEventListener('touchmove', touchMove, {passive: true});
+            heroTrack.addEventListener('touchend', touchEnd);
+        }
     }
+
 
 
     // ═══════════════════════════════════

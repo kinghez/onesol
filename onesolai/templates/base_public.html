@@ -11,7 +11,7 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
-    <link rel="stylesheet" href="{% static 'css/styles.css' %}">
+    <link rel="stylesheet" href="{% static 'css/styles.css' %}?v=4">
     {% block extra_css %}{% endblock %}
 </head>
 
@@ -56,11 +56,16 @@
                 <li><a href="#" class="nav-a">Pricing</a></li>
                 <li><a href="#" class="nav-a">Features</a></li>
                 <li><a href="#" class="nav-a">About Us</a></li>
+                {% if user.is_authenticated %}
+                <li class="nav-mobile-only"><a href="{% url 'accounts:logout' %}" class="nav-a">Logout</a></li>
+                {% else %}
+                <li class="nav-mobile-only"><a href="{% url 'accounts:login' %}" class="nav-a">Sign In</a></li>
+                {% endif %}
             </ul>
             <div class="nav-right">
                 <div class="nav-currency" id="navCurrency" style="display: flex; align-items: center; gap: 8px;">
                     <span id="navCurrencyCode">{% if user.is_authenticated %}{{ user.profile.currency_preference }}{% else %}NGN{% endif %}</span>
-                    <img src="https://flagcdn.com/w20/ng.png" alt="Flag" class="nav-flag" id="navCurrencyFlag" style="display: none;">
+                    <img src="https://flagcdn.com/w20/ng.png" alt="Flag" class="nav-flag" id="navCurrencyFlag">
                 </div>
                 {% if user.is_authenticated %}
                     <a href="{% url 'accounts:logout' %}" class="nav-sign">Logout</a>

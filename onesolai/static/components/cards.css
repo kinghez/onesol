@@ -232,16 +232,55 @@
 @media (max-width: 768px) {
     .promo-banner {
         flex-direction: column;
-        padding: 24px;
+        padding: 20px;
     }
     .promo-content {
         max-width: 100%;
         margin-bottom: 120px;
+        text-align: center;
+    }
+    .promo-title {
+        font-size: 22px;
+    }
+    .promo-subtitle {
+        font-size: 14px;
+        margin-bottom: 16px;
     }
     .promo-image {
         width: 100%;
         height: auto;
         top: auto;
         bottom: 0;
+        right: 0;
+    }
+    .card {
+        padding: 16px;
+    }
+    .list-item-left {
+        gap: 12px;
+    }
+    .list-item-right {
+        gap: 8px;
+    }
+    .list-item-logo {
+        width: 32px;
+        height: 32px;
+    }
+    .list-item-logo img, .list-item-logo i {
+        font-size: 14px;
+        width: 18px;
+        height: 18px;
+    }
+    .list-item-title, .list-item-value {
+        font-size: 13px;
+    }
+    .list-item-subtitle, .list-item-price .period {
+        font-size: 11px;
+    }
+    .list-item-price {
+        font-size: 13px;
+    }
+    .hide-on-mobile {
+        display: none !important;
     }
 }
