@@ -8,7 +8,11 @@
         <div class="auth-card">
 
             <div class="auth-header">
-                <img src="{% static 'assets/logo.png' %}" alt="OneSol Logo" class="auth-logo">
+                {% if site_settings and site_settings.site_logo %}
+                    <img src="{{ site_settings.site_logo.url }}" alt="{{ site_settings.site_name|default:'OneSol Logo' }}" class="auth-logo">
+                {% else %}
+                    <img src="{% static 'assets/logo_s.png' %}" alt="OneSol Logo" class="auth-logo">
+                {% endif %}
                 <h1 class="auth-title">Welcome back</h1>
                 <p class="auth-subtitle">Sign in to your OneSol AI Hub account</p>
             </div>

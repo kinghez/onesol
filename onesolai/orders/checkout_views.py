@@ -9,7 +9,7 @@ from django.contrib import messages
 from django.urls import reverse
 from decimal import Decimal
 
-from products.models import Tool, SubscriptionPlan
+from products.models import Tool
 from .models import Order, OrderItem, PaymentTransaction
 from . import paystack as ps
 from .delivery import trigger_delivery, credit_referral_commission
@@ -22,21 +22,14 @@ from .delivery import trigger_delivery, credit_referral_commission
 @require_POST
 def checkout_view(request):
     """
-    POST: tool_slug, plan_id (optional)
+    POST: tool_slug
     Creates a pending Order and redirects user to Paystack payment page.
     """
     tool_slug = request.POST.get('tool_slug')
-    plan_id = request.POST.get('plan_id')
-
     tool = get_object_or_404(Tool, slug=tool_slug, is_active=True)
 
-    # Determine plan and price
-    if plan_id:
-        plan = get_object_or_404(SubscriptionPlan, id=plan_id, tool=tool, is_active=True)
-        price_ngn = plan.price_ngn
-    else:
-        plan = tool.plans.filter(duration_type='monthly', is_active=True).first()
-        price_ngn = plan.price_ngn if plan else tool.base_price_ngn
+    # Determine price
+    price_ngn = tool.get_ngn_price()
 
     # Create Order
     order = Order.objects.create(
@@ -48,7 +41,6 @@ def checkout_view(request):
     OrderItem.objects.create(
         order=order,
         tool=tool,
-        plan=plan,
         price_ngn=price_ngn,
     )
 
@@ -89,6 +81,7 @@ def checkout_view(request):
             # Trigger delivery
             trigger_delivery(order)
             credit_referral_commission(order)
+            fulfill_order_via_vendors.delay(order.id)
             
             messages.success(request, f"Payment successful! You purchased {tool.name} using your wallet.")
             return redirect(reverse('orders:confirmation', args=[order.id]))
@@ -188,6 +181,13 @@ def payment_callback_view(request):
 
             # Credit referral commission (if applicable)
             credit_referral_commission(order)
+            
+            # Fulfill via vendors automatically
+            try:
+                from vendors.tasks import fulfill_order_via_vendors
+                fulfill_order_via_vendors.delay(order.id)
+            except Exception:
+                pass
 
             return redirect(reverse('orders:confirmation', kwargs={'order_id': order.id}))
 
@@ -209,7 +209,7 @@ def payment_callback_view(request):
 def order_confirmation_view(request, order_id):
     """Premium success page shown after successful payment."""
     order = get_object_or_404(
-        Order.objects.prefetch_related('items__tool', 'items__plan'),
+        Order.objects.prefetch_related('items__tool'),
         id=order_id,
         user=request.user,
     )

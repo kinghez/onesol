@@ -27,17 +27,15 @@
             <aside class="at-sidebar">
                 <div class="at-sidebar-section">
                     <h3 class="at-sidebar-title">Categories</h3>
-                    <ul class="at-category-list">
-                        <li><a href="?category=ai-chatbots" class="at-cat-link"><span><i class="fas fa-robot"></i> AI Chatbots</span> <span class="at-cat-count">12</span></a></li>
-                        <li><a href="?category=ai-image" class="at-cat-link"><span><i class="fas fa-image"></i> AI Image</span> <span class="at-cat-count">8</span></a></li>
-                        <li><a href="?category=productivity" class="at-cat-link"><span><i class="fas fa-bolt"></i> Productivity</span> <span class="at-cat-count">15</span></a></li>
-                        <li><a href="?category=writing" class="at-cat-link"><span><i class="fas fa-pen"></i> Writing</span> <span class="at-cat-count">10</span></a></li>
-                        <li><a href="?category=design" class="at-cat-link"><span><i class="fas fa-palette"></i> Design</span> <span class="at-cat-count">8</span></a></li>
-                        <li><a href="?category=video" class="at-cat-link"><span><i class="fas fa-video"></i> Video</span> <span class="at-cat-count">7</span></a></li>
-                        <li><a href="?category=marketing" class="at-cat-link"><span><i class="fas fa-bullhorn"></i> Marketing</span> <span class="at-cat-count">9</span></a></li>
-                        <li><a href="?category=development" class="at-cat-link"><span><i class="fas fa-code"></i> Development</span> <span class="at-cat-count">6</span></a></li>
-                        <li><a href="?category=business" class="at-cat-link"><span><i class="fas fa-briefcase"></i> Business</span> <span class="at-cat-count">7</span></a></li>
-                    </ul>
+                    <div class="at-select-wrap">
+                        <select class="at-select" id="categorySelect">
+                            <option value="all">All Categories</option>
+                            {% for c in categories %}
+                            <option value="{{ c.name }}" {% if active_category.slug == c.slug %}selected{% endif %}>{{ c.name }}</option>
+                            {% endfor %}
+                        </select>
+                        <i class="fas fa-chevron-down at-select-icon"></i>
+                    </div>
                 </div>
 
                 <div class="at-sidebar-section">
@@ -61,7 +59,7 @@
                     <div class="at-filter-group">
                         <label class="at-filter-label">Sort by</label>
                         <div class="at-select-wrap">
-                            <select class="at-select" name="sort">
+                            <select class="at-select" name="sort" id="sortSelect">
                                 <option value="popular">Popular</option>
                                 <option value="price_asc">Price: Low to High</option>
                                 <option value="price_desc">Price: High to Low</option>
@@ -73,7 +71,7 @@
 
                     <div class="at-filter-group">
                         <label class="at-checkbox-label">
-                            <input type="checkbox" class="at-checkbox" name="popular_only">
+                            <input type="checkbox" class="at-checkbox" name="popular_only" id="popularCheck">
                             <span class="at-checkbox-custom"></span>
                             Show Popular Only
                         </label>
@@ -94,10 +92,26 @@
                     </div>
                 </div>
 
+                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 20px;">
+                    <div id="toolsCounter" style="color:#AEB5CA; font-size:14px; font-weight:500;">
+                        Showing <span id="toolsCountNum">0</span> of <span id="toolsTotalNum">0</span> tools
+                    </div>
+                </div>
+
                 <div class="at-grid" id="allToolsGrid">
                     <!-- Rendered by JS -->
+                </div>
+                
+                <div style="text-align:center; margin-top: 40px; display: none;" id="loadMoreContainer">
+                    <button id="loadMoreBtn" style="background:rgba(91,99,246,0.1); color:#5B63F6; border:1px solid rgba(91,99,246,0.2); padding:10px 24px; border-radius:8px; cursor:pointer; font-weight:600; font-size:14px; transition:all 0.3s;">
+                        Load More Tools
+                    </button>
                 </div>
             </div>
         </div>
     </main>
+
+    <script>
+        window.djangoToolsData = {{ tools_json|safe }};
+    </script>
 {% endblock %}

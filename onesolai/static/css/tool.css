@@ -51,7 +51,7 @@
 }
 
 .th-title {
-    font-size: 54px;
+    font-size: 27px;
     font-weight: 700;
     color: #FFFFFF;
     margin: 0 0 8px 0;
@@ -122,7 +122,7 @@
 }
 
 .th-price {
-    font-size: 36px;
+    font-size: 18px;
     font-weight: 700;
     color: #8B3DFF;
 }
@@ -134,11 +134,11 @@
 
 .th-buy-btn {
     width: 280px;
-    height: 60px;
+    height: 50px;
     border-radius: 14px;
     background: linear-gradient(90deg, #5B63F6, #744BFF, #8F3EFF, #A11CF6);
     color: #FFFFFF;
-    font-size: 18px;
+    font-size: 14px;
     font-weight: 600;
     border: none;
     cursor: pointer;
@@ -535,7 +535,7 @@
         align-items: center;
     }
     .th-title {
-        font-size: 28px;
+        font-size: 20px;
     }
     .th-dev {
         font-size: 16px;
@@ -557,7 +557,7 @@
         justify-content: center;
     }
     .th-price {
-        font-size: 28px;
+        font-size: 16px;
     }
     .th-period {
         font-size: 14px;

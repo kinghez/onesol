@@ -11,7 +11,14 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
-    <link rel="stylesheet" href="{% static 'css/styles.css' %}?v=5">
+    <link rel="stylesheet" href="{% static 'css/styles.css' %}?v=10">
+    {% if site_settings.site_favicon %}
+    <link rel="icon" href="{{ site_settings.site_favicon.url }}">
+    {% elif site_settings.site_logo %}
+    <link rel="icon" href="{{ site_settings.site_logo.url }}">
+    {% else %}
+    <link rel="icon" href="{% static 'assets/images/favicon.ico' %}">
+    {% endif %}
     {% block extra_css %}{% endblock %}
 </head>
 
@@ -44,7 +51,11 @@
     <nav class="nav" id="nav">
         <div class="nav-inner">
             <a href="{% url 'home' %}" class="nav-brand">
-                <img src="{% static 'assets/logo.png' %}" alt="OneSol" class="nav-logo-img">
+                {% if site_settings and site_settings.site_logo %}
+                    <img src="{{ site_settings.site_logo.url }}" alt="{{ site_settings.site_name|default:'OneSol' }}" class="nav-logo-img">
+                {% else %}
+                    <img src="{% static 'assets/logo_s.png' %}" alt="OneSol" class="nav-logo-img">
+                {% endif %}
                 <div class="nav-logo-txt">
                     <span class="nav-logo-name">OneSol</span>
                     <span class="nav-logo-sub">AI Hub</span>
@@ -85,6 +96,58 @@
     <!-- ══════ PAGE CONTENT ══════ -->
     {% block content %}{% endblock %}
 
+    <!-- ══════ CALL TO ACTION ══════ -->
+    {% if not hide_header_footer %}
+    <section class="cta-section">
+        <!-- Decorative Elements -->
+        <div class="cta-dec cta-dec-tl"></div>
+        <div class="cta-dec cta-dec-br"></div>
+
+        <div class="cta-wrap">
+            <div class="cta-card">
+                <!-- Left Side -->
+                <div class="cta-left">
+                    <div class="cta-badge">READY TO GET STARTED?</div>
+                    <h2 class="cta-title">
+                        <span style="display: block; white-space: nowrap;">Unlock Premium AI Tools</span>
+                        <span class="cta-gradient-text" style="display: block; white-space: nowrap;">Without Premium Prices.</span>
+                    </h2>
+                    <p class="cta-desc">Join thousands of smart users saving money while enjoying the best AI tools in the world.</p>
+                </div>
+                
+                <!-- Divider -->
+                <div class="cta-divider"></div>
+
+                <!-- Right Side -->
+                <div class="cta-right">
+                    <div class="cta-actions">
+                        <button onclick="window.location.href='{% url 'tools:tools_list' %}'" class="cta-btn-primary">Browse AI Tools <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-left: 8px;"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg></button>
+                        <button onclick="window.location.href='{% url 'accounts:signup' %}'" class="cta-btn-secondary">Create Free Account <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-left: 8px;"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg></button>
+                    </div>
+                    <div class="cta-features">
+                        <div class="cta-feat">
+                            <div class="cta-ico" style="color: #4EA9FF;"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg></div>
+                            <span class="cta-feat-txt">Instant<br>Activation</span>
+                        </div>
+                        <div class="cta-feat">
+                            <div class="cta-ico" style="color: #56C8FF;"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><path d="m9 12 2 2 4-4"/></svg></div>
+                            <span class="cta-feat-txt">Secure<br>Payments</span>
+                        </div>
+                        <div class="cta-feat">
+                            <div class="cta-ico" style="color: #7A9CFF;"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2H2v10l9.29 9.29c.94.94 2.48.94 3.42 0l6.58-6.58c.94-.94.94-2.48 0-3.42L12 2Z"/><path d="M7 7h.01"/></svg></div>
+                            <span class="cta-feat-txt">Lowest Prices<br>Guaranteed</span>
+                        </div>
+                        <div class="cta-feat">
+                            <div class="cta-ico" style="color: #A15BFF;"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 18v-6a9 9 0 0 1 18 0v6"/><path d="M21 19a2 2 0 0 1-2 2h-1a2 2 0 0 1-2-2v-3a2 2 0 0 1 2-2h3zM3 19a2 2 0 0 0 2 2h1a2 2 0 0 0 2-2v-3a2 2 0 0 0-2-2H3z"/></svg></div>
+                            <span class="cta-feat-txt">24/7<br>Support</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+    {% endif %}
+
     <!-- ══════ FOOTER ══════ -->
     {% if not hide_header_footer %}
     <footer class="footer">
@@ -93,7 +156,11 @@
             <!-- Col 1: Brand & Socials -->
             <div class="footer-col brand-col">
                 <a href="{% url 'home' %}" class="footer-brand">
-                    <img src="{% static 'assets/logo.png' %}" alt="OneSol" class="footer-logo-img">
+                    {% if site_settings and site_settings.site_logo %}
+                        <img src="{{ site_settings.site_logo.url }}" alt="{{ site_settings.site_name|default:'OneSol' }}" class="footer-logo-img">
+                    {% else %}
+                        <img src="{% static 'assets/logo_s.png' %}" alt="OneSol" class="footer-logo-img">
+                    {% endif %}
                     <div class="footer-logo-txt">
                         <span class="footer-logo-name">OneSol</span>
                         <span class="footer-logo-sub">AI Hub</span>
@@ -166,7 +233,7 @@
     </footer>
     {% endif %}
 
-    <script src="{% static 'js/script.js' %}"></script>
+    <script src="{% static 'js/script.js' %}?v=1.5"></script>
     <script>
         document.addEventListener("DOMContentLoaded", function() {
             var currencyCodeSpan = document.getElementById('navCurrencyCode');

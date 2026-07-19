@@ -441,12 +441,12 @@ document.addEventListener('DOMContentLoaded', function () {
             if (badgeLabel) badgeHtml = '<div class="tt-badge ' + badgeClass + '">' + badgeLabel + '</div>';
         }
 
-        var priceNgn = tool.monthly_price_ngn || tool.base_price_ngn || tool.price || '';
+        var priceNgn = tool.price_ngn || tool.monthly_price_ngn || tool.base_price_ngn || tool.price || '';
         if (typeof priceNgn === 'number') priceNgn = priceNgn.toLocaleString();
+        
         var secPrice = '';
-        var numPrice = parseInt(String(priceNgn).replace(/,/g,''), 10);
-        if (!isNaN(numPrice)) {
-            secPrice = '\u20b5' + Math.round(numPrice / 42.85).toLocaleString() + ' GHS / Ksh ' + Math.round(numPrice / 3.57).toLocaleString() + ' KES';
+        if (typeof tool.base_price_usd === 'number' && tool.base_price_usd > 0) {
+            secPrice = '$' + tool.base_price_usd.toFixed(2) + ' USD';
         }
 
         var iconUrl = tool.image_url || tool.icon || '';
@@ -460,17 +460,25 @@ document.addEventListener('DOMContentLoaded', function () {
 
         var description = tool.desc || tool.description || tool.short_description || tool.category || '';
         if (description && description.length > 80) description = description.substring(0, 80) + '...';
+        
+        var buyBtnHtml = tool.in_stock ? 
+            '<button class="tt-buy-btn" onclick="window.buyNow(\'' + tool.slug + '\')">Buy Now</button>' :
+            '<button class="tt-buy-btn" style="background:rgba(255,0,0,0.1);color:#ff4d4d;cursor:not-allowed;" disabled>Out of Stock</button>';
+
+        if (tool.in_stock === false) {
+            badgeHtml += '<div class="tt-badge" style="background:rgba(255,0,0,0.1);color:#ff4d4d;border:1px solid rgba(255,0,0,0.2);">Sold Out</div>';
+        }
 
         return '<div class="tt-card fade-in card" style="animation-delay:' + (count * 0.05) + 's;' + extraStyle + '">' +
-            '<div class="tt-card-header">' + iconHtml + '<h3 class="tt-name">' + tool.name + '</h3></div>' +
+            '<div class="tt-card-header">' + iconHtml + '<h3 class="tt-name" style="font-size:14px; margin:0; line-height:1.3; overflow:hidden; text-overflow:ellipsis; display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical;">' + tool.name + '</h3></div>' +
             '<p class="tt-description">' + description + '</p>' +
             '<div class="tt-price-section">' +
-                '<div class="tt-price-label">MONTHLY</div>' +
-                '<div class="tt-price"><span class="tt-price-val">NGN ' + priceNgn + '</span> <span class="tt-price-mo">/ mo</span></div>' +
+                '<div class="tt-price-label">PRICE</div>' +
+                '<div class="tt-price"><span class="tt-price-val">NGN ' + priceNgn + '</span></div>' +
                 '<div class="tt-price-secondary">' + secPrice + '</div>' +
             '</div>' +
             '<div class="tt-badges-container">' + badgeHtml + '</div>' +
-            '<button class="tt-buy-btn" onclick="window.buyNow(\'' + tool.slug + '\')">Buy Now</button>' +
+            buyBtnHtml +
         '</div>';
     };
 
@@ -555,26 +563,117 @@ document.addEventListener('DOMContentLoaded', function () {
     // ═══════════════════════════════════
     const allToolsGrid = document.getElementById('allToolsGrid');
     if (allToolsGrid) {
-        const allToolsData = [
-            { slug: "chatgpt-plus", name: "ChatGPT Plus", desc: "AI Chatbot", price: "5500", rating: "4.8", badge: "Popular", icon: "/static/assets/images/logos/chatgpt.svg" },
-            { slug: "midjourney", name: "Midjourney", desc: "AI Image Generation", price: "6800", rating: "4.9", badge: "Best Seller", icon: "/static/assets/images/logos/midjourney.svg" },
-            { slug: "canva-pro", name: "Canva Pro", desc: "Design", price: "4200", rating: "4.8", badge: "Popular", icon: "/static/assets/images/logos/canva.svg" },
-            { slug: "grammarly-premium", name: "Grammarly Premium", desc: "Writing Assistant", price: "3200", rating: "4.7", badge: null, icon: "/static/assets/images/logos/grammarly.svg" },
-            { slug: "notion-plus", name: "Notion Plus", desc: "Productivity", price: "4000", rating: "4.7", badge: null, icon: "/static/assets/images/logos/notion.svg" },
-            { slug: "claude-pro", name: "Claude Pro", desc: "AI Assistant", price: "6500", rating: "4.9", badge: "New", icon: "/static/assets/images/logos/claude.svg" },
-            { slug: "copyai", name: "Copy.ai", desc: "Copywriting", price: "3000", rating: "4.6", badge: "Popular", icon: "/static/assets/images/logos/copyai.svg" },
-            { slug: "jasper", name: "Jasper", desc: "AI Content", price: "4500", rating: "4.8", badge: "Popular", icon: "/static/assets/images/logos/jasper.svg" },
-            { slug: "adobe-firefly", name: "Adobe Firefly", desc: "AI Design", price: "4200", rating: "4.7", badge: "New", icon: "/static/assets/images/logos/adobefirefly.svg" }
-        ];
+        let toolsData = [];
+        let currentPage = 1;
+        const pageSize = 15;
+        let currentFiltered = [];
+        
+        function renderAllTools(resetPage = true) {
+            if (resetPage) {
+                currentPage = 1;
+            }
+            const catSelect = document.getElementById('categorySelect');
+            const sortSelect = document.getElementById('sortSelect');
+            const popCheck = document.getElementById('popularCheck');
+            const searchInput = document.getElementById('toolSearchInput');
+            
+            let filtered = toolsData.slice();
+            
+            // Search
+            if (searchInput && searchInput.value.trim()) {
+                const q = searchInput.value.trim().toLowerCase();
+                filtered = filtered.filter(t => 
+                    (t.name && t.name.toLowerCase().includes(q)) || 
+                    (t.description && t.description.toLowerCase().includes(q))
+                );
+            }
+            
+            // Category
+            if (catSelect && catSelect.value && catSelect.value !== 'all') {
+                filtered = filtered.filter(t => t.category === catSelect.value);
+            }
+            
+            // Popular Only
+            if (popCheck && popCheck.checked) {
+                filtered = filtered.filter(t => t.is_popular);
+            }
+            
+            // Sort
+            if (sortSelect) {
+                const sort = sortSelect.value;
+                filtered.sort((a, b) => {
+                    if (sort === 'price_asc') return (a.base_price_usd || 0) - (b.base_price_usd || 0);
+                    if (sort === 'price_desc') return (b.base_price_usd || 0) - (a.base_price_usd || 0);
+                    if (sort === 'newest') return (b.id || 0) - (a.id || 0);
+                    // default popular
+                    return (b.is_popular ? 1 : 0) - (a.is_popular ? 1 : 0);
+                });
+            }
+            
+            currentFiltered = filtered;
+            
+            // Pagination Slice
+            const paged = currentFiltered.slice(0, currentPage * pageSize);
+            
+            let html = '';
+            paged.forEach((tool, i) => {
+                html += window.createToolCard(tool, i, "opacity:1; transform:none; pointer-events:auto;");
+            });
+            allToolsGrid.innerHTML = html || '<p style="color:#AEB5CA;padding:20px;grid-column:1/-1;text-align:center;">No tools found matching your criteria.</p>';
+            bindCardTilt(allToolsGrid);
+            
+            // Update Counters
+            const countNum = document.getElementById('toolsCountNum');
+            const totalNum = document.getElementById('toolsTotalNum');
+            if (countNum) countNum.textContent = paged.length;
+            if (totalNum) totalNum.textContent = currentFiltered.length;
+            
+            // Update Load More Button
+            const loadMoreContainer = document.getElementById('loadMoreContainer');
+            if (loadMoreContainer) {
+                if (currentFiltered.length > paged.length) {
+                    loadMoreContainer.style.display = 'block';
+                } else {
+                    loadMoreContainer.style.display = 'none';
+                }
+            }
+        }
 
-        let html = '';
-        allToolsData.forEach(tool => {
-            html += window.createToolCard(tool, 0, "opacity:1; transform:none; pointer-events:auto;");
-        });
-        allToolsGrid.innerHTML = html;
+        // Attach Listeners
+        const attachFilters = () => {
+            ['categorySelect', 'sortSelect'].forEach(id => {
+                const el = document.getElementById(id);
+                if (el) el.addEventListener('change', () => renderAllTools(true));
+            });
+            const popCheck = document.getElementById('popularCheck');
+            if (popCheck) popCheck.addEventListener('change', () => renderAllTools(true));
+            
+            const searchInput = document.getElementById('toolSearchInput');
+            if (searchInput) searchInput.addEventListener('input', () => renderAllTools(true));
+            
+            const loadMoreBtn = document.getElementById('loadMoreBtn');
+            if (loadMoreBtn) {
+                loadMoreBtn.addEventListener('click', () => {
+                    currentPage++;
+                    renderAllTools(false);
+                });
+            }
+        };
 
-        // Apply 3D tilt to newly generated cards
-        bindCardTilt(allToolsGrid);
+        if (window.djangoToolsData) {
+            toolsData = window.djangoToolsData;
+            attachFilters();
+            renderAllTools();
+        } else {
+            // Fallback to fetch if not injected
+            fetch('/tools/api/?filter=all&_t=' + new Date().getTime())
+                .then(r => r.json())
+                .then(data => {
+                    toolsData = data.tools || [];
+                    attachFilters();
+                    renderAllTools();
+                });
+        }
     }
 
     // ═══════════════════════════════════

@@ -10,7 +10,7 @@ from .models import Order, OrderItem, PaymentTransaction
 class OrderItemInline(admin.TabularInline):
     model = OrderItem
     extra = 0
-    readonly_fields = ('tool', 'plan', 'price_ngn')
+    readonly_fields = ('tool', 'price_ngn')
     can_delete = False
 
 

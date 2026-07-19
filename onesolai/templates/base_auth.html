@@ -26,6 +26,14 @@
     <!-- Homepage Background Styles -->
     <link rel="stylesheet" href="{% static 'css/styles.css' %}">
 
+    {% if site_settings.site_favicon %}
+    <link rel="icon" href="{{ site_settings.site_favicon.url }}">
+    {% elif site_settings.site_logo %}
+    <link rel="icon" href="{{ site_settings.site_logo.url }}">
+    {% else %}
+    <link rel="icon" href="{% static 'assets/images/favicon.ico' %}">
+    {% endif %}
+
     {% block extra_css %}{% endblock %}
 </head>
 <body class="fade-in">
@@ -54,7 +62,7 @@
 
     {% block content %}{% endblock %}
 
-    <script src="{% static 'js/script.js' %}"></script>
+    <script src="{% static 'js/script.js' %}?v=1.5"></script>
     {% block extra_js %}{% endblock %}
 </body>
 </html>

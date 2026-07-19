@@ -5,7 +5,7 @@
 {% block meta_description %}Get premium access to this AI &amp; SaaS tool at affordable prices.{% endblock %}
 
 {% block extra_css %}
-    <link rel="stylesheet" href="{% static 'css/tool.css' %}?v=3">
+    <link rel="stylesheet" href="{% static 'css/tool.css' %}?v=4">
 {% endblock %}
 
 {% block content %}
@@ -25,9 +25,7 @@
                     {% if tool.image_url %}
                         <img id="toolLogo" src="{{ tool.image_url }}" alt="{{ tool.name }} Logo">
                     {% else %}
-                        <div style="width:100%;height:100%;display:flex;align-items:center;justify-content:center;background:#2a2f4c;border-radius:18px;color:#fff;font-size:32px;font-weight:700;">
-                            {{ tool.name|make_list|first|upper }}
-                        </div>
+                        <img id="toolLogo" src="{% static 'images/default_tool.jpg' %}" alt="{{ tool.name }} Logo">
                     {% endif %}
                 </div>
                 <div class="th-info">
@@ -45,22 +43,11 @@
             <div class="th-right">
                 <button class="th-wishlist-btn"><i class="fa-regular fa-heart"></i> Add to Wishlist</button>
                 <div class="th-price-box">
-                    <span class="th-price">NGN {{ tool.base_price_ngn|floatformat:0 }}</span> <span class="th-period">/ month</span>
+                    <span class="th-price">NGN {{ tool.get_ngn_price|floatformat:0 }}</span>
                 </div>
                 <form method="POST" action="{% url 'orders:checkout' %}" class="th-checkout-form">
                     {% csrf_token %}
                     <input type="hidden" name="tool_slug" value="{{ tool.slug }}">
-                    
-                    {% if tool.plans.all %}
-                        <div class="th-plan-select mb-2" style="margin-bottom:12px;">
-                            <label style="display:block; font-size:12px; color:#AEB5CA; margin-bottom:4px;">Select Plan</label>
-                            <select name="plan_id" class="form-control" style="width:100%; background:rgba(255,255,255,.05); color:#fff; border:1px solid rgba(255,255,255,.1); padding:8px; border-radius:6px; font-size:13px;">
-                                {% for plan in plans %}
-                                    <option value="{{ plan.id }}">{{ plan.name }} - ₦{{ plan.price_ngn|floatformat:0 }}</option>
-                                {% endfor %}
-                            </select>
-                        </div>
-                    {% endif %}
                     
                     {% if user.is_authenticated and user.profile.wallet_balance > 0 %}
                     <div class="th-wallet-pay mb-3" style="margin-bottom:16px;">
@@ -95,7 +82,7 @@
                 <div class="overview-grid">
                     <div class="ov-left">
                         <h3 class="pane-title">Overview</h3>
-                        <p class="ov-desc">{{ tool.description }}</p>
+                        <p class="ov-desc">{{ tool.description|safe }}</p>
                         <ul class="ov-features-list">
                             {% for feature in tool.features.all|slice:":5" %}
                                 <li><i class="fa-solid fa-check"></i> {{ feature.title }}</li>
@@ -109,9 +96,9 @@
                         <div class="ss-gallery">
                             <div class="ss-track" id="ssTrack">
                                 {% for ss in tool.screenshots.all %}
-                                    <img src="{{ ss.image_url }}" alt="Screenshot">
+                                    <img class="ss-slide {% if forloop.first %}active{% endif %}" src="{{ ss.image_url }}" alt="Screenshot">
                                 {% empty %}
-                                    <div style="width:100%;height:100%;display:flex;align-items:center;justify-content:center;background:#1e233b;border-radius:12px;color:#AEB5CA;">No screenshots available</div>
+                                    <img class="ss-slide active" src="{% static 'images/default_tool.jpg' %}" alt="Screenshot">
                                 {% endfor %}
                             </div>
                             {% if tool.screenshots.count > 1 %}
@@ -185,5 +172,5 @@
 {% endblock %}
 
 {% block extra_js %}
-    <script src="{% static 'js/tool.js' %}?v=3"></script>
+    <script src="{% static 'js/tool.js' %}?v=4"></script>
 {% endblock %}

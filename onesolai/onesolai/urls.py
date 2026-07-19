@@ -21,6 +21,9 @@ urlpatterns = [
 
     # Notifications
     path('notifications/', include('notifications.urls')),
+
+    # Vendors (Webhooks etc)
+    path('vendors/', include('vendors.urls')),
 ]
 
 from django.conf import settings

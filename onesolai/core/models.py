@@ -42,6 +42,24 @@ class SiteSettings(models.Model):
     site_name = models.CharField(max_length=100, default='OneSol AI Hub')
     site_url = models.URLField(default='https://onesolai.com',
         help_text='Full site URL including https (used in emails and referral links)')
+    site_logo = models.ImageField(upload_to='site_logos/', blank=True, null=True,
+        help_text='Upload the site logo to replace the default one')
+    site_favicon = models.ImageField(upload_to='site_logos/', blank=True, null=True,
+        help_text='Upload the site favicon (ideally 32x32 or 64x64). If not provided, site logo is used.')
+
+    # Global Pricing Settings
+    global_markup_percent = models.DecimalField(max_digits=5, decimal_places=2, default=20.00,
+        help_text='% to add to vendor USD price for profit (e.g. 20.00 = 20%)')
+    global_markup_fixed_usd = models.DecimalField(max_digits=10, decimal_places=2, default=0.00,
+        help_text='Fixed USD profit to add instead of percentage. If greater than 0, overrides percentage.')
+    usd_to_ngn_rate = models.DecimalField(max_digits=10, decimal_places=2, default=1500.00,
+        help_text='Exchange rate to convert USD to local currency (NGN) on the frontend')
+
+    # AI Configuration (OpenRouter)
+    openrouter_api_key = models.CharField(max_length=200, blank=True, default='',
+        help_text='OpenRouter API Key for refining product descriptions')
+    openrouter_model = models.CharField(max_length=100, default='openrouter/free',
+        help_text='OpenRouter Model ID (e.g., openrouter/free, openrouter/auto, google/gemini-2.5-flash)')
 
     class Meta:
         verbose_name = 'Site Settings'

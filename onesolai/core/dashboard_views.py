@@ -17,7 +17,7 @@ def dashboard_home(request):
     recent_subscriptions = (
         OrderItem.objects
         .filter(order__user=user, order__status='paid')
-        .select_related('tool', 'plan')
+        .select_related('tool')
         .order_by('-order__created_at')[:4]
     )
 
@@ -54,7 +54,7 @@ def subscriptions(request):
     all_items = (
         OrderItem.objects
         .filter(order__user=user, order__status='paid')
-        .select_related('tool', 'plan', 'order')
+        .select_related('tool', 'order')
         .order_by('-order__created_at')
     )
     

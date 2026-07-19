@@ -1,6 +1,6 @@
 from django.db import models
 from django.conf import settings
-from products.models import Tool, SubscriptionPlan
+from products.models import Tool
 
 ORDER_STATUS_CHOICES = [
     ('pending', 'Pending'),
@@ -56,7 +56,6 @@ class Order(models.Model):
 class OrderItem(models.Model):
     order = models.ForeignKey(Order, related_name='items', on_delete=models.CASCADE)
     tool = models.ForeignKey(Tool, on_delete=models.SET_NULL, null=True)
-    plan = models.ForeignKey(SubscriptionPlan, on_delete=models.SET_NULL, null=True)
     price_ngn = models.DecimalField(max_digits=10, decimal_places=2)
     duration_days = models.IntegerField(default=30)
     expires_at = models.DateTimeField(null=True, blank=True)

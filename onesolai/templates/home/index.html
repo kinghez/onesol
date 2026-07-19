@@ -24,8 +24,8 @@
                             </h1>
                             <p class="hero-p {% if forloop.first %}hero-p2{% endif %}">{{ slide.description|safe }}</p>
 
-                            {% if slide.show_features_block %}
                             <div class="h2-features">
+                                {% if forloop.first %}
                                 <div class="h2-feat">
                                     <div class="h2-ico"><i class="fa-solid fa-wallet"></i></div>
                                     <span class="h2-txt">Local Currency<br>Payments</span>
@@ -42,8 +42,25 @@
                                     <div class="h2-ico"><i class="fa-solid fa-headset"></i></div>
                                     <span class="h2-txt">24/7<br>Support</span>
                                 </div>
+                                {% else %}
+                                <div class="h2-feat">
+                                    <div class="h2-ico"><i class="fa-solid fa-globe"></i></div>
+                                    <span class="h2-txt">Worldwide<br>Coverage</span>
+                                </div>
+                                <div class="h2-feat">
+                                    <div class="h2-ico"><i class="fa-solid fa-gem"></i></div>
+                                    <span class="h2-txt">Premium<br>Tools</span>
+                                </div>
+                                <div class="h2-feat">
+                                    <div class="h2-ico"><i class="fa-solid fa-tags"></i></div>
+                                    <span class="h2-txt">Best<br>Prices</span>
+                                </div>
+                                <div class="h2-feat">
+                                    <div class="h2-ico"><i class="fa-solid fa-bolt"></i></div>
+                                    <span class="h2-txt">Instant<br>Access</span>
+                                </div>
+                                {% endif %}
                             </div>
-                            {% endif %}
 
                             <div class="hero-btns {% if forloop.first %}hero2-btns{% endif %}">
                                 {% if slide.primary_button_text %}
@@ -57,7 +74,7 @@
                             </div>
                         </div>
                         <div class="hero-right">
-                            <div class="{% if forloop.first %}hero-illustration-2{% else %}hero-illustration{% endif %}" {% if not forloop.first %}id="heroIllust" data-parallax{% endif %}>
+                            <div class="hero-illustration-2" {% if not forloop.first %}id="heroIllust" data-parallax{% endif %}>
                                 {% if not forloop.first %}
                                 <div class="hero-glow hero-glow-1"></div>
                                 <div class="hero-glow hero-glow-2"></div>
@@ -65,7 +82,7 @@
                                 <div class="hero-platform-light"></div>
                                 {% endif %}
                                 {% if slide.image %}
-                                <img src="{{ slide.image.url }}" alt="{{ slide.title_line_1 }}" class="{% if forloop.first %}hero-img-2{% else %}hero-image{% endif %}">
+                                <img src="{{ slide.image.url }}" alt="{{ slide.title_line_1 }}" class="hero-img-2">
                                 {% endif %}
                             </div>
                         </div>
@@ -120,7 +137,7 @@
             </div>
 
             <!-- Section Heading -->
-            <div style="text-align: center; margin-bottom: 24px;">
+            <div style="text-align: center; margin-bottom: 24px; margin-top: 56px;">
                 <h2 style="font-size: 28px; font-weight: 700; color: #FFF;">How It Works</h2>
                 <p style="color: #AEB5CA; font-size: 15px; margin-top: 8px;">We bridge the gap between premium tools and affordable access.</p>
             </div>
@@ -252,5 +269,6 @@
             </div>
         </div>
     </section>
+
 
 {% endblock %}

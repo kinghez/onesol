@@ -25,10 +25,17 @@ class Category(models.Model):
 class Tool(models.Model):
     name = models.CharField(max_length=200)
     slug = models.SlugField(unique=True)
+    vendor_product = models.OneToOneField('vendors.VendorProduct', null=True, blank=True, on_delete=models.SET_NULL, help_text="Link this tool directly to a Vendor Product")
     description = models.TextField()
     short_description = models.CharField(max_length=300, blank=True)
     category = models.ForeignKey(Category, related_name='tools', on_delete=models.CASCADE)
-    base_price_ngn = models.DecimalField(max_digits=10, decimal_places=2, help_text="Base monthly price in NGN")
+    
+    # Pricing
+    sell_price_usd = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True, help_text="Manual override for USD sell price")
+    is_manual_price = models.BooleanField(default=False, help_text="If True, it will not auto-calculate the sell price based on markups")
+    markup_percent = models.DecimalField(max_digits=5, decimal_places=2, default=0.00, help_text="Per-tool percentage profit (overrides global)")
+    markup_fixed_usd = models.DecimalField(max_digits=10, decimal_places=2, default=0.00, help_text="Per-tool fixed USD profit (overrides per-tool percentage and global)")
+
     is_new = models.BooleanField(default=False)
     is_popular = models.BooleanField(default=False)
     is_featured = models.BooleanField(default=False, help_text="Show in Top Tools carousel on home page")
@@ -61,31 +68,57 @@ class Tool(models.Model):
             self.short_description = self.description[:297] + '...' if len(self.description) > 300 else self.description
         super().save(*args, **kwargs)
 
-    def get_monthly_plan(self):
-        return self.plans.filter(name__icontains='month').first()
+    def get_usd_price(self):
+        from core.models import SiteSettings
+        settings = SiteSettings.objects.first()
+        global_markup_percent = float(settings.global_markup_percent) if settings else 20.00
+        global_markup_fixed = float(settings.global_markup_fixed_usd) if settings else 0.00
+        
+        if self.is_manual_price and self.sell_price_usd is not None:
+            return round(float(self.sell_price_usd), 2)
+        elif self.vendor_product and self.vendor_product.price:
+            vendor_price = float(self.vendor_product.price)
+            if float(self.markup_fixed_usd) > 0:
+                profit = float(self.markup_fixed_usd)
+            elif float(self.markup_percent) > 0:
+                profit = vendor_price * (float(self.markup_percent) / 100)
+            elif global_markup_fixed > 0:
+                profit = global_markup_fixed
+            else:
+                profit = vendor_price * (global_markup_percent / 100)
+            return round(vendor_price + profit, 2)
+        return round(float(self.sell_price_usd or 0), 2)
 
+    def get_ngn_price(self):
+        from core.models import SiteSettings
+        from core.services import get_live_usd_rates
+        
+        usd_price = self.get_usd_price()
+        
+        # Try fetching live rates first
+        live_rates = get_live_usd_rates()
+        if live_rates and 'NGN' in live_rates:
+            rate = float(live_rates['NGN'])
+        else:
+            # Fallback to manual settings
+            settings = SiteSettings.objects.first()
+            rate = settings.usd_to_ngn_rate if settings else 1500.00
+            
+        return round(usd_price * float(rate), 2)
 
-class SubscriptionPlan(models.Model):
-    DURATION_CHOICES = [
-        ('monthly', 'Monthly'),
-        ('quarterly', 'Quarterly (3 months)'),
-        ('biannual', 'Biannual (6 months)'),
-        ('yearly', 'Yearly'),
-        ('lifetime', 'Lifetime'),
-    ]
-    tool = models.ForeignKey(Tool, related_name='plans', on_delete=models.CASCADE)
-    name = models.CharField(max_length=100, help_text="e.g. Monthly, Yearly, Lifetime")
-    duration_type = models.CharField(max_length=20, choices=DURATION_CHOICES, default='monthly')
-    duration_days = models.IntegerField(default=30)
-    price_ngn = models.DecimalField(max_digits=10, decimal_places=2)
-    is_best_value = models.BooleanField(default=False, help_text="Highlight as best value plan")
-    is_active = models.BooleanField(default=True)
+    def get_stock_status(self):
+        if self.vendor_product:
+            stock_str = self.vendor_product.stock.lower().strip()
+            if stock_str in ['0', 'none', 'out of stock', 'out_of_stock']:
+                return "Out of Stock"
+            return "In Stock"
+        return "In Stock"
 
-    class Meta:
-        ordering = ['duration_days']
+    @property
+    def is_in_stock(self):
+        return self.get_stock_status() == "In Stock"
 
-    def __str__(self):
-        return f"{self.tool.name} – {self.name} (NGN {self.price_ngn})"
+# (SubscriptionPlan removed)
 
 
 class ToolScreenshot(models.Model):

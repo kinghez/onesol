@@ -27,6 +27,14 @@
 
     <!-- Page Specific -->
     <link rel="stylesheet" href="{% static 'pages/dashboard.css' %}?v=4">
+
+    {% if site_settings.site_favicon %}
+    <link rel="icon" href="{{ site_settings.site_favicon.url }}">
+    {% elif site_settings.site_logo %}
+    <link rel="icon" href="{{ site_settings.site_logo.url }}">
+    {% else %}
+    <link rel="icon" href="{% static 'assets/images/favicon.ico' %}">
+    {% endif %}
 </head>
 <body class="fade-in">
     <div class="app-container">
@@ -35,7 +43,11 @@
         <aside class="sidebar-wrapper">
             <div class="sidebar">
                 <div class="sidebar-brand">
-                    <img src="{% static 'assets/logo.png' %}" alt="OneSol Logo" class="sidebar-logo" style="width: 32px; height: 32px; border-radius: 8px;">
+                    {% if site_settings and site_settings.site_logo %}
+                        <img src="{{ site_settings.site_logo.url }}" alt="{{ site_settings.site_name|default:'OneSol Logo' }}" class="sidebar-logo" style="width: 32px; height: 32px; border-radius: 8px;">
+                    {% else %}
+                        <img src="{% static 'assets/logo_s.png' %}" alt="OneSol Logo" class="sidebar-logo" style="width: 32px; height: 32px; border-radius: 8px;">
+                    {% endif %}
                     <span class="sidebar-text">OneSol AI Hub</span>
                 </div>
 

@@ -4,3 +4,8 @@ def unread_notifications(request):
         count = Notification.objects.filter(user=request.user, is_read=False).count()
         return {'unread_notifications_count': count}
     return {'unread_notifications_count': 0}
+
+def site_settings(request):
+    from core.models import SiteSettings
+    return {'site_settings': SiteSettings.get()}
+

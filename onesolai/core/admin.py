@@ -37,8 +37,16 @@ class SiteSettingsAdmin(admin.ModelAdmin):
                 'min_withdrawal_ngn'
             ),
         }),
+        ('💱 Dynamic Pricing', {
+            'fields': ('global_markup_percent', 'global_markup_fixed_usd', 'usd_to_ngn_rate'),
+            'description': 'Configure profit margins and currency conversion for dynamic Vendor products.',
+        }),
+        ('🤖 AI Settings (OpenRouter)', {
+            'fields': ('openrouter_api_key', 'openrouter_model'),
+            'description': 'Configure OpenRouter API to automatically clean and refine messy vendor product descriptions.',
+        }),
         ('🌐 Site Information', {
-            'fields': ('site_name', 'site_url', 'support_email'),
+            'fields': ('site_name', 'site_url', 'support_email', 'site_logo', 'site_favicon'),
         }),
     ]
 
