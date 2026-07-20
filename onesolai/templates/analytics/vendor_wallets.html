@@ -1,0 +1,143 @@
+{% extends 'analytics/base.html' %}
+{% load static %}
+
+{% block title %}Vendor Wallets - OneSol AI{% endblock %}
+{% block nav_wallets %}active{% endblock %}
+
+{% block page_title %}Vendor Wallets{% endblock %}
+{% block page_subtitle %}Manage and monitor your API vendor balances.{% endblock %}
+
+{% block topbar_actions %}
+<button class="btn-admin btn-admin-primary reload-btn mobile-hide" onclick="reloadBalances(this)">
+    <i class="fa-solid fa-rotate"></i> Reload Balances
+</button>
+{% endblock %}
+
+{% block content %}
+<div class="mobile-show" style="display: none; text-align: right; margin-bottom: 16px;">
+    <button class="btn-admin btn-admin-primary reload-btn" onclick="reloadBalances(this)">
+        <i class="fa-solid fa-rotate"></i> Reload Balances
+    </button>
+</div>
+
+<div class="admin-grid" style="grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); margin-bottom: 24px;" id="vendorCardsContainer">
+    {% for v in vendor_data %}
+    <div class="admin-card vendor-card-item" data-vendor-id="{{ v.id }}">
+        <div class="admin-card-header" style="white-space: normal; line-height: 1.2;">
+            <i class="fa-solid fa-plug" style="color: var(--admin-accent-purple);"></i> {{ v.name }} Wallet
+        </div>
+        <div class="admin-card-value vendor-amount-display" style="color: var(--admin-accent-cyan);">
+            ${{ v.balance|floatformat:2 }}
+        </div>
+        <div class="admin-card-subtext vendor-status-display" style="white-space: normal; line-height: 1.2; font-size: 10px;">Last updated: <br>{{ v.last_updated|timesince }} ago</div>
+        
+        <div class="admin-card-highlight" style="margin-top: 16px; display: flex; flex-direction: column; gap: 4px; font-size: 10px; white-space: normal;">
+            <div style="word-wrap: break-word;"><i class="fa-solid fa-layer-group"></i> {{ v.vendor_product_count }} API Products</div>
+            <div style="color: var(--admin-accent-green); word-wrap: break-word;"><i class="fa-solid fa-check"></i> {{ v.tool_count }} Active</div>
+        </div>
+    </div>
+    {% empty %}
+    <div class="admin-card" style="grid-column: 1 / -1;">
+        <p class="admin-text-muted">No active vendors found. Please add vendors in the Django Admin.</p>
+    </div>
+    {% endfor %}
+</div>
+
+<div class="admin-card full-width-mobile">
+    <div class="admin-card-header">
+        <i class="fa-solid fa-triangle-exclamation" style="color: #FF3B30;"></i> Failed User Transactions
+    </div>
+    <div class="admin-card-subtext" style="margin-bottom: 16px;">Recent failed purchases that might indicate low vendor API balances.</div>
+    
+    <div class="table-responsive-wrapper">
+        <table class="admin-table">
+            <thead>
+                <tr>
+                    <th>Date</th>
+                    <th>User Email</th>
+                    <th>Tools Ordered</th>
+                    <th>Reason/Status Message</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for order in failed_orders %}
+                <tr>
+                    <td>{{ order.created_at|date:"M d, Y H:i" }}</td>
+                    <td>{{ order.user.email }}</td>
+                    <td>
+                        {% for item in order.items.all %}
+                            <span style="background: rgba(255,255,255,0.05); padding: 2px 6px; border-radius: 4px; font-size: 11px;">{{ item.tool.name }}</span>
+                        {% endfor %}
+                    </td>
+                    <td style="color: #FF3B30; font-size: 12px; max-width: 300px; white-space: normal;">
+                        {{ order.status_message|default:"Transaction failed or pending manual intervention." }}
+                    </td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="4" class="admin-text-muted">No recent failed transactions found.</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    function reloadBalances(clickedBtn) {
+        const btns = document.querySelectorAll('.reload-btn');
+        const originalHtmls = [];
+        
+        btns.forEach((btn, index) => {
+            originalHtmls[index] = btn.innerHTML;
+            btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Reloading...';
+            btn.disabled = true;
+        });
+
+        fetch("{% url 'analytics:reload_balances' %}", {
+            method: 'POST',
+            headers: {
+                'X-CSRFToken': getCookie('csrftoken'),
+                'Content-Type': 'application/json'
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                // Update specific elements in the UI
+                data.data.forEach(v => {
+                    const card = document.querySelector(`.vendor-card-item[data-vendor-id="${v.id}"]`);
+                    if (card) {
+                        const amountDisplay = card.querySelector('.vendor-amount-display');
+                        const statusDisplay = card.querySelector('.vendor-status-display');
+                        
+                        if (v.error) {
+                            amountDisplay.style.color = '#FF3B30';
+                            amountDisplay.textContent = 'Error';
+                            statusDisplay.textContent = v.error;
+                        } else {
+                            amountDisplay.style.color = 'var(--admin-accent-cyan)';
+                            amountDisplay.textContent = '$' + parseFloat(v.balance).toFixed(2);
+                            statusDisplay.textContent = 'Last updated: Just now';
+                        }
+                    }
+                });
+            } else {
+                alert('Failed to reload balances: ' + (data.error || 'Unknown error'));
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('An error occurred while fetching balances.');
+        })
+        .finally(() => {
+            btns.forEach((btn, index) => {
+                btn.innerHTML = originalHtmls[index];
+                btn.disabled = false;
+            });
+        });
+    }
+</script>
+{% endblock %}

@@ -13,7 +13,7 @@
         <div class="hero-carousel-track" id="heroTrack">
 
             {% if hero_slides %}
-                {% for slide in hero_slides %}
+                {% for slide in hero_slides reversed %}
                 <div class="hero-slide {% if forloop.first %}active{% endif %}">
                     <div class="hero-wrap">
                         <div class="hero-left">
@@ -64,12 +64,12 @@
 
                             <div class="hero-btns {% if forloop.first %}hero2-btns{% endif %}">
                                 {% if slide.primary_button_text %}
-                                <a href="{{ slide.primary_button_url }}" class="{% if forloop.first %}btn-pri-2{% else %}btn-pri{% endif %}">
+                                <a href="#how-it-works" class="{% if forloop.first %}btn-pri-2{% else %}btn-pri{% endif %}">
                                     {% if slide.primary_button_icon %}<i class="{{ slide.primary_button_icon }}"></i> {% endif %}{{ slide.primary_button_text }}
                                 </a>
                                 {% endif %}
                                 {% if slide.secondary_button_text %}
-                                <a href="{{ slide.secondary_button_url }}" class="{% if forloop.first %}btn-sec-2{% else %}btn-sec{% endif %}">{{ slide.secondary_button_text }}</a>
+                                <a href="#how-it-works" class="{% if forloop.first %}btn-sec-2{% else %}btn-sec{% endif %}">{{ slide.secondary_button_text }}</a>
                                 {% endif %}
                             </div>
                         </div>
@@ -241,6 +241,42 @@
                 <h2 class="pw-title">Popular This Week</h2>
             </div>
 
+            <style>
+                .pw-tabs::-webkit-scrollbar {
+                    display: none;
+                }
+                .pw-tabs.show-scroll::-webkit-scrollbar {
+                    display: block;
+                    height: 4px;
+                }
+                .pw-tabs.show-scroll::-webkit-scrollbar-thumb {
+                    background: rgba(255, 255, 255, 0.2);
+                    border-radius: 4px;
+                }
+                .pw-tabs {
+                    -ms-overflow-style: none;
+                    scrollbar-width: none;
+                }
+                .pw-tabs.show-scroll {
+                    -ms-overflow-style: auto;
+                    scrollbar-width: thin;
+                }
+            </style>
+            <script>
+                document.addEventListener("DOMContentLoaded", () => {
+                    const pwTabs = document.getElementById("pwTabs");
+                    let scrollTimeout;
+                    if (pwTabs) {
+                        pwTabs.addEventListener("scroll", () => {
+                            pwTabs.classList.add("show-scroll");
+                            clearTimeout(scrollTimeout);
+                            scrollTimeout = setTimeout(() => {
+                                pwTabs.classList.remove("show-scroll");
+                            }, 2000);
+                        });
+                    }
+                });
+            </script>
             <div class="pw-tabs-container">
                 <div class="pw-tabs" id="pwTabs">
                     <button class="pw-tab active" data-filter="all">All</button>

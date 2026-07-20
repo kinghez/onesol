@@ -2,6 +2,7 @@
 {% load static %}
 
 {% block title %}Referrals & Earnings – OneSol AI Hub{% endblock %}
+{% block nav_referrals %}active{% endblock %}
 
 {% block content %}
 <div class="ref-page">
@@ -316,8 +317,8 @@
 @media (min-width: 768px) { .ref-stats { grid-template-columns: repeat(4,1fr); } }
 
 .ref-stat-card {
-  background: rgba(18,22,52,.92);
-  border: 1px solid rgba(255,255,255,.08);
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.05);
   border-radius: 16px; padding: 20px 16px;
   text-align: center;
   backdrop-filter: blur(20px);
@@ -352,8 +353,8 @@
 
 /* Glass Card base */
 .glass-card {
-  background: rgba(18,22,52,.92);
-  border: 1px solid rgba(255,255,255,.08);
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.05);
   border-radius: 16px; padding: 24px;
   backdrop-filter: blur(20px);
 }

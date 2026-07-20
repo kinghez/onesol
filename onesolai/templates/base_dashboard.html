@@ -42,14 +42,16 @@
         <!-- ══════ SIDEBAR ══════ -->
         <aside class="sidebar-wrapper">
             <div class="sidebar">
-                <div class="sidebar-brand">
-                    {% if site_settings and site_settings.site_logo %}
-                        <img src="{{ site_settings.site_logo.url }}" alt="{{ site_settings.site_name|default:'OneSol Logo' }}" class="sidebar-logo" style="width: 32px; height: 32px; border-radius: 8px;">
-                    {% else %}
-                        <img src="{% static 'assets/logo_s.png' %}" alt="OneSol Logo" class="sidebar-logo" style="width: 32px; height: 32px; border-radius: 8px;">
-                    {% endif %}
-                    <span class="sidebar-text">OneSol AI Hub</span>
-                </div>
+                <a href="{% url 'home' %}" style="text-decoration: none; display: block;">
+                    <div class="sidebar-brand">
+                        {% if site_settings and site_settings.site_logo %}
+                            <img src="{{ site_settings.site_logo.url }}" alt="{{ site_settings.site_name|default:'OneSol Logo' }}" class="sidebar-logo" style="width: 32px; height: 32px; border-radius: 8px;">
+                        {% else %}
+                            <img src="{% static 'assets/logo_s.png' %}" alt="OneSol Logo" class="sidebar-logo" style="width: 32px; height: 32px; border-radius: 8px;">
+                        {% endif %}
+                        <span class="sidebar-text" style="color: white;">OneSol AI Hub</span>
+                    </div>
+                </a>
 
                 <nav class="sidebar-nav">
                     <div class="sidebar-section-title sidebar-text">Main</div>
@@ -83,6 +85,20 @@
                         <i class="fa-regular fa-bell fa-fw"></i>
                         <span class="sidebar-text">Notifications</span>
                     </a>
+
+                    {% if user.is_staff or user.is_superuser %}
+                    <div class="sidebar-divider"></div>
+                    <div class="sidebar-section-title sidebar-text">Administrator</div>
+
+                    <a href="{% url 'analytics:dashboard' %}" class="sidebar-item {% block nav_analytics %}{% endblock %}" style="color: var(--primary);">
+                        <i class="fa-solid fa-chart-line fa-fw"></i>
+                        <span class="sidebar-text">Admin Analytics</span>
+                    </a>
+                    <a href="/admin/" class="sidebar-item" style="color: #FF3B30;">
+                        <i class="fa-solid fa-screwdriver-wrench fa-fw"></i>
+                        <span class="sidebar-text">Control Panel</span>
+                    </a>
+                    {% endif %}
 
                     <div class="sidebar-divider"></div>
 

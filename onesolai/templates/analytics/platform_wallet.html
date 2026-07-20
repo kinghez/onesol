@@ -1,0 +1,284 @@
+{% extends 'analytics/base.html' %}
+{% load static %}
+
+{% block title %}Platform Wallet - OneSol AI{% endblock %}
+{% block nav_platform_wallet %}active{% endblock %}
+
+{% block page_title %}Platform Wallet{% endblock %}
+{% block page_subtitle %}Advanced financial tracking and profit margins.{% endblock %}
+
+{% block content %}
+
+<!-- ══════ FINANCIAL KPIs ══════ -->
+<div class="admin-grid" style="grid-template-columns: repeat(5, 1fr); margin-bottom: 24px;">
+    
+    <!-- Total Inflow -->
+    <div class="admin-card">
+        <div class="admin-card-header">
+            <i class="fa-solid fa-money-bill-trend-up" style="color: var(--admin-accent-cyan);"></i> Total Inflow (Revenue)
+        </div>
+        <div class="admin-card-value" style="font-size: 20px;">₦{{ total_inflow|floatformat:2 }}</div>
+        <div class="admin-card-subtext">Sum of all successful paid orders.</div>
+    </div>
+
+    <!-- Vendor Costs -->
+    <div class="admin-card">
+        <div class="admin-card-header">
+            <i class="fa-solid fa-plug" style="color: #f59e0b;"></i> Money Made for Vendors
+        </div>
+        <div class="admin-card-value" style="font-size: 20px; color: #f59e0b;">₦{{ total_vendor_cost|floatformat:2 }}</div>
+        <div class="admin-card-subtext">Total product cost from vendors.</div>
+    </div>
+
+    <!-- Gross Profit -->
+    <div class="admin-card">
+        <div class="admin-card-header">
+            <i class="fa-solid fa-scale-balanced" style="color: var(--admin-accent-green);"></i> Gross Profit
+        </div>
+        <div class="admin-card-value" style="font-size: 20px; color: var(--admin-accent-green);">₦{{ gross_profit|floatformat:2 }}</div>
+        <div class="admin-card-subtext">Revenue minus vendor costs.</div>
+    </div>
+
+    <!-- Referrer Payouts (Outflow) -->
+    <div class="admin-card">
+        <div class="admin-card-header">
+            <i class="fa-solid fa-arrow-right-arrow-left" style="color: #FF3B30;"></i> Referrer Payouts
+        </div>
+        <div class="admin-card-value" style="font-size: 20px; color: #FF3B30;">₦{{ total_outflow|floatformat:2 }}</div>
+        <div class="admin-card-subtext">Total approved withdrawals.</div>
+    </div>
+
+    <!-- Net Profit -->
+    <div class="admin-card" style="border: 1px solid var(--admin-accent-purple);">
+        <div class="admin-card-header">
+            <i class="fa-solid fa-piggy-bank" style="color: var(--admin-accent-purple);"></i> Net Profit
+        </div>
+        <div class="admin-card-value" style="font-size: 20px; color: var(--admin-accent-purple);">₦{{ net_profit|floatformat:2 }}</div>
+        <div class="admin-card-subtext">Gross Profit minus Payouts.</div>
+    </div>
+
+</div>
+
+<!-- ══════ VENDOR FINANCIAL BREAKDOWN ══════ -->
+<div class="admin-grid" style="grid-template-columns: repeat(1, 1fr);">
+    
+    <div class="admin-card full-width-mobile">
+        <div class="admin-card-header">
+            <i class="fa-solid fa-chart-bar" style="color: var(--admin-accent-cyan);"></i> Vendor Performance & Profit Margins
+        </div>
+        
+        <div class="table-responsive-wrapper">
+            <table class="admin-table" style="min-width: 600px;">
+                <thead>
+                    <tr>
+                    <th>Vendor API</th>
+                    <th style="text-align: center;">Tools Sold</th>
+                    <th style="text-align: right;">Sales Generated (₦)</th>
+                    <th style="text-align: right;">Product Cost (₦)</th>
+                    <th style="text-align: right;">Gross Profit (₦)</th>
+                    <th style="text-align: right;">Profit Margin</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for v in vendor_breakdown %}
+                <tr>
+                    <td><strong>{{ v.name }}</strong></td>
+                    <td style="text-align: center;">{{ v.items_sold }}</td>
+                    <td style="text-align: right;">{{ v.total_sales_ngn|floatformat:2 }}</td>
+                    <td style="text-align: right; color: #f59e0b;">{{ v.total_cost_ngn|floatformat:2 }}</td>
+                    <td style="text-align: right; color: var(--admin-accent-green); font-weight: bold;">{{ v.profit_ngn|floatformat:2 }}</td>
+                    <td style="text-align: right;">
+                        <span style="background: rgba(0, 255, 136, 0.1); color: var(--admin-accent-green); padding: 4px 8px; border-radius: 4px; font-size: 12px; font-weight: bold;">
+                            {{ v.margin|floatformat:1 }}%
+                        </span>
+                    </td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="6" class="admin-text-muted" style="text-align: center;">No successful order data found to calculate vendor breakdown.</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+            </table>
+        </div>
+    </div>
+
+</div>
+
+<!-- ══════ VENDOR CHART ══════ -->
+<div class="admin-grid" style="grid-template-columns: repeat(1, 1fr); margin-top: 24px;">
+    <div class="admin-card full-width-mobile">
+        <div class="admin-card-header">
+            <i class="fa-solid fa-chart-column" style="color: var(--admin-accent-purple);"></i> Revenue vs Cost per Vendor
+        </div>
+        <div style="height: 350px; width: 100%;">
+            <canvas id="vendorFinancialChart"></canvas>
+        </div>
+    </div>
+</div>
+
+<!-- ══════ TRANSACTION LOGS ══════ -->
+<div class="admin-grid" style="grid-template-columns: repeat(2, 1fr); margin-top: 24px;">
+    
+    <!-- All Platform Transactions -->
+    <div class="admin-card full-width-mobile">
+        <div class="admin-card-header">
+            <i class="fa-solid fa-cart-shopping" style="color: var(--admin-accent-cyan);"></i> All Platform Transactions
+        </div>
+        <div class="admin-card-subtext" style="margin-bottom: 16px;">Latest 50 product purchases on the platform.</div>
+        
+        <div class="table-responsive-wrapper" style="max-height: 280px; overflow-y: auto;">
+            <table class="admin-table">
+                <thead style="position: sticky; top: 0; background: var(--admin-bg-card); z-index: 10;">
+                    <tr>
+                        <th>Date</th>
+                        <th>User</th>
+                        <th>Amount</th>
+                        <th>Status</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for item in recent_transactions %}
+                    <tr>
+                        <td>{{ item.created_at|date:"M d, Y H:i" }}</td>
+                        <td>{{ item.user.email|truncatechars:15 }}</td>
+                        <td style="color: var(--admin-accent-green); font-weight: bold;">₦{{ item.final_total|floatformat:0 }}</td>
+                        <td>
+                            {% if item.payment_status == 'successful' %}
+                            <span style="color: var(--admin-accent-green);">Success</span>
+                            {% elif item.payment_status == 'failed' %}
+                            <span style="color: #FF3B30;">Failed</span>
+                            {% else %}
+                            <span style="color: #f59e0b;">{{ item.payment_status|title }}</span>
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="4" class="admin-text-muted">No transactions yet.</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- Referrer Payout Transactions -->
+    <div class="admin-card full-width-mobile">
+        <div class="admin-card-header">
+            <i class="fa-solid fa-arrow-right-arrow-left" style="color: #FF3B30;"></i> Referrer Payout Transactions
+        </div>
+        <div class="admin-card-subtext" style="margin-bottom: 16px;">Latest 50 withdrawal requests from referrers.</div>
+        
+        <div class="table-responsive-wrapper" style="max-height: 280px; overflow-y: auto;">
+            <table class="admin-table">
+                <thead style="position: sticky; top: 0; background: var(--admin-bg-card); z-index: 10;">
+                    <tr>
+                        <th>Date</th>
+                        <th>Referrer</th>
+                        <th>Amount</th>
+                        <th>Status</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for w in recent_payouts %}
+                    <tr>
+                        <td>{{ w.created_at|date:"M d, Y H:i" }}</td>
+                        <td>{{ w.user.email|truncatechars:15 }}</td>
+                        <td style="color: #FF3B30; font-weight: bold;">₦{{ w.amount|floatformat:0 }}</td>
+                        <td>
+                            {% if w.status == 'approved' %}
+                            <span style="color: var(--admin-accent-green);">Approved</span>
+                            {% elif w.status == 'rejected' %}
+                            <span style="color: #FF3B30;">Rejected</span>
+                            {% else %}
+                            <span style="color: #f59e0b;">{{ w.get_status_display }}</span>
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="4" class="admin-text-muted">No payout requests yet.</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+</div>
+
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Chart Data
+        const vendorNames = [];
+        const salesData = [];
+        const costData = [];
+        const profitData = [];
+
+        {% for v in vendor_breakdown %}
+            vendorNames.push("{{ v.name|escapejs }}");
+            salesData.push({{ v.total_sales_ngn }});
+            costData.push({{ v.total_cost_ngn }});
+            profitData.push({{ v.profit_ngn }});
+        {% endfor %}
+
+        const ctx = document.getElementById('vendorFinancialChart').getContext('2d');
+        new Chart(ctx, {
+            type: 'bar',
+            data: {
+                labels: vendorNames,
+                datasets: [
+                    {
+                        label: 'Sales Generated (₦)',
+                        data: salesData,
+                        backgroundColor: 'rgba(0, 229, 255, 0.6)',
+                        borderColor: '#00E5FF',
+                        borderWidth: 1
+                    },
+                    {
+                        label: 'Product Cost (₦)',
+                        data: costData,
+                        backgroundColor: 'rgba(245, 158, 11, 0.6)',
+                        borderColor: '#f59e0b',
+                        borderWidth: 1
+                    },
+                    {
+                        label: 'Gross Profit (₦)',
+                        data: profitData,
+                        backgroundColor: 'rgba(0, 255, 136, 0.6)',
+                        borderColor: '#00FF88',
+                        borderWidth: 1
+                    }
+                ]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        position: 'top',
+                        labels: { color: '#A895D1' }
+                    },
+                    datalabels: {
+                        display: false
+                    }
+                },
+                scales: {
+                    x: {
+                        grid: { color: 'rgba(255,255,255,0.05)' },
+                        ticks: { color: '#A895D1' }
+                    },
+                    y: {
+                        grid: { color: 'rgba(255,255,255,0.05)' },
+                        ticks: { color: '#A895D1' }
+                    }
+                }
+            }
+        });
+    });
+</script>
+{% endblock %}

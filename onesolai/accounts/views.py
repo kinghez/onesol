@@ -88,10 +88,26 @@ def signup_view(request):
             # Save detected location/currency if provided
             detected_country = request.POST.get('detected_country', '').strip()
             detected_currency = request.POST.get('detected_currency', '').strip()
+            
+            # If frontend didn't detect, fallback to backend IP geoloc
+            if not detected_country:
+                from .utils import get_client_ip, get_location_data_from_ip
+                ip = get_client_ip(request)
+                location_data = get_location_data_from_ip(ip)
+                if location_data['country']:
+                    detected_country = location_data['country']
+                if location_data['currency']:
+                    detected_currency = location_data['currency']
+
             if detected_country:
                 profile.country_preference = detected_country
             if detected_currency:
                 profile.currency_preference = detected_currency
+                
+            # Default to Nigeria if still empty to ensure map renders nicely
+            if not profile.country_preference:
+                profile.country_preference = 'Nigeria'
+                
             profile.save()
 
             # Handle referral

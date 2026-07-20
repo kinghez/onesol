@@ -1,0 +1,127 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Analytics - OneSol AI{% endblock %}</title>
+
+    <!-- Fonts & Icons -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    
+    <!-- Custom Admin CSS -->
+    <link rel="stylesheet" href="{% static 'css/admin_dashboard.css' %}?v=2">
+    
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels"></script>
+    
+    <!-- Map Libraries -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/jsvectormap/dist/css/jsvectormap.min.css" />
+    <script src="https://cdn.jsdelivr.net/npm/jsvectormap"></script>
+    <script src="https://cdn.jsdelivr.net/npm/jsvectormap/dist/maps/world.js"></script>
+
+    {% block extra_head %}{% endblock %}
+</head>
+<body class="admin-dashboard-body">
+
+    <!-- ══════ CUSTOM ADMIN SIDEBAR ══════ -->
+    <aside class="admin-sidebar">
+        <a href="{% url 'home' %}" style="text-decoration: none; display: block;">
+            <div class="admin-sidebar-header">
+                <img src="{% if site_settings.site_logo %}{{ site_settings.site_logo.url }}{% else %}{% static 'assets/logo_s.png' %}{% endif %}" alt="Logo">
+                <h2 style="color: white; margin: 0;">OneSol Admin</h2>
+            </div>
+        </a>
+
+        <div class="admin-menu-section">Main</div>
+        <a href="{% url 'analytics:dashboard' %}" class="admin-menu-link {% block nav_dashboard %}{% endblock %}">
+            <i class="fa-solid fa-chart-line"></i> Analytics Dashboard
+        </a>
+        <a href="{% url 'analytics:vendor_wallets' %}" class="admin-menu-link {% block nav_wallets %}{% endblock %}">
+            <i class="fa-solid fa-wallet"></i> Vendor Wallets
+        </a>
+        <a href="{% url 'analytics:platform_wallet' %}" class="admin-menu-link {% block nav_platform_wallet %}{% endblock %}">
+            <i class="fa-solid fa-building-columns"></i> Platform Wallet
+        </a>
+        <a href="{% url 'dashboard:home' %}" class="admin-menu-link">
+            <i class="fa-solid fa-house"></i> Return to Frontend
+        </a>
+
+    </aside>
+
+    <!-- ══════ MAIN CONTENT ══════ -->
+    <main class="admin-main">
+        
+        <!-- Topbar -->
+        <header class="admin-topbar">
+            <div style="display: flex; align-items: center; gap: 16px;">
+                <button id="mobileSidebarToggle" class="mobile-only-btn" style="display: none; background: transparent; border: none; color: white; font-size: 20px; cursor: pointer;">
+                    <i class="fa-solid fa-bars"></i>
+                </button>
+                <div>
+                    <h1 class="admin-topbar-title">{% block page_title %}Analytics Dashboard{% endblock %}</h1>
+                    <p class="admin-topbar-subtitle">{% block page_subtitle %}Let's check your platform's update today{% endblock %}</p>
+                </div>
+            </div>
+            <div class="admin-topbar-right">
+                {% block topbar_actions %}{% endblock %}
+                <span style="font-size: 14px; font-weight: 600; margin-left: 16px;">{{ request.user.get_full_name|default:request.user.username }}</span>
+                <div style="width: 32px; height: 32px; background: var(--admin-accent-purple); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: bold; margin-left: 10px;">
+                    {{ request.user.username|make_list|first|upper }}
+                </div>
+            </div>
+        </header>
+
+        <!-- Content Area -->
+        <div class="admin-content-area">
+            {% block content %}{% endblock %}
+        </div>
+    </main>
+
+    <!-- Helper functions -->
+    <script>
+        function getCookie(name) {
+            let cookieValue = null;
+            if (document.cookie && document.cookie !== '') {
+                const cookies = document.cookie.split(';');
+                for (let i = 0; i < cookies.length; i++) {
+                    const cookie = cookies[i].trim();
+                    if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                        cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                        break;
+                    }
+                }
+            }
+            return cookieValue;
+        }
+
+        // Mobile Sidebar Toggle
+        const toggleBtn = document.getElementById('mobileSidebarToggle');
+        const sidebar = document.querySelector('.admin-sidebar');
+        if (toggleBtn && sidebar) {
+            toggleBtn.addEventListener('click', function(e) {
+                e.stopPropagation();
+                sidebar.classList.toggle('open');
+            });
+            
+            // Close sidebar when clicking outside
+            document.addEventListener('click', function(event) {
+                if (sidebar.classList.contains('open')) {
+                    if (!sidebar.contains(event.target)) {
+                        sidebar.classList.remove('open');
+                    }
+                }
+            });
+            
+            // Prevent click inside sidebar from closing it
+            sidebar.addEventListener('click', function(e) {
+                e.stopPropagation();
+            });
+        }
+    </script>
+    
+    {% block extra_js %}{% endblock %}
+</body>
+</html>

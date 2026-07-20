@@ -24,6 +24,9 @@ urlpatterns = [
 
     # Vendors (Webhooks etc)
     path('vendors/', include('vendors.urls')),
+
+    # Custom Admin Analytics
+    path('dashboard/admin-analytics/', include('analytics.urls')),
 ]
 
 from django.conf import settings

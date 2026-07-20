@@ -1,0 +1,400 @@
+{% extends 'analytics/base.html' %}
+{% load static %}
+
+{% block title %}Analytics Dashboard - OneSol AI{% endblock %}
+{% block nav_dashboard %}active{% endblock %}
+
+{% block content %}
+
+<!-- ══════ FILTERS ══════ -->
+<div class="admin-card" style="margin-bottom: 24px;">
+    <div class="admin-card-header">
+        <i class="fa-solid fa-filter" style="color: var(--admin-accent-green);"></i> Filters
+    </div>
+    <form method="GET" action="{% url 'analytics:dashboard' %}">
+        <div style="display: flex; flex-direction: column; gap: 16px; margin-bottom: 16px;">
+            
+            <div class="admin-grid" style="grid-template-columns: repeat(3, 1fr);">
+                <div>
+                    <label style="color: var(--admin-text-muted); font-size: 12px; margin-bottom: 8px; display: block;">Date Range</label>
+                    <select name="date_range" id="dateRangeSelect" class="admin-select" style="width: 100%; padding: 10px; background: rgba(0,0,0,0.2); border: 1px solid var(--admin-border); color: #fff; border-radius: 6px;">
+                        <option value="7" {% if current_date_range == '7' %}selected{% endif %}>Last 7 days</option>
+                        <option value="30" {% if current_date_range == '30' %}selected{% endif %}>Last 30 days</option>
+                        <option value="90" {% if current_date_range == '90' %}selected{% endif %}>Last 90 days</option>
+                        <option value="all" {% if current_date_range == 'all' %}selected{% endif %}>All Time</option>
+                        <option value="custom" {% if current_date_range == 'custom' %}selected{% endif %}>Custom Range</option>
+                    </select>
+                </div>
+                
+                <div>
+                    <label style="color: var(--admin-text-muted); font-size: 12px; margin-bottom: 8px; display: block;">Country</label>
+                    <select name="country" class="admin-select" style="width: 100%; padding: 10px; background: rgba(0,0,0,0.2); border: 1px solid var(--admin-border); color: #fff; border-radius: 6px;">
+                        <option value="All">All Countries</option>
+                        {% for c in all_countries %}
+                        <option value="{{ c }}" {% if current_country == c %}selected{% endif %}>{{ c }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                
+                <div>
+                    <label style="color: var(--admin-text-muted); font-size: 12px; margin-bottom: 8px; display: block;">Product</label>
+                    <select name="product" class="admin-select" style="width: 100%; padding: 10px; background: rgba(0,0,0,0.2); border: 1px solid var(--admin-border); color: #fff; border-radius: 6px;">
+                        <option value="All">All Products</option>
+                        {% for tool in all_tools %}
+                        <option value="{{ tool.id }}" {% if current_product == tool.id|stringformat:"s" %}selected{% endif %}>{{ tool.name }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+            </div>
+
+            <div id="customDateContainer" class="admin-grid" style="grid-template-columns: repeat(2, 1fr); display: {% if current_date_range == 'custom' %}grid{% else %}none{% endif %};">
+                <div>
+                    <label style="color: var(--admin-text-muted); font-size: 12px; margin-bottom: 8px; display: block;">Start Date</label>
+                    <input type="date" name="start_date" value="{{ current_start_date }}" class="admin-select" style="width: 100%; padding: 10px; background: rgba(0,0,0,0.2); border: 1px solid var(--admin-border); color: #fff; border-radius: 6px; color-scheme: dark;">
+                </div>
+                <div>
+                    <label style="color: var(--admin-text-muted); font-size: 12px; margin-bottom: 8px; display: block;">End Date</label>
+                    <input type="date" name="end_date" value="{{ current_end_date }}" class="admin-select" style="width: 100%; padding: 10px; background: rgba(0,0,0,0.2); border: 1px solid var(--admin-border); color: #fff; border-radius: 6px; color-scheme: dark;">
+                </div>
+            </div>
+
+        </div>
+        <div style="display: flex; gap: 12px; align-items: center; flex-wrap: wrap;">
+            <button type="submit" class="btn-admin btn-admin-primary">Apply Filters</button>
+            <a href="{% url 'analytics:dashboard' %}" class="btn-admin">Reset</a>
+        </div>
+    </form>
+</div>
+
+<!-- ══════ KPI CARDS ══════ -->
+<div class="admin-grid" style="grid-template-columns: repeat(4, 1fr);">
+    
+    <div class="admin-card">
+        <div class="admin-card-header">
+            <i class="fa-solid fa-users" style="color: var(--admin-accent-cyan);"></i> Active Users
+        </div>
+        <div class="admin-card-value">{{ active_users }}</div>
+        <div class="admin-card-subtext">Total Users: {{ total_users }}</div>
+        <div class="admin-card-highlight">+{{ users_past_7_days }} New</div>
+    </div>
+
+    <div class="admin-card">
+        <div class="admin-card-header">
+            <i class="fa-solid fa-percent" style="color: var(--admin-accent-purple);"></i> Conversion Rate
+        </div>
+        <div class="admin-card-value">{{ conversion_rate }}%</div>
+        <div class="admin-card-subtext">Registered to Paid</div>
+        <div class="admin-card-highlight" style="color: #A895D1; background: rgba(255,255,255,0.05);">Platform Health</div>
+    </div>
+
+    <div class="admin-card">
+        <div class="admin-card-header">
+            <i class="fa-solid fa-money-bill-trend-up" style="color: var(--admin-accent-green);"></i> Revenue
+        </div>
+        <div class="admin-card-value">₦{{ total_processed|floatformat:0 }}</div>
+        <div class="admin-card-subtext">Total processed</div>
+        <div class="admin-card-highlight">Success Rate: {{ success_rate }}%</div>
+    </div>
+
+    <div class="admin-card">
+        <div class="admin-card-header">
+            <i class="fa-solid fa-layer-group" style="color: #f59e0b;"></i> Tools Inventory
+        </div>
+        <div class="admin-card-value">{{ total_tools }}</div>
+        <div class="admin-card-subtext">Total active tools available</div>
+        {% if out_of_stock_tools > 0 %}
+        <div class="admin-card-highlight" style="color: #FF3B30; background: rgba(255, 59, 48, 0.1);">{{ out_of_stock_tools }} Out of Stock</div>
+        {% else %}
+        <div class="admin-card-highlight">All in stock</div>
+        {% endif %}
+    </div>
+
+</div>
+
+<div class="admin-grid" style="grid-template-columns: repeat(2, 1fr);">
+    <!-- Top Selling Tools -->
+    <div class="admin-card full-width-mobile">
+        <div class="admin-card-header">
+            <i class="fa-solid fa-trophy" style="color: #fbbf24;"></i> Top Selling Tools
+        </div>
+        <div class="table-responsive-wrapper">
+            <table class="admin-table">
+                <thead>
+                    <tr>
+                        <th>Tool</th>
+                        <th style="text-align: right;">Revenue</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for tool in top_tools %}
+                    <tr>
+                        <td>{{ tool.name|truncatechars:20 }}</td>
+                        <td style="text-align: right; color: var(--admin-accent-green); font-weight: bold;">₦{{ tool.revenue|floatformat:0 }}</td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="2" class="admin-text-muted">No sales data yet.</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- Top Referrers -->
+    <div class="admin-card full-width-mobile">
+        <div class="admin-card-header">
+            <i class="fa-solid fa-ranking-star" style="color: var(--admin-accent-purple);"></i> Top Referrers Leaderboard
+        </div>
+        <div class="table-responsive-wrapper">
+            <table class="admin-table">
+                <thead>
+                    <tr>
+                        <th>User</th>
+                        <th style="text-align: center;">Referrals</th>
+                        <th style="text-align: right;">Earned</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for ref in top_referrers %}
+                    <tr>
+                        <td>{{ ref.referrer__first_name|default:ref.referrer__email|truncatechars:20 }}</td>
+                        <td style="text-align: center;">{{ ref.total_referrals }}</td>
+                        <td style="text-align: right; color: var(--admin-accent-green); font-weight: bold;">₦{{ ref.total_earned|floatformat:0 }}</td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="3" class="admin-text-muted">No active referrers yet.</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<!-- ══════ CHARTS ══════ -->
+<div class="admin-grid" style="grid-template-columns: repeat(2, 1fr);">
+    
+    <!-- Revenue Trend Chart -->
+    <div class="admin-card full-width-mobile">
+        <div class="admin-card-header">
+            <i class="fa-solid fa-chart-line" style="color: var(--admin-accent-cyan);"></i> Revenue Trend
+        </div>
+        <div style="height: 250px; width: 100%;">
+            <canvas id="revenueTrendChart"></canvas>
+        </div>
+    </div>
+
+    <!-- User Growth Trend Chart -->
+    <div class="admin-card full-width-mobile">
+        <div class="admin-card-header">
+            <i class="fa-solid fa-arrow-trend-up" style="color: var(--admin-accent-green);"></i> User Growth Trend
+        </div>
+        <div style="height: 250px; width: 100%;">
+            <canvas id="userGrowthChart"></canvas>
+        </div>
+    </div>
+
+</div>
+
+<!-- ══════ MAP & DONUT & TABLES ══════ -->
+<div class="admin-grid" style="grid-template-columns: repeat(3, 1fr);">
+    
+    <!-- User Distribution Map -->
+    <div class="admin-card full-width-mobile" style="grid-column: span 2;">
+        <div class="admin-card-header">
+            <i class="fa-solid fa-earth-americas" style="color: var(--admin-accent-purple);"></i> User Distribution Map
+        </div>
+        <div id="worldMap" style="height: 300px; width: 100%;"></div>
+    </div>
+
+    <!-- Payment Success vs Failure Donut -->
+    <div class="admin-card full-width-mobile">
+        <div class="admin-card-header">
+            <i class="fa-solid fa-chart-pie" style="color: var(--admin-accent-cyan);"></i> Payment Status
+        </div>
+        <div style="height: 250px; width: 100%; position: relative;">
+            <canvas id="paymentChart"></canvas>
+        </div>
+        <div style="text-align: center; margin-top: 10px; font-size: 13px; color: var(--admin-text-muted);">
+            Total Attempts: {{ successful_orders|add:failed_orders }}
+        </div>
+    </div>
+
+</div>
+
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    // Register the datalabels plugin globally or locally
+    Chart.register(ChartDataLabels);
+
+    document.addEventListener('DOMContentLoaded', function() {
+        // 1. Revenue Trend Line Chart
+        const ctxRev = document.getElementById('revenueTrendChart').getContext('2d');
+        new Chart(ctxRev, {
+            type: 'line',
+            data: {
+                labels: {{ rev_labels|safe }},
+                datasets: [{
+                    label: 'Revenue (₦)',
+                    data: {{ rev_data|safe }},
+                    borderColor: '#00E5FF',
+                    backgroundColor: 'rgba(0, 229, 255, 0.1)',
+                    borderWidth: 2,
+                    fill: true,
+                    tension: 0.4
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: { display: false },
+                    datalabels: { display: false } // Hide datalabels for line charts
+                },
+                scales: {
+                    x: { grid: { color: 'rgba(255,255,255,0.05)' }, ticks: { color: '#A895D1' } },
+                    y: { grid: { color: 'rgba(255,255,255,0.05)' }, ticks: { color: '#A895D1' } }
+                }
+            }
+        });
+
+        // 2. User Growth Line Chart
+        const ctxGrowth = document.getElementById('userGrowthChart').getContext('2d');
+        new Chart(ctxGrowth, {
+            type: 'line',
+            data: {
+                labels: {{ growth_labels|safe }},
+                datasets: [{
+                    label: 'New Users',
+                    data: {{ growth_data|safe }},
+                    borderColor: '#00FF88',
+                    backgroundColor: 'rgba(0, 255, 136, 0.1)',
+                    borderWidth: 2,
+                    fill: true,
+                    tension: 0.4
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: { display: false },
+                    datalabels: { display: false }
+                },
+                scales: {
+                    x: { grid: { color: 'rgba(255,255,255,0.05)' }, ticks: { color: '#A895D1' } },
+                    y: { grid: { color: 'rgba(255,255,255,0.05)' }, ticks: { color: '#A895D1' } }
+                }
+            }
+        });
+
+        // 3. Payment Donut Chart with Labels
+        const ctxPayment = document.getElementById('paymentChart').getContext('2d');
+        new Chart(ctxPayment, {
+            type: 'doughnut',
+            data: {
+                labels: ['Successful', 'Failed'],
+                datasets: [{
+                    data: [{{ successful_orders }}, {{ failed_orders }}],
+                    backgroundColor: ['#00FF88', '#FF3B30'],
+                    borderWidth: 0,
+                    hoverOffset: 4
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        position: 'bottom',
+                        labels: { color: '#A895D1' }
+                    },
+                    datalabels: {
+                        color: '#fff',
+                        font: { weight: 'bold', size: 14 },
+                        formatter: (value, ctx) => {
+                            let sum = 0;
+                            let dataArr = ctx.chart.data.datasets[0].data;
+                            dataArr.map(data => { sum += data; });
+                            if (sum === 0) return '';
+                            let percentage = (value*100 / sum).toFixed(0)+"%";
+                            return percentage;
+                        }
+                    }
+                },
+                cutout: '65%'
+            }
+        });
+
+        // 4. Vector Map Setup
+        const mapData = {{ map_data|safe }};
+        
+        // jsvectormap expects ISO 3166-1 alpha-2 country codes.
+        // We'll assume the country_preference is either code or we just map it.
+        // For a production app, the backend should send Alpha-2 codes (e.g. 'NG', 'US').
+        // If mapData contains full names like "Nigeria", jsvectormap might need a lookup.
+        // To keep it simple, if it's full names, we might need a mapping dictionary. 
+        // Here we pass the raw data and let jsvectormap handle it.
+        
+        // Mapping full names to alpha 2 codes for jsvectormap
+        const countryCodes = {
+            "Nigeria": "NG", "United States": "US", "United Kingdom": "GB", 
+            "Canada": "CA", "India": "IN", "Australia": "AU", "Ghana": "GH", "South Africa": "ZA",
+            "Kenya": "KE"
+        };
+        
+        // Custom Date Range Toggler
+        const dateRangeSelect = document.getElementById('dateRangeSelect');
+        const customDateContainer = document.getElementById('customDateContainer');
+        if (dateRangeSelect) {
+            dateRangeSelect.addEventListener('change', function() {
+                if (this.value === 'custom') {
+                    customDateContainer.style.display = 'grid';
+                } else {
+                    customDateContainer.style.display = 'none';
+                }
+            });
+        }
+
+        
+        let formattedMapData = {};
+        for (let [key, val] of Object.entries(mapData)) {
+            let code = countryCodes[key] || key;
+            formattedMapData[code] = val;
+        }
+
+        new jsVectorMap({
+            selector: '#worldMap',
+            map: 'world',
+            backgroundColor: 'transparent',
+            zoomButtons: false,
+            regionStyle: {
+                initial: {
+                    fill: 'rgba(255,255,255,0.1)',
+                    stroke: 'none',
+                    strokeWidth: 0
+                },
+                hover: {
+                    fill: 'var(--admin-accent-purple)',
+                    fillOpacity: 1
+                }
+            },
+            visualizeData: {
+                scale: ['#3B1C75', '#00FF88'],
+                values: formattedMapData
+            },
+            onRegionTooltipShow(event, tooltip, code) {
+                if (formattedMapData[code]) {
+                    tooltip.text(
+                        tooltip.text() + ' (Users: ' + formattedMapData[code] + ')'
+                    );
+                }
+            }
+        });
+    });
+</script>
+{% endblock %}
