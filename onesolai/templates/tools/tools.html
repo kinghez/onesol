@@ -6,6 +6,87 @@
 
 {% block nav_tools %}active{% endblock %}
 
+{% block extra_css %}
+<style>
+/* ── TOOLS PAGE: Mobile Filter Card ── */
+@media (max-width: 767px) {
+    .at-container {
+        flex-direction: column !important;
+        padding: 10px !important;
+        gap: 14px !important;
+    }
+    .at-sidebar {
+        width: 100% !important;
+        position: static !important;
+        background: #171C2B !important;
+        border: 1px solid rgba(142,108,255,0.25) !important;
+        border-radius: 14px !important;
+        padding: 16px !important;
+        box-shadow: 0 6px 24px rgba(0,0,0,0.35) !important;
+        box-sizing: border-box !important;
+    }
+    .at-sidebar-title {
+        font-size: 11px !important;
+        color: #8E6CFF !important;
+        text-transform: uppercase !important;
+        letter-spacing: 1px !important;
+        font-weight: 700 !important;
+        margin-bottom: 10px !important;
+    }
+    .at-sidebar-section { margin-bottom: 14px !important; }
+    .at-sidebar-section:last-child { margin-bottom: 0 !important; }
+    .at-filter-group { margin-bottom: 12px !important; }
+    .at-filter-label { font-size: 11px !important; color: #AEB5CA !important; margin-bottom: 6px !important; display: block; }
+    .at-select {
+        height: 40px !important;
+        font-size: 13px !important;
+        border-radius: 10px !important;
+        padding: 0 34px 0 12px !important;
+        background: rgba(255,255,255,0.06) !important;
+        border: 1px solid rgba(255,255,255,0.12) !important;
+        color: #FFF !important;
+    }
+    .at-checkbox-label { font-size: 12px !important; color: #AEB5CA !important; }
+    .at-range-labels { font-size: 10px !important; }
+    /* Search bar */
+    .at-search-bar {
+        flex-direction: column !important;
+        gap: 10px !important;
+        margin-bottom: 14px !important;
+    }
+    .at-search-input {
+        height: 44px !important;
+        font-size: 14px !important;
+        border-radius: 10px !important;
+        background: rgba(255,255,255,0.05) !important;
+        border: 1px solid rgba(255,255,255,0.12) !important;
+        color: #FFF !important;
+        padding: 0 16px 0 44px !important;
+        width: 100% !important;
+        box-sizing: border-box !important;
+    }
+    .at-currency-select {
+        height: 44px !important;
+        border-radius: 10px !important;
+        font-size: 13px !important;
+        justify-content: center !important;
+    }
+    .at-grid { grid-template-columns: 1fr !important; }
+    #toolsCounter { font-size: 12px !important; }
+}
+
+/* ── PAGINATION BUTTONS (all sizes) ── */
+#paginationContainer button {
+    font-family: 'Inter', sans-serif;
+}
+#paginationContainer button:hover:not(:disabled) {
+    background: rgba(142,108,255,0.15) !important;
+    color: #FFF !important;
+    border-color: rgba(142,108,255,0.4) !important;
+}
+</style>
+{% endblock %}
+
 {% block content %}
     <!-- ══════ ALL TOOLS PAGE ══════ -->
     <main class="all-tools-page">
@@ -92,26 +173,258 @@
                     </div>
                 </div>
 
-                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 20px;">
-                    <div id="toolsCounter" style="color:#AEB5CA; font-size:14px; font-weight:500;">
-                        Showing <span id="toolsCountNum">0</span> of <span id="toolsTotalNum">0</span> tools
+                <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:12px; margin-bottom:16px; background: rgba(142,108,255,0.1); border: 1px solid rgba(142,108,255,0.3); border-radius: 10px; padding: 12px 16px;">
+                    <div id="toolsCounter" style="color:#FFF; font-size:14px; font-weight:600; display:flex; align-items:center; gap:6px;">
+                        <i class="fas fa-layer-group" style="color:#8E6CFF;"></i>
+                        Showing <span id="toolsCountNum" style="color:#8E6CFF;">0</span> of <span id="toolsTotalNum" style="color:#8E6CFF;">0</span> tools
+                    </div>
+                    <div style="display:flex; align-items:center; gap:8px;">
+                        <span id="topPageIndicator" style="color:#AEB5CA; font-size:13px; font-weight:600;">Page 1 of 1</span>
+                        <div id="topPaginationBtns" style="display:inline-flex; gap:4px;"></div>
                     </div>
                 </div>
 
                 <div class="at-grid" id="allToolsGrid">
                     <!-- Rendered by JS -->
                 </div>
-                
-                <div style="text-align:center; margin-top: 40px; display: none;" id="loadMoreContainer">
-                    <button id="loadMoreBtn" style="background:rgba(91,99,246,0.1); color:#5B63F6; border:1px solid rgba(91,99,246,0.2); padding:10px 24px; border-radius:8px; cursor:pointer; font-weight:600; font-size:14px; transition:all 0.3s;">
-                        Load More Tools
-                    </button>
-                </div>
+
+                <div id="paginationContainer" style="display:flex; justify-content:center; align-items:center; gap:6px; margin-top:32px; flex-wrap:wrap; padding-bottom: 16px;"></div>
             </div>
         </div>
     </main>
 
+    <script id="tools-data" type="application/json">
+        {{ tools_json|safe }}
+    </script>
+
+    <!-- INLINE TOOLS PAGE LOGIC — bypasses script.js caching -->
     <script>
-        window.djangoToolsData = {{ tools_json|safe }};
+    (function() {
+        'use strict';
+
+        function initToolsPage() {
+            var grid = document.getElementById('allToolsGrid');
+            if (!grid) return;
+
+            var rawElem = document.getElementById('tools-data');
+            var toolsData = [];
+            if (rawElem) {
+                try {
+                    toolsData = JSON.parse(rawElem.textContent || '[]');
+                } catch (e) {
+                    console.error('Failed to parse tools_json:', e);
+                    toolsData = window.djangoToolsData || [];
+                }
+            } else {
+                toolsData = window.djangoToolsData || [];
+            }
+
+            var currentPage = 1;
+            var pageSize = 12;
+            var currentFiltered = [];
+
+            function createCard(tool, i) {
+                if (typeof window.createToolCard === 'function') {
+                    return window.createToolCard(tool, i, 'opacity:1;transform:none;pointer-events:auto;');
+                }
+                var usdPrice = typeof tool.base_price_usd === 'number' ? tool.base_price_usd : parseFloat(tool.base_price_usd || 0);
+                if (!usdPrice && tool.price_ngn) {
+                    usdPrice = parseFloat(tool.price_ngn) / 1500;
+                }
+                var priceObj = (typeof window.formatToolPrice === 'function') ? window.formatToolPrice(usdPrice) : {
+                    primary: 'NGN ' + (tool.price_ngn ? parseFloat(tool.price_ngn).toLocaleString() : '0.00'),
+                    secondary: '$' + (usdPrice ? usdPrice.toFixed(2) : '0.00') + ' USD'
+                };
+                var iconUrl = tool.image_url || tool.icon || '';
+                var iconHtml = iconUrl ?
+                    ('<img src="' + iconUrl + '" alt="' + tool.name + '" class="tt-logo" onerror="this.style.display=\'none\';this.nextSibling.style.display=\'flex\'"><span class="tt-logo-fallback" style="display:none;width:40px;height:40px;border-radius:8px;background:linear-gradient(135deg,#5B63F6,#8B3DFF);align-items:center;justify-content:center;font-size:14px;font-weight:700;color:#fff">' + (tool.name || '?').charAt(0) + '</span>') :
+                    ('<span class="tt-logo-fallback" style="display:flex;width:40px;height:40px;border-radius:8px;background:linear-gradient(135deg,#5B63F6,#8B3DFF);align-items:center;justify-content:center;font-size:14px;font-weight:700;color:#fff">' + (tool.name || '?').charAt(0) + '</span>');
+                var description = tool.desc || tool.description || tool.short_description || tool.category || '';
+                if (description && description.length > 80) description = description.substring(0, 80) + '...';
+                var buyBtnHtml = tool.in_stock ?
+                    ('<button class="tt-buy-btn" onclick="window.buyNow(\'' + tool.slug + '\')">Buy Now</button>') :
+                    ('<button class="tt-buy-btn" style="background:rgba(255,0,0,0.1);color:#ff4d4d;cursor:not-allowed;" disabled>Out of Stock</button>');
+                var wishActive = tool.in_wishlist ? 'active' : '';
+                var wishBorder = tool.in_wishlist ? 'border-color: #FF4D4D;' : '';
+                var wishIcon = tool.in_wishlist ? '<i class="fa-solid fa-heart" style="color:#FF4D4D;"></i>' : '<i class="fa-regular fa-heart"></i>';
+                var wishlistBtnHtml = '<button class="card-wishlist-btn ' + wishActive + '" onclick="event.stopPropagation(); window.toggleCardWishlist(' + tool.id + ', this)" title="' + (tool.in_wishlist ? 'Remove from Wishlist' : 'Add to Wishlist') + '" style="position:absolute; top:12px; right:12px; background:rgba(255,255,255,0.08); border:1px solid rgba(255,255,255,0.12); ' + wishBorder + ' color:#AEB5CA; width:32px; height:32px; border-radius:50%; display:flex; align-items:center; justify-content:center; cursor:pointer; z-index:10; transition:all 0.25s ease;">' + wishIcon + '</button>';
+
+                return '<div class="tt-card fade-in card" style="position:relative; opacity:1; transform:none; pointer-events:auto;">' +
+                    wishlistBtnHtml +
+                    '<div class="tt-card-header">' + iconHtml + '<h3 class="tt-name" style="font-size:14px; margin:0; line-height:1.3; overflow:hidden; text-overflow:ellipsis; display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical;">' + tool.name + '</h3></div>' +
+                    '<p class="tt-description">' + description + '</p>' +
+                    '<div class="tt-price-section"><div class="tt-price-label">PRICE</div><div class="tt-price"><span class="tt-price-val">' + priceObj.primary + '</span></div><div class="tt-price-secondary">' + priceObj.secondary + '</div></div>' +
+                    buyBtnHtml +
+                    '</div>';
+            }
+
+            window.updateAllCardPrices = function() {
+                renderTools(false);
+            };
+
+            function renderTools(resetPage) {
+                if (resetPage !== false) currentPage = 1;
+
+                var catVal = (document.getElementById('categorySelect') || {}).value || 'all';
+                var sortVal = (document.getElementById('sortSelect') || {}).value || 'popular';
+                var searchVal = ((document.getElementById('toolSearchInput') || {}).value || '').trim().toLowerCase();
+                var popularOnly = (document.getElementById('popularCheck') || {}).checked;
+
+                var filtered = toolsData.slice();
+
+                if (searchVal) {
+                    filtered = filtered.filter(function(t) {
+                        return (t.name && t.name.toLowerCase().indexOf(searchVal) > -1) ||
+                               (t.description && t.description.toLowerCase().indexOf(searchVal) > -1);
+                    });
+                }
+                if (catVal && catVal !== 'all') {
+                    filtered = filtered.filter(function(t) {
+                        return t.category && t.category.toLowerCase() === catVal.toLowerCase();
+                    });
+                }
+                if (popularOnly) {
+                    filtered = filtered.filter(function(t) { return t.is_popular; });
+                }
+
+                filtered.sort(function(a, b) {
+                    if (sortVal === 'price_asc') return (a.base_price_usd || 0) - (b.base_price_usd || 0);
+                    if (sortVal === 'price_desc') return (b.base_price_usd || 0) - (a.base_price_usd || 0);
+                    if (sortVal === 'newest') return (b.id || 0) - (a.id || 0);
+                    return (b.is_popular ? 1 : 0) - (a.is_popular ? 1 : 0);
+                });
+
+                currentFiltered = filtered;
+
+                var totalPages = Math.ceil(filtered.length / pageSize) || 1;
+                if (currentPage > totalPages) currentPage = totalPages;
+                var start = (currentPage - 1) * pageSize;
+                var paged = filtered.slice(start, start + pageSize);
+
+                // Render cards
+                var html = '';
+                paged.forEach(function(tool, i) {
+                    html += createCard(tool, i);
+                });
+                grid.innerHTML = html || '<p style="color:#AEB5CA;padding:20px;grid-column:1/-1;text-align:center;">No tools found matching your criteria.</p>';
+
+                if (window.bindCardTilt) window.bindCardTilt(grid);
+
+                // Dynamic counter display (e.g. Showing 1 - 12 of 34 tools)
+                var fromNum = filtered.length === 0 ? 0 : (start + 1);
+                var toNum = Math.min(start + pageSize, filtered.length);
+                var countRange = filtered.length === 0 ? '0' : (fromNum === toNum ? fromNum : (fromNum + ' - ' + toNum));
+
+                var cn = document.getElementById('toolsCountNum');
+                var tn = document.getElementById('toolsTotalNum');
+                if (cn) cn.textContent = countRange;
+                if (tn) tn.textContent = filtered.length;
+
+                // Render pagination
+                renderPagination(totalPages);
+            }
+
+            function renderPagination(totalPages) {
+                var container = document.getElementById('paginationContainer');
+                var topIndicator = document.getElementById('topPageIndicator');
+                var topBtns = document.getElementById('topPaginationBtns');
+
+                if (topIndicator) {
+                    topIndicator.textContent = 'Page ' + currentPage + ' of ' + totalPages;
+                }
+
+                var base = 'display:inline-flex;align-items:center;justify-content:center;min-width:36px;height:36px;padding:0 10px;border-radius:8px;font-size:13px;font-weight:600;cursor:pointer;border:1px solid rgba(255,255,255,0.12);background:rgba(255,255,255,0.04);color:#AEB5CA;transition:all 0.2s;font-family:inherit;';
+                var active = 'display:inline-flex;align-items:center;justify-content:center;min-width:36px;height:36px;padding:0 10px;border-radius:8px;font-size:13px;font-weight:700;cursor:default;border:1px solid #8E6CFF;background:#8E6CFF;color:#FFF;font-family:inherit;';
+                var disabled = 'display:inline-flex;align-items:center;justify-content:center;min-width:36px;height:36px;padding:0 10px;border-radius:8px;font-size:13px;font-weight:600;cursor:not-allowed;border:1px solid rgba(255,255,255,0.04);background:transparent;color:rgba(255,255,255,0.2);font-family:inherit;';
+
+                if (topBtns) {
+                    if (totalPages <= 1) {
+                        topBtns.innerHTML = '';
+                    } else {
+                        var miniPrev = (currentPage > 1) ?
+                            '<button style="' + base + ';padding:0 8px;height:28px;font-size:11px;" onclick="window.__tp(' + (currentPage-1) + ')"><i class="fas fa-chevron-left"></i> Prev</button>' :
+                            '<button style="' + disabled + ';padding:0 8px;height:28px;font-size:11px;" disabled><i class="fas fa-chevron-left"></i> Prev</button>';
+                        var miniNext = (currentPage < totalPages) ?
+                            '<button style="' + base + ';padding:0 8px;height:28px;font-size:11px;" onclick="window.__tp(' + (currentPage+1) + ')">Next <i class="fas fa-chevron-right"></i></button>' :
+                            '<button style="' + disabled + ';padding:0 8px;height:28px;font-size:11px;" disabled>Next <i class="fas fa-chevron-right"></i></button>';
+                        topBtns.innerHTML = miniPrev + miniNext;
+                    }
+                }
+
+                if (!container) return;
+                
+                if (totalPages <= 1) { 
+                    container.innerHTML = ''; 
+                    return; 
+                }
+
+                var parts = [];
+
+                // Prev
+                if (currentPage > 1) {
+                    parts.push('<button style="' + base + '" onclick="window.__tp(' + (currentPage-1) + ')"><i class="fas fa-chevron-left"></i></button>');
+                } else {
+                    parts.push('<button style="' + disabled + '" disabled><i class="fas fa-chevron-left"></i></button>');
+                }
+
+                // Page numbers
+                var maxV = 5;
+                var sp = Math.max(1, currentPage - Math.floor(maxV/2));
+                var ep = Math.min(totalPages, sp + maxV - 1);
+                if (ep - sp < maxV - 1) sp = Math.max(1, ep - maxV + 1);
+
+                if (sp > 1) {
+                    parts.push('<button style="' + base + '" onclick="window.__tp(1)">1</button>');
+                    if (sp > 2) parts.push('<span style="color:#AEB5CA;padding:0 4px;line-height:36px;">…</span>');
+                }
+                for (var i = sp; i <= ep; i++) {
+                    if (i === currentPage) {
+                        parts.push('<button style="' + active + '">' + i + '</button>');
+                    } else {
+                        parts.push('<button style="' + base + '" onclick="window.__tp(' + i + ')">' + i + '</button>');
+                    }
+                }
+                if (ep < totalPages) {
+                    if (ep < totalPages - 1) parts.push('<span style="color:#AEB5CA;padding:0 4px;line-height:36px;">…</span>');
+                    parts.push('<button style="' + base + '" onclick="window.__tp(' + totalPages + ')">' + totalPages + '</button>');
+                }
+
+                // Next
+                if (currentPage < totalPages) {
+                    parts.push('<button style="' + base + '" onclick="window.__tp(' + (currentPage+1) + ')"><i class="fas fa-chevron-right"></i></button>');
+                } else {
+                    parts.push('<button style="' + disabled + '" disabled><i class="fas fa-chevron-right"></i></button>');
+                }
+
+                container.innerHTML = parts.join('');
+            }
+
+            window.__tp = function(page) {
+                currentPage = page;
+                renderTools(false);
+                grid.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            };
+
+            // Wire up filters
+            ['categorySelect', 'sortSelect'].forEach(function(id) {
+                var el = document.getElementById(id);
+                if (el) el.addEventListener('change', function() { renderTools(true); });
+            });
+            var pc = document.getElementById('popularCheck');
+            if (pc) pc.addEventListener('change', function() { renderTools(true); });
+            var si = document.getElementById('toolSearchInput');
+            if (si) si.addEventListener('input', function() { renderTools(true); });
+
+            renderTools(true);
+        }
+
+        if (document.readyState === 'complete' || document.readyState === 'interactive') {
+            setTimeout(initToolsPage, 0);
+        } else {
+            window.addEventListener('DOMContentLoaded', initToolsPage);
+            window.addEventListener('load', initToolsPage);
+        }
+    })();
     </script>
 {% endblock %}
+

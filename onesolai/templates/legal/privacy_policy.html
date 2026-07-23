@@ -1,0 +1,227 @@
+{% extends 'base_public.html' %}
+{% load static %}
+
+{% block title %}Privacy Policy - OneSol AI Hub{% endblock %}
+{% block meta_description %}Read OneSol AI Hub's Privacy Policy to understand how we collect, use, protect, and handle your personal information.{% endblock %}
+
+{% block extra_css %}
+<style>
+    .legal-page {
+        padding: 60px 24px 100px;
+        max-width: 1100px;
+        margin: 0 auto;
+    }
+    .legal-hero {
+        text-align: center;
+        margin-bottom: 48px;
+    }
+    .legal-badge {
+        display: inline-block;
+        padding: 6px 16px;
+        background: rgba(142, 108, 255, 0.12);
+        border: 1px solid rgba(142, 108, 255, 0.3);
+        border-radius: 20px;
+        color: #8E6CFF;
+        font-size: 13px;
+        font-weight: 600;
+        margin-bottom: 16px;
+        letter-spacing: 0.5px;
+        text-transform: uppercase;
+    }
+    .legal-title {
+        font-size: 38px;
+        font-weight: 800;
+        color: #FFF;
+        margin-bottom: 12px;
+        line-height: 1.25;
+    }
+    .legal-subtitle {
+        color: #AEB5CA;
+        font-size: 16px;
+        max-width: 680px;
+        margin: 0 auto 24px;
+        line-height: 1.6;
+    }
+    .legal-nav-tabs {
+        display: flex;
+        justify-content: center;
+        gap: 12px;
+        flex-wrap: wrap;
+        margin-bottom: 40px;
+    }
+    .legal-tab {
+        padding: 10px 22px;
+        border-radius: 12px;
+        background: rgba(255, 255, 255, 0.05);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        color: #AEB5CA;
+        font-size: 14px;
+        font-weight: 600;
+        text-decoration: none;
+        transition: all 0.25s ease;
+    }
+    .legal-tab:hover, .legal-tab.active {
+        background: linear-gradient(135deg, #5B63F6 0%, #8B3DFF 100%);
+        border-color: transparent;
+        color: #FFF;
+        box-shadow: 0 4px 16px rgba(139, 61, 255, 0.35);
+    }
+    .legal-card {
+        background: #180836;
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        border-radius: 20px;
+        padding: 48px;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+        color: #D1D7E6;
+        font-size: 15px;
+        line-height: 1.8;
+    }
+    .legal-card h2 {
+        font-size: 22px;
+        font-weight: 700;
+        color: #FFF;
+        margin: 36px 0 16px;
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+        padding-bottom: 12px;
+    }
+    .legal-card h2:first-child {
+        margin-top: 0;
+    }
+    .legal-card h2 i {
+        color: #8E6CFF;
+        font-size: 20px;
+    }
+    .legal-card p {
+        margin-bottom: 16px;
+    }
+    .legal-card ul {
+        margin: 0 0 24px 20px;
+        list-style-type: none;
+    }
+    .legal-card ul li {
+        position: relative;
+        padding-left: 24px;
+        margin-bottom: 10px;
+    }
+    .legal-card ul li::before {
+        content: "✦";
+        position: absolute;
+        left: 0;
+        color: #8E6CFF;
+        font-size: 12px;
+    }
+    .legal-highlight-box {
+        background: rgba(142, 108, 255, 0.08);
+        border-left: 4px solid #8E6CFF;
+        border-radius: 8px;
+        padding: 20px 24px;
+        margin: 24px 0;
+        color: #E2D9FF;
+    }
+    .legal-highlight-box strong {
+        color: #FFF;
+    }
+    .updated-date {
+        font-size: 13px;
+        color: #AEB5CA;
+        margin-top: 30px;
+        padding-top: 20px;
+        border-top: 1px solid rgba(255, 255, 255, 0.08);
+        text-align: right;
+        font-style: italic;
+    }
+    @media (max-width: 768px) {
+        .legal-page { padding: 40px 16px 60px; }
+        .legal-card { padding: 24px; }
+        .legal-title { font-size: 28px; }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="legal-page">
+    <div class="legal-hero">
+        <span class="legal-badge">Legal Documentation</span>
+        <h1 class="legal-title">Privacy Policy</h1>
+        <p class="legal-subtitle">At OneSol AI Hub, your privacy and data security are our highest priority. Learn how we collect, protect, and manage your personal information.</p>
+        
+        <div class="legal-nav-tabs">
+            <a href="{% url 'privacy_policy' %}" class="legal-tab active"><i class="fas fa-user-shield"></i> Privacy Policy</a>
+            <a href="{% url 'terms_of_service' %}" class="legal-tab"><i class="fas fa-file-contract"></i> Terms of Service</a>
+            <a href="{% url 'refund_policy' %}" class="legal-tab"><i class="fas fa-undo-alt"></i> Refund Policy</a>
+        </div>
+    </div>
+
+    <div class="legal-card">
+        {% if custom_content %}
+            {{ custom_content|safe }}
+        {% else %}
+        <h2><i class="fas fa-info-circle"></i> 1. Introduction</h2>
+        <p>Welcome to <strong>OneSol AI Hub</strong> ("we," "our," or "us"). We operate as an online digital marketplace providing affordable access to premium Artificial Intelligence and Software-as-a-Service (SaaS) tools for individuals, creators, and businesses across Africa and worldwide.</p>
+        <p>This Privacy Policy explains how we collect, use, disclose, and safeguard your personal information when you visit our website <strong>{{ site_settings.site_url|default:"https://onesolai.com" }}</strong>, register an account, or purchase access to tools on our platform.</p>
+
+        <div class="legal-highlight-box">
+            <strong>Key Summary:</strong> We never sell your personal data to third parties. We only collect the minimal information necessary to deliver access to your ordered software tools, process payments securely, and assist you via customer support.
+        </div>
+
+        <h2><i class="fas fa-database"></i> 2. Information We Collect</h2>
+        <p>We collect information you provide directly to us when interacting with our platform:</p>
+        <ul>
+            <li><strong>Account & Contact Data:</strong> Full name, email address, country of residence, and account password when you register or make a purchase.</li>
+            <li><strong>Transaction & Payment Information:</strong> Order history, billing currency, and payment status. <em>Note: We do not store your credit card numbers or banking PINs. All payment processing is securely handled by PCI-DSS compliant partners (Paystack & Flutterwave).</em></li>
+            <li><strong>Technical & Usage Data:</strong> Your IP address, browser type, device information, operating system, and geolocation data used to set your local currency and language preferences.</li>
+            <li><strong>Support & Communications:</strong> Records of your customer support inquiries via email or WhatsApp.</li>
+        </ul>
+
+        <h2><i class="fas fa-cogs"></i> 3. How We Use Your Information</h2>
+        <p>We process your data for the following essential business purposes:</p>
+        <ul>
+            <li>To process orders and deliver tool activation credentials to your registered email address instantly.</li>
+            <li>To display products in your local country currency and configure regional payment gateways.</li>
+            <li>To manage your OneSol AI Hub user dashboard, order records, and referral commissions.</li>
+            <li>To send important transaction receipts, delivery updates, security alerts, and system notices.</li>
+            <li>To respond to your support queries and resolve technical issues quickly.</li>
+            <li>To detect, prevent, and mitigate fraudulent activities, unauthorized abuse, or security breaches.</li>
+        </ul>
+
+        <h2><i class="fas fa-shield-alt"></i> 4. Data Protection & Security</h2>
+        <p>We implement robust technical and organizational security measures to protect your personal data against unauthorized access, loss, alteration, or disclosure. These measures include:</p>
+        <ul>
+            <li>HTTPS / TLS 256-bit end-to-end encryption across all web pages and API communications.</li>
+            <li>Secure hashed password storage utilizing Django's PBKDF2 encryption standard.</li>
+            <li>Restricted admin access control and encrypted database storage for user credential delivery details.</li>
+        </ul>
+
+        <h2><i class="fas fa-share-alt"></i> 5. Sharing & Disclosure of Information</h2>
+        <p>We do not rent, sell, or trade your personal data. We may share information only under the following limited circumstances:</p>
+        <ul>
+            <li><strong>Service Providers & Payment Processors:</strong> Trusted payment gateways (Paystack, Flutterwave) and automated tool delivery systems required to complete your purchase.</li>
+            <li><strong>Legal Obligations:</strong> If required by law, court order, or governmental regulation to comply with legal processes or protect the rights, property, and safety of OneSol AI Hub and its users.</li>
+        </ul>
+
+        <h2><i class="fas fa-cookie-bite"></i> 6. Cookies & Local Storage</h2>
+        <p>We use essential cookies and browser local storage to maintain your active session, store your detected currency preference, and enable smooth website navigation. You may disable non-essential cookies via your browser settings, though certain interactive features of the platform may be affected.</p>
+
+        <h2><i class="fas fa-user-check"></i> 7. Your Rights & Choices</h2>
+        <p>You have full control over your personal information:</p>
+        <ul>
+            <li><strong>Access & Correction:</strong> You can view and update your profile details at any time from your User Dashboard.</li>
+            <li><strong>Email Preferences:</strong> You can unsubscribe from marketing newsletters at any time using the unsubscribe link provided in our emails.</li>
+            <li><strong>Account Deletion:</strong> You may request permanent deletion of your account and associated data by contacting our support team at <strong>{{ site_settings.support_email|default:"support@onesolai.com" }}</strong>.</li>
+        </ul>
+
+        <h2><i class="fas fa-envelope"></i> 8. Contact Us</h2>
+        <p>If you have any questions, concerns, or requests regarding this Privacy Policy, please reach out to us:</p>
+        <p>
+            <strong>Support Email:</strong> <a href="mailto:{{ site_settings.support_email|default:'support@onesolai.com' }}" style="color:#8E6CFF;">{{ site_settings.support_email|default:"support@onesolai.com" }}</a><br>
+            <strong>WhatsApp Support:</strong> {{ site_settings.whatsapp_number|default:"+2349110585508" }}
+        </p>
+
+        <div class="updated-date">Last Updated: July 2026 | OneSol AI Hub Legal Team</div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

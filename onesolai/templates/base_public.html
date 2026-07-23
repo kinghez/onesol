@@ -11,7 +11,7 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
-    <link rel="stylesheet" href="{% static 'css/styles.css' %}?v=10">
+    <link rel="stylesheet" href="{% static 'css/styles.css' %}?v=11">
     {% if site_settings.site_favicon %}
     <link rel="icon" href="{{ site_settings.site_favicon.url }}">
     {% elif site_settings.site_logo %}
@@ -20,9 +20,70 @@
     <link rel="icon" href="{% static 'assets/images/favicon.ico' %}">
     {% endif %}
     {% block extra_css %}{% endblock %}
+    <script>
+        window.liveUsdRates = {{ live_rates_json|safe }};
+        window.currencySymbols = {{ currency_symbols_json|safe }};
+        window.userCurrency = "{{ user_currency|default:'USD' }}";
+        window.userCountryCode = "{{ user_country_code|default:'us' }}";
+
+        window.currencyFlagMap = {
+            'USD': 'us', 'NGN': 'ng', 'GBP': 'gb', 'EUR': 'eu',
+            'GHS': 'gh', 'KES': 'ke', 'ZAR': 'za', 'UGX': 'ug',
+            'TZS': 'tz', 'RWF': 'rw', 'XOF': 'sn', 'XAF': 'cm',
+            'ZMW': 'zm', 'MWK': 'mw', 'MUR': 'mu', 'EGP': 'eg',
+            'ETB': 'et', 'CAD': 'ca', 'AUD': 'au', 'INR': 'in'
+        };
+
+        window.formatToolPrice = function(usdPrice) {
+            var curr = (window.userCurrency || localStorage.getItem('detectedCurrency') || 'USD').toUpperCase();
+            var countryCode = (window.userCountryCode || localStorage.getItem('detectedCountryCode') || window.currencyFlagMap[curr] || 'us').toLowerCase();
+            
+            usdPrice = typeof usdPrice === 'number' ? usdPrice : parseFloat(usdPrice || 0);
+            
+            var rates = window.liveUsdRates || { 'USD': 1, 'NGN': 1500, 'GBP': 0.78, 'EUR': 0.92, 'GHS': 15.4, 'KES': 129.5 };
+            var symbols = window.currencySymbols || { 'USD': '$', 'NGN': '₦', 'GBP': '£', 'EUR': '€', 'GHS': 'GH₵', 'KES': 'KSh' };
+
+            // 1. Primary Price calculation
+            var rate = (rates[curr] !== undefined && rates[curr] > 0) ? rates[curr] : (curr === 'NGN' ? 1500 : 1.0);
+            var primaryAmount = usdPrice * rate;
+            var primarySymbol = symbols[curr] || curr;
+            
+            var formattedPrimaryAmount = primaryAmount.toLocaleString(undefined, {
+                minimumFractionDigits: 2,
+                maximumFractionDigits: 2
+            });
+            
+            var primaryDisplay = primarySymbol + ' ' + formattedPrimaryAmount + ' ' + curr;
+
+            // 2. Secondary Price calculation
+            // Special Rule: If user current location is USA or currency is USD, secondary price is set to GBP (£)
+            var isUsa = (curr === 'USD') || (countryCode === 'us') || (countryCode === 'usa');
+            var secondaryDisplay = '';
+            
+            if (isUsa) {
+                var gbpRate = rates['GBP'] || 0.78;
+                var gbpAmount = usdPrice * gbpRate;
+                var formattedGbp = gbpAmount.toLocaleString(undefined, {
+                    minimumFractionDigits: 2,
+                    maximumFractionDigits: 2
+                });
+                secondaryDisplay = '£' + formattedGbp + ' GBP';
+            } else {
+                // Standard rule: secondary price remains in USD ($)
+                secondaryDisplay = '$' + usdPrice.toFixed(2) + ' USD';
+            }
+
+            return {
+                primary: primaryDisplay,
+                secondary: secondaryDisplay,
+                currency: curr
+            };
+        };
+    </script>
 </head>
 
 <body {% block body_class %}{% endblock %}>
+    {% include 'includes/toast_messages.html' %}
 
     <!-- BG gradient -->
     <div class="bg-base"></div>
@@ -75,10 +136,16 @@
             </ul>
             <div class="nav-right">
                 <div class="nav-currency" id="navCurrency" style="display: flex; align-items: center; gap: 8px;">
-                    <span id="navCurrencyCode">{% if user.is_authenticated %}{{ user.profile.currency_preference }}{% else %}NGN{% endif %}</span>
-                    <img src="https://flagcdn.com/w20/ng.png" alt="Flag" class="nav-flag" id="navCurrencyFlag">
+                    <span id="navCurrencyCode">{{ user_currency|default:'USD' }}</span>
+                    <img src="{{ user_flag_url|default:'https://flagcdn.com/w20/us.png' }}" alt="{{ user_currency }} Flag" class="nav-flag" id="navCurrencyFlag" style="width:20px; height:auto; display:inline-block;">
                 </div>
                 {% if user.is_authenticated %}
+                    <a href="{% url 'dashboard:wishlist' %}" title="Wishlist" style="position:relative; color:#FFF; font-size:16px; text-decoration:none; display:inline-flex; align-items:center; justify-content:center; width:36px; height:36px; border-radius:50%; background:rgba(255,255,255,0.08); border:1px solid rgba(255,255,255,0.12); margin-right: 4px;">
+                        <i class="fa-regular fa-heart"></i>
+                        <span id="wishlist-badge" class="wishlist-badge" style="position:absolute; top:-2px; right:-2px; background:#8E6CFF; color:white; font-size:10px; font-weight:bold; border-radius:10px; padding:2px 5px; line-height:1; box-shadow:0 0 0 2px #0f1535; display: {% if wishlist_count > 0 %}inline-block{% else %}none{% endif %};">
+                            {{ wishlist_count }}
+                        </span>
+                    </a>
                     <a href="{% url 'accounts:logout' %}" class="nav-sign">Logout</a>
                     <a href="{% url 'dashboard:home' %}" class="nav-get">Dashboard</a>
                 {% else %}
@@ -171,10 +238,21 @@
                     AI &amp; SaaS tools in Africa.
                 </p>
                 <div class="footer-socials">
-                    <a href="#" class="social-btn" style="color: #1877F2; font-size: 18px;"><i class="fa-brands fa-facebook-f"></i></a>
-                    <a href="#" class="social-btn" style="color: #FFFFFF; font-size: 18px;"><i class="fa-brands fa-x-twitter"></i></a>
-                    <a href="#" class="social-btn" style="color: #E4405F; font-size: 18px;"><i class="fa-brands fa-instagram"></i></a>
-                    <a href="#" class="social-btn" style="color: #0A66C2; font-size: 18px;"><i class="fa-brands fa-linkedin-in"></i></a>
+                    {% if site_settings and site_settings.facebook_url %}
+                        <a href="{{ site_settings.facebook_url }}" class="social-btn" style="color: #1877F2; font-size: 18px;" target="_blank" title="Facebook"><i class="fa-brands fa-facebook-f"></i></a>
+                    {% endif %}
+                    {% if site_settings and site_settings.twitter_url %}
+                        <a href="{{ site_settings.twitter_url }}" class="social-btn" style="color: #FFFFFF; font-size: 18px;" target="_blank" title="Twitter / X"><i class="fa-brands fa-x-twitter"></i></a>
+                    {% endif %}
+                    {% if site_settings and site_settings.instagram_url %}
+                        <a href="{{ site_settings.instagram_url }}" class="social-btn" style="color: #E4405F; font-size: 18px;" target="_blank" title="Instagram"><i class="fa-brands fa-instagram"></i></a>
+                    {% endif %}
+                    {% if site_settings and site_settings.linkedin_url %}
+                        <a href="{{ site_settings.linkedin_url }}" class="social-btn" style="color: #0A66C2; font-size: 18px;" target="_blank" title="LinkedIn"><i class="fa-brands fa-linkedin-in"></i></a>
+                    {% endif %}
+                    {% if site_settings and site_settings.youtube_url %}
+                        <a href="{{ site_settings.youtube_url }}" class="social-btn" style="color: #FF0000; font-size: 18px;" target="_blank" title="YouTube"><i class="fa-brands fa-youtube"></i></a>
+                    {% endif %}
                 </div>
             </div>
 
@@ -183,25 +261,25 @@
                 <h4 class="footer-title">Quick Links</h4>
                 <a href="{% url 'home' %}" class="footer-link">Home</a>
                 <a href="{% url 'tools:tools_list' %}" class="footer-link">Tools</a>
-                <a href="#" class="footer-link">Categories</a>
-                <a href="#" class="footer-link">Pricing</a>
+                <a href="{% url 'tools:tools_list' %}" class="footer-link">Categories</a>
+                <a href="{% url 'tools:tools_list' %}" class="footer-link">Pricing</a>
             </div>
 
             <!-- Col 3: Company -->
             <div class="footer-col">
                 <h4 class="footer-title">Company</h4>
-                <a href="#" class="footer-link">About Us</a>
-                <a href="#" class="footer-link">How It Works</a>
-                <a href="#" class="footer-link">Support</a>
-                <a href="#" class="footer-link">Contact Us</a>
+                <a href="{% url 'home' %}#trustFeatures" class="footer-link">About Us</a>
+                <a href="{% url 'home' %}#trustFeatures" class="footer-link">How It Works</a>
+                <a href="mailto:{{ site_settings.support_email|default:'support@onesolai.com' }}" class="footer-link">Support</a>
+                <a href="mailto:{{ site_settings.support_email|default:'support@onesolai.com' }}" class="footer-link">Contact Us</a>
             </div>
 
             <!-- Col 4: Legal -->
             <div class="footer-col">
                 <h4 class="footer-title">Legal</h4>
-                <a href="#" class="footer-link">Terms of Service</a>
-                <a href="#" class="footer-link">Privacy Policy</a>
-                <a href="#" class="footer-link">Refund Policy</a>
+                <a href="{% url 'terms_of_service' %}" class="footer-link">Terms of Service</a>
+                <a href="{% url 'privacy_policy' %}" class="footer-link">Privacy Policy</a>
+                <a href="{% url 'refund_policy' %}" class="footer-link">Refund Policy</a>
             </div>
 
             <!-- Col 5: Payment Partners -->
@@ -219,10 +297,12 @@
             <div class="footer-col news-col">
                 <h4 class="footer-title">Stay Updated</h4>
                 <p class="footer-desc">Subscribe to get updates and exclusive offers.</p>
-                <form class="newsletter-form" onsubmit="event.preventDefault();">
-                    <input type="email" class="news-input" placeholder="Enter your email" required>
-                    <button type="submit" class="news-btn">Subscribe</button>
+                <form class="newsletter-form" id="newsletterForm" action="{% url 'subscribe_newsletter' %}" method="POST">
+                    {% csrf_token %}
+                    <input type="email" id="newsletterEmail" class="news-input" placeholder="Enter your email" required>
+                    <button type="submit" id="newsletterBtn" class="news-btn">Subscribe</button>
                 </form>
+                <div id="newsletterMsg" style="display:none; margin-top:10px; font-size:13px; font-weight:600; border-radius:8px; padding:8px 12px; transition:all 0.3s ease;"></div>
             </div>
 
         </div>
@@ -233,42 +313,281 @@
     </footer>
     {% endif %}
 
-    <script src="{% static 'js/script.js' %}?v=1.5"></script>
+    <script src="{% static 'js/script.js' %}?v=3.0"></script>
     <script>
+        window.liveUsdRates = {{ live_rates_json|safe }};
+        window.currencySymbols = {{ currency_symbols_json|safe }};
+        window.userCurrency = "{{ user_currency|default:'NGN' }}";
+        window.userCountryCode = "{{ user_country_code|default:'' }}";
+
+        window.formatToolPrice = function(usdPrice) {
+            var curr = (window.userCurrency || localStorage.getItem('detectedCurrency') || 'NGN').toUpperCase();
+            var countryCode = (window.userCountryCode || localStorage.getItem('detectedCountryCode') || '').toUpperCase();
+            
+            usdPrice = typeof usdPrice === 'number' ? usdPrice : parseFloat(usdPrice || 0);
+            
+            var rates = window.liveUsdRates || { 'USD': 1, 'NGN': 1500, 'GBP': 0.78, 'EUR': 0.92, 'GHS': 15.4, 'KES': 129.5 };
+            var symbols = window.currencySymbols || { 'USD': '$', 'NGN': '₦', 'GBP': '£', 'EUR': '€', 'GHS': 'GH₵', 'KES': 'KSh' };
+
+            // 1. Primary Price calculation
+            var rate = (rates[curr] !== undefined && rates[curr] > 0) ? rates[curr] : (curr === 'NGN' ? 1500 : 1.0);
+            var primaryAmount = usdPrice * rate;
+            var primarySymbol = symbols[curr] || curr;
+            
+            var formattedPrimaryAmount = primaryAmount.toLocaleString(undefined, {
+                minimumFractionDigits: 2,
+                maximumFractionDigits: 2
+            });
+            
+            var primaryDisplay = primarySymbol + ' ' + formattedPrimaryAmount + ' ' + curr;
+
+            // 2. Secondary Price calculation
+            // Special Rule: If user current location is USA or currency is USD, secondary price is set to GBP (£)
+            var isUsa = (curr === 'USD') || (countryCode === 'US') || (countryCode === 'USA');
+            var secondaryDisplay = '';
+            
+            if (isUsa) {
+                var gbpRate = rates['GBP'] || 0.78;
+                var gbpAmount = usdPrice * gbpRate;
+                var formattedGbp = gbpAmount.toLocaleString(undefined, {
+                    minimumFractionDigits: 2,
+                    maximumFractionDigits: 2
+                });
+                secondaryDisplay = '£' + formattedGbp + ' GBP';
+            } else {
+                // Standard rule: secondary price remains in USD ($)
+                secondaryDisplay = '$' + usdPrice.toFixed(2) + ' USD';
+            }
+
+            return {
+                primary: primaryDisplay,
+                secondary: secondaryDisplay,
+                currency: curr
+            };
+        };
+
+        var currencyFlagMap = {
+            'USD': 'us', 'NGN': 'ng', 'GBP': 'gb', 'EUR': 'eu',
+            'GHS': 'gh', 'KES': 'ke', 'ZAR': 'za', 'UGX': 'ug',
+            'TZS': 'tz', 'RWF': 'rw', 'XOF': 'sn', 'XAF': 'cm',
+            'ZMW': 'zm', 'MWK': 'mw', 'MUR': 'mu', 'EGP': 'eg',
+            'ETB': 'et', 'CAD': 'ca', 'AUD': 'au', 'INR': 'in'
+        };
+
+        // IP Location and Currency Detection Function
+        function detectAndApplyLocation() {
+            var currencyCodeSpan = document.getElementById('navCurrencyCode');
+            var flagImg = document.getElementById('navCurrencyFlag');
+
+            fetch('https://ipapi.co/json/')
+                .then(function(res) { return res.json(); })
+                .then(function(data) {
+                    if (data && data.currency) {
+                        var curr = data.currency.toUpperCase();
+                        var cc = (data.country_code || currencyFlagMap[curr] || 'us').toLowerCase();
+                        window.userCurrency = curr;
+                        window.userCountryCode = cc;
+                        localStorage.setItem('detectedCurrency', curr);
+                        localStorage.setItem('detectedCountryCode', cc);
+
+                        if (currencyCodeSpan) currencyCodeSpan.textContent = curr;
+                        if (flagImg) {
+                            flagImg.src = 'https://flagcdn.com/w20/' + cc + '.png';
+                            flagImg.style.display = 'block';
+                        }
+
+                        // Sync session and profile via backend endpoint
+                        fetch('/auth/update-location/', {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                                'X-CSRFToken': (document.cookie.match(/csrftoken=([^;]+)/) || [])[1] || ''
+                            },
+                            body: JSON.stringify({
+                                currency: curr,
+                                country_code: cc,
+                                country: data.country_name || data.country
+                            })
+                        }).catch(function(e) { console.warn('Location sync skipped:', e); });
+
+                        // Re-render cards if handler exists
+                        if (typeof window.updateAllCardPrices === 'function') {
+                            window.updateAllCardPrices();
+                        }
+                    }
+                })
+                .catch(function(err) {
+                    // Fallback to ip-api.com
+                    fetch('http://ip-api.com/json/?fields=country,countryCode,currency,status')
+                        .then(function(r) { return r.json(); })
+                        .then(function(data) {
+                            if (data && data.status === 'success' && data.currency) {
+                                var curr = data.currency.toUpperCase();
+                                var cc = (data.countryCode || currencyFlagMap[curr] || 'us').toLowerCase();
+                                window.userCurrency = curr;
+                                window.userCountryCode = cc;
+                                localStorage.setItem('detectedCurrency', curr);
+                                localStorage.setItem('detectedCountryCode', cc);
+
+                                if (currencyCodeSpan) currencyCodeSpan.textContent = curr;
+                                if (flagImg) {
+                                    flagImg.src = 'https://flagcdn.com/w20/' + cc + '.png';
+                                    flagImg.style.display = 'block';
+                                }
+
+                                if (typeof window.updateAllCardPrices === 'function') {
+                                    window.updateAllCardPrices();
+                                }
+                            }
+                        }).catch(function(e) {});
+                });
+        }
+
         document.addEventListener("DOMContentLoaded", function() {
             var currencyCodeSpan = document.getElementById('navCurrencyCode');
             var flagImg = document.getElementById('navCurrencyFlag');
-            if(currencyCodeSpan && flagImg) {
-                var isAuth = {% if user.is_authenticated %}true{% else %}false{% endif %};
-                if (!isAuth) {
-                    fetch('https://ipapi.co/json/')
-                        .then(response => response.json())
-                        .then(data => {
-                            if (data.currency) {
-                                currencyCodeSpan.textContent = data.currency;
-                            }
-                            if (data.country_code) {
-                                flagImg.src = `https://flagcdn.com/w20/${data.country_code.toLowerCase()}.png`;
-                                flagImg.style.display = 'block';
-                            }
-                        })
-                        .catch(err => console.error(err));
-                } else {
-                    // For auth users, they already have currencyCodeSpan set by Django.
-                    // We just fetch the flag based on their IP to show the correct local flag.
-                    fetch('https://ipapi.co/json/')
-                        .then(response => response.json())
-                        .then(data => {
-                            if (data.country_code) {
-                                flagImg.src = `https://flagcdn.com/w20/${data.country_code.toLowerCase()}.png`;
-                                flagImg.style.display = 'block';
-                            }
-                        })
-                        .catch(err => console.error(err));
-                }
+
+            var currentCurr = (window.userCurrency || localStorage.getItem('detectedCurrency') || 'NGN').toUpperCase();
+            var currentCc = (window.userCountryCode || localStorage.getItem('detectedCountryCode') || currencyFlagMap[currentCurr] || 'ng').toLowerCase();
+
+            if (currencyCodeSpan) currencyCodeSpan.textContent = currentCurr;
+            if (flagImg) {
+                flagImg.src = 'https://flagcdn.com/w20/' + currentCc + '.png';
+                flagImg.style.display = 'block';
+            }
+
+            detectAndApplyLocation();
+
+            // Newsletter AJAX handler
+            var newsForm = document.getElementById('newsletterForm');
+            if (newsForm) {
+                newsForm.addEventListener('submit', function(e) {
+                    e.preventDefault();
+                    var emailInput = document.getElementById('newsletterEmail');
+                    var newsBtn = document.getElementById('newsletterBtn');
+                    var newsMsg = document.getElementById('newsletterMsg');
+                    if (!emailInput || !emailInput.value) return;
+
+                    var email = emailInput.value.trim();
+                    newsBtn.disabled = true;
+                    newsBtn.textContent = 'Subscribing...';
+                    newsMsg.style.display = 'none';
+
+                    fetch('{% url "subscribe_newsletter" %}', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'X-CSRFToken': (document.cookie.match(/csrftoken=([^;]+)/) || [])[1] || ''
+                        },
+                        body: JSON.stringify({ email: email })
+                    })
+                    .then(function(r) { return r.json(); })
+                    .then(function(data) {
+                        newsBtn.disabled = false;
+                        newsBtn.textContent = 'Subscribe';
+                        newsMsg.style.display = 'block';
+                        var toastType = (data.status === 'success') ? 'success' : (data.status === 'info') ? 'info' : 'error';
+                        if (typeof window.showToast === 'function') {
+                            window.showToast(data.message || 'Subscription processed.', toastType);
+                        }
+                        if (data.status === 'success') {
+                            newsMsg.style.background = 'rgba(78, 201, 126, 0.15)';
+                            newsMsg.style.color = '#4EC97E';
+                            newsMsg.style.border = '1px solid rgba(78, 201, 126, 0.3)';
+                            newsMsg.textContent = data.message;
+                            emailInput.value = '';
+                        } else if (data.status === 'info') {
+                            newsMsg.style.background = 'rgba(142, 108, 255, 0.15)';
+                            newsMsg.style.color = '#BBA4FF';
+                            newsMsg.style.border = '1px solid rgba(142, 108, 255, 0.3)';
+                            newsMsg.textContent = data.message;
+                        } else {
+                            newsMsg.style.background = 'rgba(255, 77, 77, 0.15)';
+                            newsMsg.style.color = '#FF4D4D';
+                            newsMsg.style.border = '1px solid rgba(255, 77, 77, 0.3)';
+                            newsMsg.textContent = data.message || 'An error occurred. Please try again.';
+                        }
+                    })
+                    .catch(function(err) {
+                        newsBtn.disabled = false;
+                        newsBtn.textContent = 'Subscribe';
+                        newsMsg.style.display = 'block';
+                        newsMsg.style.background = 'rgba(255, 77, 77, 0.15)';
+                        newsMsg.style.color = '#FF4D4D';
+                        newsMsg.style.border = '1px solid rgba(255, 77, 77, 0.3)';
+                        newsMsg.textContent = 'Network error. Please try again.';
+                    });
+                });
             }
         });
     </script>
+    <!-- Floating WhatsApp Button -->
+    <style>
+        .floating-whatsapp {
+            position: fixed;
+            bottom: 24px;
+            right: 24px;
+            width: 60px;
+            height: 60px;
+            background: linear-gradient(135deg, #5B63F6 0%, #6D56F8 35%, #8B3DF8 70%, #A11CF6 100%);
+            color: #FFF;
+            border-radius: 50%;
+            border: 2px dashed rgba(255, 255, 255, 0.85);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 30px;
+            box-shadow: 0 4px 18px rgba(139, 61, 248, 0.45);
+            z-index: 9999;
+            text-decoration: none;
+            animation: waDropIn 0.6s cubic-bezier(0.22, 1, 0.36, 1) forwards, waSlowRotate 12s linear 0.6s infinite;
+            transition: box-shadow 0.3s ease, filter 0.3s ease;
+        }
+        .floating-whatsapp i {
+            animation: waCounterRotate 12s linear 0.6s infinite;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .floating-whatsapp:hover {
+            filter: brightness(1.15);
+            box-shadow: 0 6px 24px rgba(161, 28, 246, 0.65);
+            color: #FFF;
+        }
+        @keyframes waDropIn {
+            0% {
+                transform: translateY(-100vh) rotate(0deg);
+                opacity: 0;
+            }
+            80% {
+                opacity: 1;
+            }
+            100% {
+                transform: translateY(0) rotate(0deg);
+                opacity: 1;
+            }
+        }
+        @keyframes waSlowRotate {
+            0% {
+                transform: rotate(0deg);
+            }
+            100% {
+                transform: rotate(360deg);
+            }
+        }
+        @keyframes waCounterRotate {
+            0% {
+                transform: rotate(0deg);
+            }
+            100% {
+                transform: rotate(-360deg);
+            }
+        }
+    </style>
+    <a href="https://wa.me/2349110585508" class="floating-whatsapp" target="_blank" rel="noopener noreferrer">
+        <i class="fa-brands fa-whatsapp"></i>
+    </a>
+
     {% block extra_js %}{% endblock %}
 </body>
 

@@ -19,4 +19,5 @@ urlpatterns = [
     path('orders/<int:order_id>/refund/', request_refund_view, name='request_refund'),
     path('referrals/', referrals_view, name='referrals'),
     path('referrals/withdraw/', withdrawal_request_view, name='withdraw'),
+    path('wishlist/', dashboard_views.wishlist_view, name='wishlist'),
 ]

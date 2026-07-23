@@ -1,0 +1,108 @@
+/* Custom styling for Jazzmin to match OneSol AI Hub brand */
+html, body, .wrapper, .content-wrapper, .layout-navbar-fixed .wrapper .content-wrapper, 
+.content, .content-header, .container-fluid, .bg-white, .bg-light, .bg-transparent {
+    background-color: #180836 !important;
+    color: #FFFFFF !important;
+}
+
+/* Sidebar */
+.main-sidebar, .sidebar-dark-primary {
+    background-color: #1E0C4A !important;
+}
+
+/* Navbar */
+.main-header, .navbar-dark {
+    background-color: #1E0C4A !important;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05) !important;
+}
+
+/* Cards / Boxes */
+.card, .info-box {
+    background-color: #2A1659 !important;
+    border: 1px solid rgba(255, 255, 255, 0.05) !important;
+    box-shadow: none !important;
+    color: #FFFFFF !important;
+}
+.card-header {
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05) !important;
+}
+.card-footer {
+    border-top: 1px solid rgba(255, 255, 255, 0.05) !important;
+    background-color: transparent !important;
+}
+
+/* Tables & Tabs */
+.nav-tabs {
+    flex-wrap: nowrap !important;
+    overflow-x: auto !important;
+    overflow-y: hidden !important;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05) !important;
+}
+.nav-tabs .nav-item {
+    white-space: nowrap;
+}
+.table {
+    color: #FFFFFF !important;
+}
+.table td, .table th {
+    border-top: 1px solid rgba(255, 255, 255, 0.05) !important;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05) !important;
+}
+.table-striped tbody tr:nth-of-type(odd) {
+    background-color: rgba(255, 255, 255, 0.02) !important;
+}
+
+/* Buttons */
+.btn-primary, .btn-info, .btn-success, .btn-outline-primary, .btn-outline-info, .btn-outline-success {
+    background-color: #8B5CF6 !important;
+    border-color: #8B5CF6 !important;
+    color: #FFFFFF !important;
+}
+.btn-primary:hover, .btn-info:hover, .btn-success:hover {
+    background-color: #7C3AED !important;
+    border-color: #7C3AED !important;
+}
+
+/* Inputs / Selects */
+.form-control, .select2-selection, input[type="text"], input[type="search"], input[type="password"], input[type="email"], input[type="number"], select, textarea {
+    background-color: #FFFFFF !important;
+    border: 1px solid #ced4da !important;
+    color: #000000 !important;
+}
+.form-control:focus, input:focus, select:focus, textarea:focus {
+    border-color: #8B5CF6 !important;
+    background-color: #FFFFFF !important;
+    color: #000000 !important;
+    box-shadow: 0 0 0 0.2rem rgba(139, 92, 246, 0.25) !important;
+}
+
+/* Select2 dropdowns specifically */
+.select2-dropdown, .select2-results__option, .select2-search__field {
+    background-color: #FFFFFF !important;
+    color: #000000 !important;
+}
+.select2-results__option--highlighted {
+    background-color: #8B5CF6 !important;
+    color: #FFFFFF !important;
+}
+
+/* Text Overrides */
+h1, h2, h3, h4, h5, h6, label, p {
+    color: #FFFFFF !important;
+}
+h1, .page-title, .content-header h1 {
+    color: #FFFFFF !important;
+    font-weight: 600;
+}
+.text-muted {
+    color: #A895D1 !important;
+}
+.text-dark {
+    color: #FFFFFF !important;
+}
+.nav-link {
+    color: rgba(255, 255, 255, 0.8) !important;
+}
+.nav-link.active, .nav-link:hover {
+    color: #FFFFFF !important;
+}

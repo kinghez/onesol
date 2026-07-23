@@ -1597,12 +1597,67 @@ img{max-width:100%;height:auto;display:block}
 .brand-col { grid-column: 1; }
 
 /* All Tools page – mobile */
-.all-tools-page { padding: 0 12px; margin: 20px auto; }
-.at-title { font-size: 26px; }
-.at-grid { grid-template-columns: 1fr; }
-.at-container { flex-direction: column; padding: 16px; gap: 20px; }
-.at-sidebar { width: 100%; position: static; }
-.at-search-bar { flex-direction: column; }
+@media (max-width: 767px) {
+    .all-tools-page { padding: 0 12px; margin: 20px auto; }
+    .at-title { font-size: 26px; }
+    .at-grid { grid-template-columns: 1fr; }
+    .at-container { flex-direction: column; padding: 12px; gap: 16px; border-radius: 16px; }
+    .at-sidebar {
+        width: 100%;
+        position: static;
+        background: rgba(23, 28, 43, 0.97) !important;
+        border: 1px solid rgba(142, 108, 255, 0.2);
+        border-radius: 14px;
+        padding: 16px;
+        box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
+        box-sizing: border-box;
+    }
+    .at-sidebar-section { margin-bottom: 16px; }
+    .at-sidebar-section:last-child { margin-bottom: 0; }
+    .at-sidebar-title {
+        font-size: 12px;
+        margin-bottom: 10px;
+        color: #8E6CFF;
+        text-transform: uppercase;
+        letter-spacing: 0.8px;
+        font-weight: 700;
+    }
+    .at-filter-group { margin-bottom: 14px; }
+    .at-filter-label { font-size: 12px; margin-bottom: 8px; }
+    .at-select {
+        height: 42px;
+        font-size: 13px;
+        border-radius: 10px;
+        padding: 0 36px 0 12px;
+        background: rgba(255,255,255,0.06) !important;
+        border: 1px solid rgba(255,255,255,0.12) !important;
+        color: #FFF !important;
+    }
+    .at-checkbox-label { font-size: 12px; }
+    .at-range-labels { font-size: 11px; }
+    .at-search-bar { flex-direction: column; gap: 10px; margin-bottom: 16px; }
+    .at-search-input {
+        height: 44px;
+        font-size: 14px;
+        border-radius: 10px;
+        background: rgba(255,255,255,0.06);
+        border: 1px solid rgba(255,255,255,0.12);
+        padding: 0 16px 0 42px;
+        color: #FFF;
+    }
+    .at-search-icon { left: 14px; font-size: 14px; }
+    .at-currency-select {
+        height: 44px;
+        border-radius: 10px;
+        padding: 0 16px;
+        font-size: 13px;
+        justify-content: center;
+    }
+    #toolsCounter { font-size: 12px !important; }
+    .at-badge { font-size: 11px; }
+    .at-subtitle { font-size: 13px; }
+}
+
 
 /* CTA Responsive (Max 1024px) */
 @media (max-width: 1024px) {

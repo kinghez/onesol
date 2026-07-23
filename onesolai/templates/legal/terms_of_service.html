@@ -1,0 +1,222 @@
+{% extends 'base_public.html' %}
+{% load static %}
+
+{% block title %}Terms of Service - OneSol AI Hub{% endblock %}
+{% block meta_description %}Read OneSol AI Hub's Terms of Service governing the use of our platform, purchases, accounts, and services.{% endblock %}
+
+{% block extra_css %}
+<style>
+    .legal-page {
+        padding: 60px 24px 100px;
+        max-width: 1100px;
+        margin: 0 auto;
+    }
+    .legal-hero {
+        text-align: center;
+        margin-bottom: 48px;
+    }
+    .legal-badge {
+        display: inline-block;
+        padding: 6px 16px;
+        background: rgba(142, 108, 255, 0.12);
+        border: 1px solid rgba(142, 108, 255, 0.3);
+        border-radius: 20px;
+        color: #8E6CFF;
+        font-size: 13px;
+        font-weight: 600;
+        margin-bottom: 16px;
+        letter-spacing: 0.5px;
+        text-transform: uppercase;
+    }
+    .legal-title {
+        font-size: 38px;
+        font-weight: 800;
+        color: #FFF;
+        margin-bottom: 12px;
+        line-height: 1.25;
+    }
+    .legal-subtitle {
+        color: #AEB5CA;
+        font-size: 16px;
+        max-width: 680px;
+        margin: 0 auto 24px;
+        line-height: 1.6;
+    }
+    .legal-nav-tabs {
+        display: flex;
+        justify-content: center;
+        gap: 12px;
+        flex-wrap: wrap;
+        margin-bottom: 40px;
+    }
+    .legal-tab {
+        padding: 10px 22px;
+        border-radius: 12px;
+        background: rgba(255, 255, 255, 0.05);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        color: #AEB5CA;
+        font-size: 14px;
+        font-weight: 600;
+        text-decoration: none;
+        transition: all 0.25s ease;
+    }
+    .legal-tab:hover, .legal-tab.active {
+        background: linear-gradient(135deg, #5B63F6 0%, #8B3DFF 100%);
+        border-color: transparent;
+        color: #FFF;
+        box-shadow: 0 4px 16px rgba(139, 61, 255, 0.35);
+    }
+    .legal-card {
+        background: #180836;
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        border-radius: 20px;
+        padding: 48px;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+        color: #D1D7E6;
+        font-size: 15px;
+        line-height: 1.8;
+    }
+    .legal-card h2 {
+        font-size: 22px;
+        font-weight: 700;
+        color: #FFF;
+        margin: 36px 0 16px;
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+        padding-bottom: 12px;
+    }
+    .legal-card h2:first-child {
+        margin-top: 0;
+    }
+    .legal-card h2 i {
+        color: #8E6CFF;
+        font-size: 20px;
+    }
+    .legal-card p {
+        margin-bottom: 16px;
+    }
+    .legal-card ul {
+        margin: 0 0 24px 20px;
+        list-style-type: none;
+    }
+    .legal-card ul li {
+        position: relative;
+        padding-left: 24px;
+        margin-bottom: 10px;
+    }
+    .legal-card ul li::before {
+        content: "✦";
+        position: absolute;
+        left: 0;
+        color: #8E6CFF;
+        font-size: 12px;
+    }
+    .legal-highlight-box {
+        background: rgba(142, 108, 255, 0.08);
+        border-left: 4px solid #8E6CFF;
+        border-radius: 8px;
+        padding: 20px 24px;
+        margin: 24px 0;
+        color: #E2D9FF;
+    }
+    .legal-highlight-box strong {
+        color: #FFF;
+    }
+    .updated-date {
+        font-size: 13px;
+        color: #AEB5CA;
+        margin-top: 30px;
+        padding-top: 20px;
+        border-top: 1px solid rgba(255, 255, 255, 0.08);
+        text-align: right;
+        font-style: italic;
+    }
+    @media (max-width: 768px) {
+        .legal-page { padding: 40px 16px 60px; }
+        .legal-card { padding: 24px; }
+        .legal-title { font-size: 28px; }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="legal-page">
+    <div class="legal-hero">
+        <span class="legal-badge">Legal Documentation</span>
+        <h1 class="legal-title">Terms of Service</h1>
+        <p class="legal-subtitle">Please read these Terms of Service carefully before accessing or using OneSol AI Hub. By accessing our platform, you agree to be bound by these terms.</p>
+        
+        <div class="legal-nav-tabs">
+            <a href="{% url 'privacy_policy' %}" class="legal-tab"><i class="fas fa-user-shield"></i> Privacy Policy</a>
+            <a href="{% url 'terms_of_service' %}" class="legal-tab active"><i class="fas fa-file-contract"></i> Terms of Service</a>
+            <a href="{% url 'refund_policy' %}" class="legal-tab"><i class="fas fa-undo-alt"></i> Refund Policy</a>
+        </div>
+    </div>
+
+    <div class="legal-card">
+        {% if custom_content %}
+            {{ custom_content|safe }}
+        {% else %}
+        <h2><i class="fas fa-gavel"></i> 1. Acceptance of Terms</h2>
+        <p>By creating an account, browsing our website, or purchasing products on <strong>OneSol AI Hub</strong> ("the Platform"), you acknowledge that you have read, understood, and agreed to be legally bound by these Terms of Service ("Terms"). If you do not agree with any part of these Terms, you must discontinue use of our platform immediately.</p>
+
+        <h2><i class="fas fa-user-cog"></i> 2. Platform Description & Service Delivery</h2>
+        <p>OneSol AI Hub operates as an online marketplace facilitating affordable access to third-party AI and SaaS software products. Upon successful payment:</p>
+        <ul>
+            <li>Your tool access details or account activation links are automatically processed and delivered to your registered email address and displayed in your User Dashboard.</li>
+            <li>Tool subscriptions remain valid for the duration specified at checkout (e.g., 30-day monthly access, annual access, or single-use credits).</li>
+            <li>You agree to use delivered credentials strictly for personal or business operations as intended by the software provider.</li>
+        </ul>
+
+        <h2><i class="fas fa-wallet"></i> 3. Pricing, Payments & Local Currency</h2>
+        <p>All prices displayed on OneSol AI Hub are converted dynamically to your local currency based on current exchange rates.</p>
+        <ul>
+            <li>Payments are processed securely via authorized payment gateways (Paystack, Flutterwave) or your OneSol Wallet balance.</li>
+            <li>We reserve the right to adjust product pricing, discount rates, or markup percentages at any time without prior notice.</li>
+            <li>You are responsible for ensuring that your payment information is accurate and that sufficient funds are available to complete transactions.</li>
+        </ul>
+
+        <h2><i class="fas fa-user-lock"></i> 4. User Accounts & Responsibilities</h2>
+        <p>When registering an account with OneSol AI Hub, you agree to:</p>
+        <ul>
+            <li>Provide accurate, current, and complete account details.</li>
+            <li>Maintain the confidentiality of your login password and account credentials.</li>
+            <li>Refrain from sharing, reselling, or publicly distributing delivered tool access details or sub-licensing access to unauthorized third parties.</li>
+            <li>Not engage in automated scraping, malicious attacks, or activities that compromise the integrity or security of the Platform.</li>
+        </ul>
+
+        <div class="legal-highlight-box">
+            <strong>Important Notice:</strong> Sharing or reselling OneSol AI Hub tool accounts to third parties without prior authorization will result in immediate termination of your account without refund.
+        </div>
+
+        <h2><i class="fas fa-handshake"></i> 5. Referral & Affiliate Program</h2>
+        <p>OneSol AI Hub offers a referral program allowing registered users to earn commissions by referring new customers:</p>
+        <ul>
+            <li>Referral commissions are credited to your earnings wallet in accordance with the site's active referral rates.</li>
+            <li>Self-referrals, fraudulent account creation, or attempt to manipulate referral links using fake accounts are strictly prohibited.</li>
+            <li>Withdrawal requests are processed upon reaching the minimum withdrawal threshold (NGN 5,000 or equivalent) after admin verification.</li>
+        </ul>
+
+        <h2><i class="fas fa-ban"></i> 6. Intellectual Property & Third-Party Trademarks</h2>
+        <p>All brand names, product logos, software names (e.g., OpenAI, Canva, Claude, Gemini, ChatGPT) belong to their respective trademark owners and software vendors. OneSol AI Hub does not claim ownership of third-party software products sold on the platform.</p>
+
+        <h2><i class="fas fa-exclamation-triangle"></i> 7. Limitation of Liability</h2>
+        <p>To the maximum extent permitted by applicable law, OneSol AI Hub shall not be liable for any indirect, incidental, special, or consequential damages resulting from tool outages, third-party software vendor policy changes, or temporary service interruptions beyond our direct control.</p>
+
+        <h2><i class="fas fa-sync-alt"></i> 8. Amendments to Terms</h2>
+        <p>We reserve the right to revise or update these Terms of Service at any time. Continued use of OneSol AI Hub following any modifications constitutes your acceptance of the updated Terms.</p>
+
+        <h2><i class="fas fa-envelope"></i> 9. Contact Information</h2>
+        <p>For questions or clarifications regarding these Terms of Service, please contact our legal support team:</p>
+        <p>
+            <strong>Support Email:</strong> <a href="mailto:{{ site_settings.support_email|default:'support@onesolai.com' }}" style="color:#8E6CFF;">{{ site_settings.support_email|default:"support@onesolai.com" }}</a><br>
+            <strong>WhatsApp Support:</strong> {{ site_settings.whatsapp_number|default:"+2349110585508" }}
+        </p>
+
+        <div class="updated-date">Last Updated: July 2026 | OneSol AI Hub Legal Team</div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

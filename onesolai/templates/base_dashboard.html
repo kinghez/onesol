@@ -37,6 +37,7 @@
     {% endif %}
 </head>
 <body class="fade-in">
+    {% include 'includes/toast_messages.html' %}
     <div class="app-container">
 
         <!-- ══════ SIDEBAR ══════ -->
@@ -69,6 +70,11 @@
                     <a href="{% url 'dashboard:order_history' %}" class="sidebar-item {% block nav_orders %}{% endblock %}">
                         <i class="fa-solid fa-receipt fa-fw"></i>
                         <span class="sidebar-text">Order History</span>
+                    </a>
+
+                    <a href="{% url 'dashboard:wishlist' %}" class="sidebar-item {% block nav_wishlist %}{% endblock %}">
+                        <i class="fa-regular fa-heart fa-fw"></i>
+                        <span class="sidebar-text">Wishlist</span>
                     </a>
 
                     <a href="{% url 'dashboard:referrals' %}" class="sidebar-item {% block nav_referrals %}{% endblock %}">
@@ -139,22 +145,103 @@
         <!-- ══════ MAIN CONTENT AREA ══════ -->
         <main class="main-content">
             <!-- Top Navbar -->
+            <style>
+                .navbar-right {
+                    display: flex;
+                    align-items: center;
+                    gap: 8px !important;
+                }
+                .dash-tools-btn {
+                    padding: 6px 14px;
+                    font-size: 13px;
+                    border-radius: 8px;
+                    font-weight: 600;
+                    text-decoration: none;
+                    display: inline-flex;
+                    align-items: center;
+                    gap: 6px;
+                    white-space: nowrap;
+                    transition: all 0.2s ease;
+                }
+                .nav-username-br {
+                    display: inline;
+                }
+                @media (max-width: 768px) {
+                    .nav-username-br {
+                        display: block !important;
+                    }
+                    .navbar {
+                        padding: 0 10px !important;
+                    }
+                    .navbar-left {
+                        gap: 4px;
+                    }
+                    .navbar-title {
+                        font-size: 14px !important;
+                        line-height: 1.2;
+                    }
+                    .navbar-title span, .navbar-title i {
+                        font-size: 14px !important;
+                    }
+                    .dash-tools-btn {
+                        padding: 4px 8px !important;
+                        font-size: 11px !important;
+                        gap: 3px !important;
+                        border-radius: 6px !important;
+                    }
+                    .dash-tools-btn i {
+                        font-size: 10px !important;
+                    }
+                    .navbar-right {
+                        gap: 5px !important;
+                    }
+                    .nav-icon-btn {
+                        width: 32px !important;
+                        height: 32px !important;
+                    }
+                    .nav-icon-btn i {
+                        font-size: 14px !important;
+                    }
+                    .user-profile {
+                        padding: 2px !important;
+                        display: flex !important;
+                        align-items: center !important;
+                    }
+                    .user-profile .avatar, 
+                    .user-profile .avatar img, 
+                    .user-profile .avatar i {
+                        width: 30px !important;
+                        height: 30px !important;
+                        font-size: 30px !important;
+                        display: flex !important;
+                    }
+                    .user-profile .user-name {
+                        display: none !important;
+                    }
+                }
+            </style>
             <header class="navbar">
                 <div class="navbar-left">
                     <button class="nav-icon-btn mobile-menu-btn">
                         <i class="fa-solid fa-bars"></i>
                     </button>
                     <div>
-                        <h1 class="navbar-title">{% block page_title %}Dashboard{% endblock %} {% block page_title_emoji %}👋{% endblock %}</h1>
+                        <h1 class="navbar-title">{% block page_title %}Dashboard{% endblock %}{% block page_title_emoji %}{% endblock %}</h1>
                         <p class="navbar-subtitle">{% block page_subtitle %}Here's what's happening with your account today.{% endblock %}</p>
                     </div>
                 </div>
 
                 <div class="navbar-right">
-                    <button class="nav-icon-btn" onclick="window.location.href='{% url 'tools:tools_list' %}'">
+                    <a href="{% url 'tools:tools_list' %}" class="dash-tools-btn btn btn-primary">
+                        <i class="fa-solid fa-wrench"></i> <span>Tools</span>
+                    </a>
+                    <button class="nav-icon-btn" onclick="window.location.href='{% url 'dashboard:wishlist' %}'" style="position:relative;" title="Wishlist">
                         <i class="fa-regular fa-heart"></i>
+                        <span id="wishlist-badge" class="wishlist-badge" style="position:absolute;top:0;right:0;background:#8E6CFF;color:white;font-size:10px;font-weight:bold;border-radius:10px;padding:2px 6px;line-height:1;box-shadow:0 0 0 2px #0f1535; display: {% if wishlist_count > 0 %}inline-block{% else %}none{% endif %};">
+                            {{ wishlist_count }}
+                        </span>
                     </button>
-                    <button class="nav-icon-btn" onclick="window.location.href='{% url 'notifications:list' %}'" style="position:relative;">
+                    <button class="nav-icon-btn" onclick="window.location.href='{% url 'notifications:list' %}'" style="position:relative;" title="Notifications">
                         <i class="fa-regular fa-bell"></i>
                         {% if unread_notifications_count > 0 %}
                         <span id="notif-badge" style="position:absolute;top:0;right:0;background:#f87171;color:white;font-size:10px;font-weight:bold;border-radius:10px;padding:2px 6px;line-height:1;box-shadow:0 0 0 2px #0f1535;">
@@ -205,6 +292,73 @@
         }
     });
     </script>
+    <!-- Floating WhatsApp Button -->
+    <style>
+        .floating-whatsapp {
+            position: fixed;
+            bottom: 24px;
+            right: 24px;
+            width: 60px;
+            height: 60px;
+            background: linear-gradient(135deg, #5B63F6 0%, #6D56F8 35%, #8B3DF8 70%, #A11CF6 100%);
+            color: #FFF;
+            border-radius: 50%;
+            border: 2px dashed rgba(255, 255, 255, 0.85);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 30px;
+            box-shadow: 0 4px 18px rgba(139, 61, 248, 0.45);
+            z-index: 9999;
+            text-decoration: none;
+            animation: waDropIn 0.6s cubic-bezier(0.22, 1, 0.36, 1) forwards, waSlowRotate 12s linear 0.6s infinite;
+            transition: box-shadow 0.3s ease, filter 0.3s ease;
+        }
+        .floating-whatsapp i {
+            animation: waCounterRotate 12s linear 0.6s infinite;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .floating-whatsapp:hover {
+            filter: brightness(1.15);
+            box-shadow: 0 6px 24px rgba(161, 28, 246, 0.65);
+            color: #FFF;
+        }
+        @keyframes waDropIn {
+            0% {
+                transform: translateY(-100vh) rotate(0deg);
+                opacity: 0;
+            }
+            80% {
+                opacity: 1;
+            }
+            100% {
+                transform: translateY(0) rotate(0deg);
+                opacity: 1;
+            }
+        }
+        @keyframes waSlowRotate {
+            0% {
+                transform: rotate(0deg);
+            }
+            100% {
+                transform: rotate(360deg);
+            }
+        }
+        @keyframes waCounterRotate {
+            0% {
+                transform: rotate(0deg);
+            }
+            100% {
+                transform: rotate(-360deg);
+            }
+        }
+    </style>
+    <a href="https://wa.me/{{ site_settings.whatsapp_number|default:'+2349110585508' }}" class="floating-whatsapp" target="_blank" rel="noopener noreferrer">
+        <i class="fa-brands fa-whatsapp"></i>
+    </a>
+
     {% block extra_js %}{% endblock %}
 </body>
 </html>

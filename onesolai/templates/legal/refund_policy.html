@@ -1,0 +1,213 @@
+{% extends 'base_public.html' %}
+{% load static %}
+
+{% block title %}Refund Policy - OneSol AI Hub{% endblock %}
+{% block meta_description %}Read OneSol AI Hub's Refund & Guarantee Policy for tool purchases, replacements, and refund eligibility conditions.{% endblock %}
+
+{% block extra_css %}
+<style>
+    .legal-page {
+        padding: 60px 24px 100px;
+        max-width: 1100px;
+        margin: 0 auto;
+    }
+    .legal-hero {
+        text-align: center;
+        margin-bottom: 48px;
+    }
+    .legal-badge {
+        display: inline-block;
+        padding: 6px 16px;
+        background: rgba(142, 108, 255, 0.12);
+        border: 1px solid rgba(142, 108, 255, 0.3);
+        border-radius: 20px;
+        color: #8E6CFF;
+        font-size: 13px;
+        font-weight: 600;
+        margin-bottom: 16px;
+        letter-spacing: 0.5px;
+        text-transform: uppercase;
+    }
+    .legal-title {
+        font-size: 38px;
+        font-weight: 800;
+        color: #FFF;
+        margin-bottom: 12px;
+        line-height: 1.25;
+    }
+    .legal-subtitle {
+        color: #AEB5CA;
+        font-size: 16px;
+        max-width: 680px;
+        margin: 0 auto 24px;
+        line-height: 1.6;
+    }
+    .legal-nav-tabs {
+        display: flex;
+        justify-content: center;
+        gap: 12px;
+        flex-wrap: wrap;
+        margin-bottom: 40px;
+    }
+    .legal-tab {
+        padding: 10px 22px;
+        border-radius: 12px;
+        background: rgba(255, 255, 255, 0.05);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        color: #AEB5CA;
+        font-size: 14px;
+        font-weight: 600;
+        text-decoration: none;
+        transition: all 0.25s ease;
+    }
+    .legal-tab:hover, .legal-tab.active {
+        background: linear-gradient(135deg, #5B63F6 0%, #8B3DFF 100%);
+        border-color: transparent;
+        color: #FFF;
+        box-shadow: 0 4px 16px rgba(139, 61, 255, 0.35);
+    }
+    .legal-card {
+        background: #180836;
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        border-radius: 20px;
+        padding: 48px;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+        color: #D1D7E6;
+        font-size: 15px;
+        line-height: 1.8;
+    }
+    .legal-card h2 {
+        font-size: 22px;
+        font-weight: 700;
+        color: #FFF;
+        margin: 36px 0 16px;
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+        padding-bottom: 12px;
+    }
+    .legal-card h2:first-child {
+        margin-top: 0;
+    }
+    .legal-card h2 i {
+        color: #8E6CFF;
+        font-size: 20px;
+    }
+    .legal-card p {
+        margin-bottom: 16px;
+    }
+    .legal-card ul {
+        margin: 0 0 24px 20px;
+        list-style-type: none;
+    }
+    .legal-card ul li {
+        position: relative;
+        padding-left: 24px;
+        margin-bottom: 10px;
+    }
+    .legal-card ul li::before {
+        content: "✦";
+        position: absolute;
+        left: 0;
+        color: #8E6CFF;
+        font-size: 12px;
+    }
+    .legal-highlight-box {
+        background: rgba(142, 108, 255, 0.08);
+        border-left: 4px solid #8E6CFF;
+        border-radius: 8px;
+        padding: 20px 24px;
+        margin: 24px 0;
+        color: #E2D9FF;
+    }
+    .legal-highlight-box strong {
+        color: #FFF;
+    }
+    .updated-date {
+        font-size: 13px;
+        color: #AEB5CA;
+        margin-top: 30px;
+        padding-top: 20px;
+        border-top: 1px solid rgba(255, 255, 255, 0.08);
+        text-align: right;
+        font-style: italic;
+    }
+    @media (max-width: 768px) {
+        .legal-page { padding: 40px 16px 60px; }
+        .legal-card { padding: 24px; }
+        .legal-title { font-size: 28px; }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="legal-page">
+    <div class="legal-hero">
+        <span class="legal-badge">Legal Documentation</span>
+        <h1 class="legal-title">Refund &amp; Guarantee Policy</h1>
+        <p class="legal-subtitle">We are committed to providing reliable, working tool access. Review our full replacement, guarantee, and refund guidelines below.</p>
+        
+        <div class="legal-nav-tabs">
+            <a href="{% url 'privacy_policy' %}" class="legal-tab"><i class="fas fa-user-shield"></i> Privacy Policy</a>
+            <a href="{% url 'terms_of_service' %}" class="legal-tab"><i class="fas fa-file-contract"></i> Terms of Service</a>
+            <a href="{% url 'refund_policy' %}" class="legal-tab active"><i class="fas fa-undo-alt"></i> Refund Policy</a>
+        </div>
+    </div>
+
+    <div class="legal-card">
+        {% if custom_content %}
+            {{ custom_content|safe }}
+        {% else %}
+        <h2><i class="fas fa-shield-heart"></i> 1. Our Customer Commitment</h2>
+        <p>At <strong>OneSol AI Hub</strong>, customer satisfaction is at the core of everything we do. Because we sell digital tool subscriptions and access credentials, we maintain a transparent, fair, and user-friendly refund and replacement policy to protect your purchase.</p>
+
+        <div class="legal-highlight-box">
+            <strong>100% Replacement & Working Guarantee:</strong> If a tool access code or account fails to work upon delivery, or stops working within the warranty period due to technical issues, we guarantee a free replacement or instant wallet refund.
+        </div>
+
+        <h2><i class="fas fa-check-circle"></i> 2. Refund & Replacement Eligibility</h2>
+        <p>You are eligible for a replacement or full refund under the following conditions:</p>
+        <ul>
+            <li><strong>Non-Delivery of Access Details:</strong> Payment was successfully debited from your account, but you did not receive activation details within 24 hours due to a delivery glitch.</li>
+            <li><strong>Defective or Non-Working Access Code:</strong> The provided activation link, promo code, or account credentials fail to grant access upon first use.</li>
+            <li><strong>Tool Outage During Warranty Period:</strong> If a tool subscription stops functioning prior to the expiration of its advertised coverage period and our team is unable to restore or replace access within 48 hours.</li>
+            <li><strong>Duplicate Billing:</strong> You were inadvertently charged twice for a single order transaction.</li>
+        </ul>
+
+        <h2><i class="fas fa-times-circle"></i> 3. Non-Refundable Scenarios</h2>
+        <p>Refunds or replacements will NOT be issued under the following circumstances:</p>
+        <ul>
+            <li>Change of mind after tool activation details have been accessed or utilized.</li>
+            <li>Incompatibility of third-party tools with your personal computer or local network settings when product system requirements were clearly stated.</li>
+            <li>Violation of OneSol AI Hub Terms of Service, such as account sharing, reselling access, or attempting to compromise tool security.</li>
+            <li>Requests submitted after the tool's specified warranty period has expired.</li>
+        </ul>
+
+        <h2><i class="fas fa-headset"></i> 4. How to Submit a Refund or Support Claim</h2>
+        <p>Submitting a claim is simple and fast. Follow these steps:</p>
+        <ul>
+            <li>Contact our dedicated support team via Email (<strong>{{ site_settings.support_email|default:"support@onesolai.com" }}</strong>) or WhatsApp (<strong>{{ site_settings.whatsapp_number|default:"+2349110585508" }}</strong>).</li>
+            <li>Provide your <strong>Order ID</strong> (found in your User Dashboard or email receipt) and a brief description/screenshot of the issue encountered.</li>
+            <li>Our support technical team will review and verify your request within 2–12 hours.</li>
+        </ul>
+
+        <h2><i class="fas fa-exchange-alt"></i> 5. Processing & Refund Methods</h2>
+        <p>Once approved by our support team, refunds are processed via one of the following methods according to your preference:</p>
+        <ul>
+            <li><strong>OneSol Wallet Balance (Recommended & Instant):</strong> Refunded directly to your OneSol AI Hub wallet for immediate use on any other tool.</li>
+            <li><strong>Original Payment Source:</strong> Refunded back to your Paystack / Flutterwave card or bank account within 3–5 business days depending on your bank.</li>
+        </ul>
+
+        <h2><i class="fas fa-comments"></i> 6. Contact & Support</h2>
+        <p>For any questions or assistance with an existing order, please get in touch:</p>
+        <p>
+            <strong>Support Email:</strong> <a href="mailto:{{ site_settings.support_email|default:'support@onesolai.com' }}" style="color:#8E6CFF;">{{ site_settings.support_email|default:"support@onesolai.com" }}</a><br>
+            <strong>WhatsApp Support:</strong> {{ site_settings.whatsapp_number|default:"+2349110585508" }}
+        </p>
+
+        <div class="updated-date">Last Updated: July 2026 | OneSol AI Hub Legal Team</div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

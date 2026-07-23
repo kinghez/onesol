@@ -119,3 +119,14 @@ def order_detail_view(request, order_id):
     }
     return render(request, 'dashboard/partials/order_detail.html', context)
 
+
+@login_required(login_url='/auth/login/')
+def wishlist_view(request):
+    """Render user wishlist page in dashboard."""
+    from products.models import Wishlist
+    wishlist_items = Wishlist.objects.filter(user=request.user).select_related('tool', 'tool__category')
+    return render(request, 'dashboard/wishlist.html', {
+        'wishlist_items': wishlist_items,
+        'wishlist_count': wishlist_items.count(),
+    })
+

@@ -143,3 +143,48 @@ def logout_view(request):
     """Log the user out and redirect to home."""
     logout(request)
     return redirect('home')
+
+
+from django.views.decorators.http import require_POST
+from django.http import JsonResponse
+import json
+
+@require_POST
+def update_location_session(request):
+    """
+    Endpoint called by frontend IP detection script to update user currency, country, and country code.
+    Saves in session and updates user profile if logged in.
+    """
+    try:
+        data = json.loads(request.body.decode('utf-8'))
+    except Exception:
+        data = request.POST
+
+    currency = data.get('currency', '').strip().upper()
+    country = data.get('country', '').strip()
+    country_code = data.get('country_code', '').strip().upper()
+
+    if currency:
+        request.session['detected_currency'] = currency
+    if country:
+        request.session['detected_country'] = country
+    if country_code:
+        request.session['detected_country_code'] = country_code
+
+    if request.user.is_authenticated and hasattr(request.user, 'profile'):
+        profile = request.user.profile
+        changed = False
+        if currency and profile.currency_preference != currency:
+            profile.currency_preference = currency
+            changed = True
+        if country and profile.country_preference != country:
+            profile.country_preference = country
+            changed = True
+        if changed:
+            profile.save()
+
+    return JsonResponse({
+        'status': 'success',
+        'currency': currency or request.session.get('detected_currency', 'NGN'),
+        'country_code': country_code or request.session.get('detected_country_code', ''),
+    })

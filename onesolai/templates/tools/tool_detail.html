@@ -41,9 +41,16 @@
 
             <!-- Right: Pricing & Buttons -->
             <div class="th-right">
-                <button class="th-wishlist-btn"><i class="fa-regular fa-heart"></i> Add to Wishlist</button>
+                <button class="th-wishlist-btn {% if in_wishlist %}active{% endif %}" id="detailWishlistBtn" onclick="toggleWishlistDetail({{ tool.id }})" {% if in_wishlist %}style="border-color: #FF4D4D;"{% endif %}>
+                    {% if in_wishlist %}
+                        <i class="fa-solid fa-heart" style="color: #FF4D4D;"></i> <span style="color: #FF4D4D;">In Wishlist</span>
+                    {% else %}
+                        <i class="fa-regular fa-heart"></i> <span>Add to Wishlist</span>
+                    {% endif %}
+                </button>
                 <div class="th-price-box">
-                    <span class="th-price">NGN {{ tool.get_ngn_price|floatformat:0 }}</span>
+                    <span class="th-price" id="detailPrimaryPrice">NGN {{ tool.get_ngn_price|floatformat:2 }}</span>
+                    <div class="th-price-secondary" id="detailSecondaryPrice" style="color: #AEB5CA; font-size: 13px; margin-top: 4px; font-weight: 500;">$ {{ tool.get_usd_price|floatformat:2 }} USD</div>
                 </div>
                 <form method="POST" action="{% url 'orders:checkout' %}" class="th-checkout-form">
                     {% csrf_token %}
@@ -173,4 +180,58 @@
 
 {% block extra_js %}
     <script src="{% static 'js/tool.js' %}?v=4"></script>
+    <script>
+        function toggleWishlistDetail(toolId) {
+            {% if not user.is_authenticated %}
+                window.location.href = "{% url 'accounts:login' %}?next={{ request.path }}";
+                return;
+            {% endif %}
+            var btn = document.getElementById('detailWishlistBtn');
+            if (!btn) return;
+
+            fetch('{% url "tools:toggle_wishlist" %}', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded',
+                    'X-Requested-With': 'XMLHttpRequest',
+                    'X-CSRFToken': (document.cookie.match(/csrftoken=([^;]+)/) || [])[1] || ''
+                },
+                body: 'tool_id=' + toolId
+            })
+            .then(function(r) { return r.json(); })
+            .then(function(data) {
+                if (data.status === 'success') {
+                    if (data.in_wishlist) {
+                        btn.classList.add('active');
+                        btn.style.borderColor = '#FF4D4D';
+                        btn.innerHTML = '<i class="fa-solid fa-heart" style="color: #FF4D4D;"></i> <span style="color: #FF4D4D;">In Wishlist</span>';
+                    } else {
+                        btn.classList.remove('active');
+                        btn.style.borderColor = '';
+                        btn.innerHTML = '<i class="fa-regular fa-heart"></i> <span>Add to Wishlist</span>';
+                    }
+                    if (typeof window.showToast === 'function') {
+                        window.showToast(data.message, data.in_wishlist ? 'success' : 'info');
+                    }
+                    if (typeof window.updateWishlistBadge === 'function' && typeof data.wishlist_count !== 'undefined') {
+                        window.updateWishlistBadge(data.wishlist_count);
+                    }
+                }
+            });
+        }
+
+        document.addEventListener("DOMContentLoaded", function() {
+            function updateDetailPrices() {
+                if (typeof window.formatToolPrice === 'function') {
+                    var priceObj = window.formatToolPrice({{ tool.get_usd_price }});
+                    var pElem = document.getElementById('detailPrimaryPrice');
+                    var sElem = document.getElementById('detailSecondaryPrice');
+                    if (pElem) pElem.textContent = priceObj.primary;
+                    if (sElem) sElem.textContent = priceObj.secondary;
+                }
+            }
+            updateDetailPrices();
+            window.updateAllCardPrices = updateDetailPrices;
+        });
+    </script>
 {% endblock %}

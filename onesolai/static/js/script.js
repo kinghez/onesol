@@ -427,6 +427,71 @@ document.addEventListener('DOMContentLoaded', function () {
     // ─────────────────────────────────────────────────────
     // Global: buyNow(slug) – Redirect to Tool Detail Page
     // ─────────────────────────────────────────────────────
+    window.updateWishlistBadge = function(count) {
+        var badges = document.querySelectorAll('#wishlist-badge, .wishlist-badge');
+        badges.forEach(function(badge) {
+            badge.textContent = count;
+            if (count > 0) {
+                badge.style.display = 'inline-block';
+            } else {
+                badge.style.display = 'none';
+            }
+        });
+    };
+
+    window.toggleCardWishlist = function(toolId, btn) {
+        if (!toolId || !btn) return;
+        fetch('/tools/wishlist/toggle/', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded',
+                'X-Requested-With': 'XMLHttpRequest',
+                'X-CSRFToken': (document.cookie.match(/csrftoken=([^;]+)/) || [])[1] || ''
+            },
+            body: 'tool_id=' + toolId
+        })
+        .then(function(r) {
+            if (!r.ok && r.status === 401) {
+                window.location.href = '/auth/login/?next=' + encodeURIComponent(window.location.pathname);
+                return;
+            }
+            if (r.url && r.url.indexOf('/auth/login') !== -1) {
+                window.location.href = '/auth/login/?next=' + encodeURIComponent(window.location.pathname);
+                return;
+            }
+            return r.json();
+        })
+        .then(function(data) {
+            if (!data) return;
+            if (data.status === 'success') {
+                if (data.in_wishlist) {
+                    btn.classList.add('active');
+                    btn.style.borderColor = '#FF4D4D';
+                    btn.innerHTML = '<i class="fa-solid fa-heart" style="color: #FF4D4D;"></i>';
+                    btn.title = 'Remove from Wishlist';
+                } else {
+                    btn.classList.remove('active');
+                    btn.style.borderColor = '';
+                    btn.innerHTML = '<i class="fa-regular fa-heart"></i>';
+                    btn.title = 'Add to Wishlist';
+                }
+                if (typeof window.showToast === 'function') {
+                    window.showToast(data.message, data.in_wishlist ? 'success' : 'info');
+                }
+                if (typeof data.wishlist_count !== 'undefined') {
+                    window.updateWishlistBadge(data.wishlist_count);
+                }
+            } else if (data.message) {
+                if (typeof window.showToast === 'function') {
+                    window.showToast(data.message, 'error');
+                }
+            }
+        })
+        .catch(function(err) {
+            console.error(err);
+        });
+    };
+
     window.buyNow = function(toolSlug) {
         window.location.href = '/tools/' + toolSlug + '/';
     };
@@ -441,13 +506,15 @@ document.addEventListener('DOMContentLoaded', function () {
             if (badgeLabel) badgeHtml = '<div class="tt-badge ' + badgeClass + '">' + badgeLabel + '</div>';
         }
 
-        var priceNgn = tool.price_ngn || tool.monthly_price_ngn || tool.base_price_ngn || tool.price || '';
-        if (typeof priceNgn === 'number') priceNgn = priceNgn.toLocaleString();
-        
-        var secPrice = '';
-        if (typeof tool.base_price_usd === 'number' && tool.base_price_usd > 0) {
-            secPrice = '$' + tool.base_price_usd.toFixed(2) + ' USD';
+        var usdPrice = typeof tool.base_price_usd === 'number' ? tool.base_price_usd : parseFloat(tool.base_price_usd || 0);
+        if (!usdPrice && tool.price_ngn) {
+            usdPrice = parseFloat(tool.price_ngn) / 1500;
         }
+
+        var priceObj = (typeof window.formatToolPrice === 'function') ? window.formatToolPrice(usdPrice) : {
+            primary: 'NGN ' + (tool.price_ngn ? parseFloat(tool.price_ngn).toLocaleString() : '0.00'),
+            secondary: '$' + (usdPrice ? usdPrice.toFixed(2) : '0.00') + ' USD'
+        };
 
         var iconUrl = tool.image_url || tool.icon || '';
         var iconHtml;
@@ -469,13 +536,19 @@ document.addEventListener('DOMContentLoaded', function () {
             badgeHtml += '<div class="tt-badge" style="background:rgba(255,0,0,0.1);color:#ff4d4d;border:1px solid rgba(255,0,0,0.2);">Sold Out</div>';
         }
 
-        return '<div class="tt-card fade-in card" style="animation-delay:' + (count * 0.05) + 's;' + extraStyle + '">' +
+        var wishActive = tool.in_wishlist ? 'active' : '';
+        var wishBorder = tool.in_wishlist ? 'border-color: #FF4D4D;' : '';
+        var wishIcon = tool.in_wishlist ? '<i class="fa-solid fa-heart" style="color:#FF4D4D;"></i>' : '<i class="fa-regular fa-heart"></i>';
+        var wishlistBtnHtml = '<button class="card-wishlist-btn ' + wishActive + '" onclick="event.stopPropagation(); window.toggleCardWishlist(' + tool.id + ', this)" title="' + (tool.in_wishlist ? 'Remove from Wishlist' : 'Add to Wishlist') + '" style="position:absolute; top:12px; right:12px; background:rgba(255,255,255,0.08); border:1px solid rgba(255,255,255,0.12); ' + wishBorder + ' color:#AEB5CA; width:32px; height:32px; border-radius:50%; display:flex; align-items:center; justify-content:center; cursor:pointer; z-index:10; transition:all 0.25s ease;">' + wishIcon + '</button>';
+
+        return '<div class="tt-card fade-in card" style="position:relative; animation-delay:' + (count * 0.05) + 's;' + extraStyle + '">' +
+            wishlistBtnHtml +
             '<div class="tt-card-header">' + iconHtml + '<h3 class="tt-name" style="font-size:14px; margin:0; line-height:1.3; overflow:hidden; text-overflow:ellipsis; display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical;">' + tool.name + '</h3></div>' +
             '<p class="tt-description">' + description + '</p>' +
             '<div class="tt-price-section">' +
                 '<div class="tt-price-label">PRICE</div>' +
-                '<div class="tt-price"><span class="tt-price-val">NGN ' + priceNgn + '</span></div>' +
-                '<div class="tt-price-secondary">' + secPrice + '</div>' +
+                '<div class="tt-price"><span class="tt-price-val">' + priceObj.primary + '</span></div>' +
+                '<div class="tt-price-secondary">' + priceObj.secondary + '</div>' +
             '</div>' +
             '<div class="tt-badges-container">' + badgeHtml + '</div>' +
             buyBtnHtml +
@@ -503,15 +576,39 @@ document.addEventListener('DOMContentLoaded', function () {
     }
 
     // ═══════════════════════════════════
-    // 6.6 TOP TOOLS – Fetch from DB API
+    // 6.6 TOP TOOLS & POPULAR CAROUSELS – Fetch from DB API
     // ═══════════════════════════════════
     var topToolsGrid = document.getElementById('topToolsGrid');
+    var pwGrid = document.getElementById('pwGrid');
+    var pwTabs = document.querySelectorAll('.pw-tab');
+    var allPopularTools = [];
+    var allTopTools = [];
+
+    window.updateAllCardPrices = function() {
+        if (topToolsGrid && allTopTools.length > 0) {
+            var html = '';
+            allTopTools.forEach(function(tool, i){ html += window.createToolCard(tool, i); });
+            topToolsGrid.innerHTML = html;
+            bindCardTilt(topToolsGrid);
+        }
+        if (pwGrid && allPopularTools.length > 0) {
+            var activeTab = document.querySelector('.pw-tab.active');
+            var filter = activeTab ? activeTab.getAttribute('data-filter') : 'all';
+            var filtered = filter === 'all' ? allPopularTools : allPopularTools.filter(function(t){ return t.category === filter; });
+            var html = '';
+            filtered.forEach(function(tool, i){ html += window.createToolCard(tool, i); });
+            pwGrid.innerHTML = html;
+            bindCardTilt(pwGrid);
+        }
+    };
+
     if (topToolsGrid) {
         fetch('/tools/api/?filter=featured')
             .then(function(r){ return r.json(); })
             .then(function(data){
+                allTopTools = data.tools || [];
                 var html = '';
-                (data.tools || []).forEach(function(tool, i){ html += window.createToolCard(tool, i); });
+                allTopTools.forEach(function(tool, i){ html += window.createToolCard(tool, i); });
                 topToolsGrid.innerHTML = html || '<p style="color:#AEB5CA;padding:20px">No tools available yet.</p>';
                 bindCardTilt(topToolsGrid);
             })
@@ -519,13 +616,6 @@ document.addEventListener('DOMContentLoaded', function () {
                 topToolsGrid.innerHTML = '<p style="color:#AEB5CA;padding:20px">Failed to load tools.</p>';
             });
     }
-
-    // ═══════════════════════════════════
-    // 7. POPULAR THIS WEEK – Fetch from DB API
-    // ═══════════════════════════════════
-    var pwGrid = document.getElementById('pwGrid');
-    var pwTabs = document.querySelectorAll('.pw-tab');
-    var allPopularTools = [];
 
     if (pwGrid) {
         function renderPopularCards(filter) {
@@ -561,120 +651,8 @@ document.addEventListener('DOMContentLoaded', function () {
     // ═══════════════════════════════════
     // 8. ALL TOOLS PAGE (tools.html)
     // ═══════════════════════════════════
-    const allToolsGrid = document.getElementById('allToolsGrid');
-    if (allToolsGrid) {
-        let toolsData = [];
-        let currentPage = 1;
-        const pageSize = 15;
-        let currentFiltered = [];
-        
-        function renderAllTools(resetPage = true) {
-            if (resetPage) {
-                currentPage = 1;
-            }
-            const catSelect = document.getElementById('categorySelect');
-            const sortSelect = document.getElementById('sortSelect');
-            const popCheck = document.getElementById('popularCheck');
-            const searchInput = document.getElementById('toolSearchInput');
-            
-            let filtered = toolsData.slice();
-            
-            // Search
-            if (searchInput && searchInput.value.trim()) {
-                const q = searchInput.value.trim().toLowerCase();
-                filtered = filtered.filter(t => 
-                    (t.name && t.name.toLowerCase().includes(q)) || 
-                    (t.description && t.description.toLowerCase().includes(q))
-                );
-            }
-            
-            // Category
-            if (catSelect && catSelect.value && catSelect.value !== 'all') {
-                filtered = filtered.filter(t => t.category === catSelect.value);
-            }
-            
-            // Popular Only
-            if (popCheck && popCheck.checked) {
-                filtered = filtered.filter(t => t.is_popular);
-            }
-            
-            // Sort
-            if (sortSelect) {
-                const sort = sortSelect.value;
-                filtered.sort((a, b) => {
-                    if (sort === 'price_asc') return (a.base_price_usd || 0) - (b.base_price_usd || 0);
-                    if (sort === 'price_desc') return (b.base_price_usd || 0) - (a.base_price_usd || 0);
-                    if (sort === 'newest') return (b.id || 0) - (a.id || 0);
-                    // default popular
-                    return (b.is_popular ? 1 : 0) - (a.is_popular ? 1 : 0);
-                });
-            }
-            
-            currentFiltered = filtered;
-            
-            // Pagination Slice
-            const paged = currentFiltered.slice(0, currentPage * pageSize);
-            
-            let html = '';
-            paged.forEach((tool, i) => {
-                html += window.createToolCard(tool, i, "opacity:1; transform:none; pointer-events:auto;");
-            });
-            allToolsGrid.innerHTML = html || '<p style="color:#AEB5CA;padding:20px;grid-column:1/-1;text-align:center;">No tools found matching your criteria.</p>';
-            bindCardTilt(allToolsGrid);
-            
-            // Update Counters
-            const countNum = document.getElementById('toolsCountNum');
-            const totalNum = document.getElementById('toolsTotalNum');
-            if (countNum) countNum.textContent = paged.length;
-            if (totalNum) totalNum.textContent = currentFiltered.length;
-            
-            // Update Load More Button
-            const loadMoreContainer = document.getElementById('loadMoreContainer');
-            if (loadMoreContainer) {
-                if (currentFiltered.length > paged.length) {
-                    loadMoreContainer.style.display = 'block';
-                } else {
-                    loadMoreContainer.style.display = 'none';
-                }
-            }
-        }
+    // Handled inline in templates/tools/tools.html
 
-        // Attach Listeners
-        const attachFilters = () => {
-            ['categorySelect', 'sortSelect'].forEach(id => {
-                const el = document.getElementById(id);
-                if (el) el.addEventListener('change', () => renderAllTools(true));
-            });
-            const popCheck = document.getElementById('popularCheck');
-            if (popCheck) popCheck.addEventListener('change', () => renderAllTools(true));
-            
-            const searchInput = document.getElementById('toolSearchInput');
-            if (searchInput) searchInput.addEventListener('input', () => renderAllTools(true));
-            
-            const loadMoreBtn = document.getElementById('loadMoreBtn');
-            if (loadMoreBtn) {
-                loadMoreBtn.addEventListener('click', () => {
-                    currentPage++;
-                    renderAllTools(false);
-                });
-            }
-        };
-
-        if (window.djangoToolsData) {
-            toolsData = window.djangoToolsData;
-            attachFilters();
-            renderAllTools();
-        } else {
-            // Fallback to fetch if not injected
-            fetch('/tools/api/?filter=all&_t=' + new Date().getTime())
-                .then(r => r.json())
-                .then(data => {
-                    toolsData = data.tools || [];
-                    attachFilters();
-                    renderAllTools();
-                });
-        }
-    }
 
     // ═══════════════════════════════════
     // 9. HORIZONTAL SCROLL NAVIGATION

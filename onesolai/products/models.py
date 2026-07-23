@@ -1,3 +1,4 @@
+from django.conf import settings
 from django.db import models
 from django.utils.text import slugify
 
@@ -40,6 +41,7 @@ class Tool(models.Model):
     is_popular = models.BooleanField(default=False)
     is_featured = models.BooleanField(default=False, help_text="Show in Top Tools carousel on home page")
     is_active = models.BooleanField(default=True, help_text="Visible on the site")
+    is_ai_refined = models.BooleanField(default=False, help_text="Indicates whether this tool has been refined using OpenRouter AI.")
     image_url = models.URLField(blank=True, null=True, help_text="Tool logo/icon URL (e.g. svgl)")
     developer = models.CharField(max_length=200, blank=True, help_text="Company/developer name e.g. OpenAI")
     rating = models.DecimalField(max_digits=3, decimal_places=1, default=4.5)
@@ -118,8 +120,6 @@ class Tool(models.Model):
     def is_in_stock(self):
         return self.get_stock_status() == "In Stock"
 
-# (SubscriptionPlan removed)
-
 
 class ToolScreenshot(models.Model):
     tool = models.ForeignKey(Tool, related_name='screenshots', on_delete=models.CASCADE)
@@ -172,3 +172,18 @@ class ToolReview(models.Model):
 
     def __str__(self):
         return f"{self.rating} star review by {self.user_name} for {self.tool.name}"
+
+
+class Wishlist(models.Model):
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, related_name='wishlist_items', on_delete=models.CASCADE)
+    tool = models.ForeignKey(Tool, related_name='wishlisted_by', on_delete=models.CASCADE)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        verbose_name = 'Wishlist Item'
+        verbose_name_plural = 'Wishlist Items'
+        unique_together = ('user', 'tool')
+        ordering = ['-created_at']
+
+    def __str__(self):
+        return f"{self.user.username} - {self.tool.name}"

@@ -85,8 +85,14 @@ def tool_detail(request, slug):
         .prefetch_related('screenshots', 'features', 'faqs', 'reviews'),
         slug=slug
     )
+    in_wishlist = False
+    if request.user.is_authenticated:
+        from .models import Wishlist
+        in_wishlist = Wishlist.objects.filter(user=request.user, tool=tool).exists()
+
     context = {
         'tool': tool,
+        'in_wishlist': in_wishlist,
         'related_tools': Tool.objects.filter(
             category=tool.category, is_active=True
         ).exclude(pk=tool.pk)[:4],
@@ -115,6 +121,12 @@ def api_tools_json(request):
     if filter_type != 'all':
         tools = tools[:20]
 
+    # Get user wishlisted tool IDs if authenticated
+    user_wishlist_ids = set()
+    if request.user.is_authenticated:
+        from .models import Wishlist
+        user_wishlist_ids = set(Wishlist.objects.filter(user=request.user).values_list('tool_id', flat=True))
+
     data = []
     for tool in tools:
         data.append({
@@ -138,6 +150,56 @@ def api_tools_json(request):
             'review_count': tool.review_count,
             'users_count': tool.users_count,
             'detail_url': f'/tools/{tool.slug}/',
+            'in_wishlist': tool.id in user_wishlist_ids,
         })
 
     return JsonResponse({'tools': data})
+
+
+from django.contrib.auth.decorators import login_required
+from django.views.decorators.http import require_POST
+from django.shortcuts import redirect
+
+
+@login_required(login_url='/auth/login/')
+@require_POST
+def toggle_wishlist(request):
+    """
+    POST: tool_id or tool_slug
+    Toggles a tool in the user's wishlist.
+    """
+    from .models import Wishlist
+    tool_id = request.POST.get('tool_id')
+    tool_slug = request.POST.get('tool_slug')
+
+    if tool_id:
+        tool = get_object_or_404(Tool, id=tool_id, is_active=True)
+    elif tool_slug:
+        tool = get_object_or_404(Tool, slug=tool_slug, is_active=True)
+    else:
+        return JsonResponse({'status': 'error', 'message': 'Tool ID or slug required.'}, status=400)
+
+    wishlist_item, created = Wishlist.objects.get_or_create(user=request.user, tool=tool)
+    if not created:
+        wishlist_item.delete()
+        in_wishlist = False
+        msg = f"{tool.name} removed from your Wishlist."
+    else:
+        in_wishlist = True
+        msg = f"{tool.name} added to your Wishlist!"
+
+    count = Wishlist.objects.filter(user=request.user).count()
+
+    accept_header = request.headers.get('Accept', '')
+    is_ajax = request.headers.get('x-requested-with') == 'XMLHttpRequest' or 'application/json' in accept_header or 'text/html' not in accept_header
+    if is_ajax:
+        return JsonResponse({
+            'status': 'success',
+            'in_wishlist': in_wishlist,
+            'message': msg,
+            'wishlist_count': count,
+        })
+
+    from django.contrib import messages
+    messages.success(request, msg)
+    return redirect(request.META.get('HTTP_REFERER', '/dashboard/wishlist/'))

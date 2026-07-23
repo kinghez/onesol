@@ -35,6 +35,7 @@ CSRF_TRUSTED_ORIGINS = ['https://*.ngrok-free.app']
 # Application definition
 
 INSTALLED_APPS = [
+    "jazzmin",
     "django.contrib.admin",
     "django.contrib.auth",
     "django.contrib.contenttypes",
@@ -76,6 +77,7 @@ TEMPLATES = [
                 "django.contrib.messages.context_processors.messages",
                 "core.context_processors.unread_notifications",
                 "core.context_processors.site_settings",
+                "core.context_processors.currency_settings",
             ],
         },
     },
@@ -214,4 +216,84 @@ CURRENCY_SYMBOLS = {
     'UGX': 'USh', 'TZS': 'TSh', 'RWF': 'FRw', 'XOF': 'CFA',
     'XAF': 'CFA', 'ZMW': 'K', 'MWK': 'MK', 'MUR': '₨',
     'EGP': 'E£', 'ETB': 'Br', 'USD': '$', 'GBP': '£', 'EUR': '€',
+}
+
+JAZZMIN_SETTINGS = {
+    # title of the window (Will default to current_admin_site.site_title if absent or None)
+    "site_title": "OneSol AI Hub Admin",
+    
+    # Title on the login screen (19 chars max) (defaults to current_admin_site.site_header if absent or None)
+    "site_header": "OneSol AI Hub",
+    
+    # Title on the brand (19 chars max) (defaults to current_admin_site.site_header if absent or None)
+    "site_brand": "",
+    
+    # Logo to use for your site, must be present in static files, used for brand on top left
+    "site_logo": "assets/logo.png",
+    
+    # Welcome text on the login screen
+    "welcome_sign": "Welcome to OneSol AI Hub Administration",
+    
+    # Copyright on the footer
+    "copyright": "OneSol AI Hub Ltd",
+    
+    # Whether to show the UI customizer on the sidebar
+    "show_ui_builder": False,
+    
+    # Custom CSS for the admin
+    "custom_css": "css/admin_jazzmin_custom.css",
+    
+    "topmenu_links": [
+        {"name": "Home",  "url": "admin:index", "permissions": ["auth.view_user"]},
+        {"name": "Frontend", "url": "home", "new_window": False},
+        {"name": "Admin Analytics", "url": "analytics:dashboard", "new_window": False},
+    ],
+    
+    # Custom icons for side menu apps/models
+    "icons": {
+        "auth": "fas fa-users-cog",
+        "auth.user": "fas fa-user",
+        "auth.Group": "fas fa-users",
+        "accounts.User": "fas fa-user-shield",
+        "accounts.Profile": "fas fa-id-badge",
+        "products.Category": "fas fa-tags",
+        "products.Tool": "fas fa-layer-group",
+        "vendors.Vendor": "fas fa-plug",
+        "vendors.VendorBalance": "fas fa-wallet",
+        "orders.Order": "fas fa-cart-shopping",
+        "orders.PaymentTransaction": "fas fa-money-bill-transfer",
+        "orders.OrderAPIRequest": "fas fa-server",
+        "core.SiteSettings": "fas fa-gear",
+    },
+    
+    "default_icon_parents": "fas fa-chevron-circle-right",
+    "default_icon_children": "fas fa-circle",
+}
+
+JAZZMIN_UI_TWEAKS = {
+    "theme": "darkly",
+    "dark_mode_theme": "darkly",
+    "navbar": "navbar-dark",
+    "navbar_small_text": False,
+    "body_small_text": False,
+    "brand_small_text": False,
+    "brand_colour": "navbar-dark",
+    "accent": "accent-primary",
+    "navbar": "navbar-dark",
+    "no_navbar_border": False,
+    "sidebar": "sidebar-dark-primary",
+    "sidebar_nav_child_indent": True,
+    "sidebar_nav_compact_style": True,
+    "sidebar_nav_legacy_style": False,
+    "sidebar_nav_flat_style": False,
+    "theme": "darkly",
+    "dark_mode_theme": "darkly",
+    "button_classes": {
+        "primary": "btn-outline-primary",
+        "secondary": "btn-outline-secondary",
+        "info": "btn-info",
+        "warning": "btn-warning",
+        "danger": "btn-danger",
+        "success": "btn-success"
+    }
 }

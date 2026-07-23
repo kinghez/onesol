@@ -96,19 +96,27 @@ class VendorProductAdmin(admin.ModelAdmin):
             tool_short_desc = ""
 
             # Try AI Refinement
-            refined = refine_product_copy(tool_name, tool_desc)
+            categories = list(Category.objects.values_list('name', flat=True))
+            refined = refine_product_copy(tool_name, tool_desc, available_categories=categories)
+            assigned_cat = cat
             if refined:
                 tool_name = refined.get('name', tool_name)
                 tool_short_desc = refined.get('short_description', '')
                 tool_desc = refined.get('description', tool_desc)
+                ai_cat_name = refined.get('category')
+                if ai_cat_name:
+                    matched_cat = Category.objects.filter(name__iexact=ai_cat_name.strip()).first()
+                    if matched_cat:
+                        assigned_cat = matched_cat
                 ai_refined += 1
             
             Tool.objects.create(
                 name=tool_name,
-                category=cat,
+                category=assigned_cat,
                 vendor_product=vp,
                 description=tool_desc,
                 short_description=tool_short_desc,
+                is_ai_refined=bool(refined),
                 is_active=True
             )
             created += 1

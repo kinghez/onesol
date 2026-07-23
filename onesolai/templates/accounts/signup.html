@@ -85,12 +85,6 @@
                         </label>
                     </div>
 
-                    {% if messages %}
-                        {% for message in messages %}
-                            <p style="color: #ef4444; font-size: 14px; margin-bottom: 8px;">{{ message }}</p>
-                        {% endfor %}
-                    {% endif %}
-
                     <!-- Hidden fields for auto-detected geolocation data -->
                     <input type="hidden" id="detected_country" name="detected_country" value="">
                     <input type="hidden" id="detected_currency" name="detected_currency" value="">

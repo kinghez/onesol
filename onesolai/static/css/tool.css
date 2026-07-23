@@ -111,8 +111,47 @@
 }
 
 .th-wishlist-btn:hover {
-    background: #8B3DFF;
-    border-color: #8B3DFF;
+    background: rgba(255, 255, 255, 0.1);
+    border-color: rgba(255, 255, 255, 0.4);
+}
+
+.th-wishlist-btn.active {
+    background: rgba(255, 77, 77, 0.15) !important;
+    border-color: #FF4D4D !important;
+    color: #FF4D4D !important;
+}
+
+.th-wishlist-btn.active i {
+    color: #FF4D4D !important;
+}
+
+.card-wishlist-btn {
+    position: absolute;
+    top: 12px;
+    right: 12px;
+    background: rgba(255, 255, 255, 0.08);
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    color: #AEB5CA;
+    width: 34px;
+    height: 34px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    z-index: 10;
+    transition: all 0.25s ease;
+}
+
+.card-wishlist-btn:hover, .card-wishlist-btn.active {
+    background: rgba(255, 77, 77, 0.2) !important;
+    border-color: #FF4D4D !important;
+    color: #FF4D4D !important;
+    transform: scale(1.1);
+}
+
+.card-wishlist-btn.active i {
+    color: #FF4D4D !important;
 }
 
 .th-price-box {
