@@ -101,25 +101,71 @@ def tool_detail(request, slug):
     return render(request, 'tools/tool_detail.html', context)
 
 
+def get_popular_tools(limit=10, category_name=None):
+    """
+    Automated Popular Tools selection:
+    Top 10 most recent items purchased on platform or added to tool table.
+    If recently purchased items < limit, complete list with recently added tools.
+    """
+    from orders.models import OrderItem
+    base_qs = Tool.objects.filter(is_active=True).select_related('category', 'vendor_product')
+    if category_name and category_name != 'all':
+        base_qs = base_qs.filter(category__name__iexact=category_name.strip())
+
+    purchased_ids = []
+    order_items = (
+        OrderItem.objects.filter(order__status='paid', tool__in=base_qs)
+        .order_by('-order__created_at')
+        .select_related('tool')
+    )
+    for item in order_items:
+        if item.tool_id and item.tool_id not in purchased_ids:
+            purchased_ids.append(item.tool_id)
+            if len(purchased_ids) >= limit:
+                break
+
+    needed = limit - len(purchased_ids)
+    if needed > 0:
+        recent_ids = list(
+            base_qs.exclude(id__in=purchased_ids)
+            .order_by('-created_at')
+            .values_list('id', flat=True)[:needed]
+        )
+        popular_ids = purchased_ids + recent_ids
+    else:
+        popular_ids = purchased_ids[:limit]
+
+    tools_dict = {t.id: t for t in base_qs.filter(id__in=popular_ids)}
+    return [tools_dict[tid] for tid in popular_ids if tid in tools_dict]
+
+
+def get_cheapest_tools(limit=10, category_name=None):
+    """
+    Automated Top & Best Selling Tools selection:
+    Top 10 cheapest tools in the tool table.
+    """
+    base_qs = Tool.objects.filter(is_active=True).select_related('category', 'vendor_product')
+    if category_name and category_name != 'all':
+        base_qs = base_qs.filter(category__name__iexact=category_name.strip())
+
+    tools = list(base_qs)
+    tools.sort(key=lambda t: t.get_usd_price())
+    return tools[:limit]
+
+
 def api_tools_json(request):
     """API endpoint returning tools as JSON for the JS carousels on the home page."""
-    tools = Tool.objects.filter(is_active=True).select_related('category')
-
-    # Optional filter: featured or popular
     filter_type = request.GET.get('filter', 'featured')
-    if filter_type == 'featured':
-        tools = tools.filter(is_featured=True)
-    elif filter_type == 'popular':
-        tools = tools.filter(is_popular=True)
-    # filter_type == 'all' returns all active tools (no extra filter)
-
     category_filter = request.GET.get('category')
-    if category_filter and category_filter != 'all':
-        tools = tools.filter(category__name=category_filter)
 
-    # Slice logic: only limit for carousels, not for 'all'
-    if filter_type != 'all':
-        tools = tools[:20]
+    if filter_type == 'popular':
+        tools = get_popular_tools(limit=10, category_name=category_filter)
+    elif filter_type == 'featured':
+        tools = get_cheapest_tools(limit=10, category_name=category_filter)
+    else:
+        tools = Tool.objects.filter(is_active=True).select_related('category')
+        if category_filter and category_filter != 'all':
+            tools = tools.filter(category__name__iexact=category_filter.strip())
 
     # Get user wishlisted tool IDs if authenticated
     user_wishlist_ids = set()

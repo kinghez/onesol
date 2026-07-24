@@ -618,34 +618,36 @@ document.addEventListener('DOMContentLoaded', function () {
     }
 
     if (pwGrid) {
-        function renderPopularCards(filter) {
-            var filtered = filter === 'all' ? allPopularTools : allPopularTools.filter(function(t){ return t.category === filter; });
-            var html = '';
-            filtered.forEach(function(tool, i){ html += window.createToolCard(tool, i); });
-            pwGrid.innerHTML = html || '<p style="color:#AEB5CA;padding:20px">No tools in this category yet.</p>';
-            bindCardTilt(pwGrid);
+        function loadPopularTools(category) {
+            var url = '/tools/api/?filter=popular';
+            if (category && category !== 'all') {
+                url += '&category=' + encodeURIComponent(category);
+            }
+            fetch(url)
+                .then(function(r){ return r.json(); })
+                .then(function(data){
+                    var tools = data.tools || [];
+                    var html = '';
+                    tools.forEach(function(tool, i){ html += window.createToolCard(tool, i); });
+                    pwGrid.innerHTML = html || '<p style="color:#AEB5CA;padding:20px">No tools in this category yet.</p>';
+                    bindCardTilt(pwGrid);
+                })
+                .catch(function(){
+                    pwGrid.innerHTML = '<p style="color:#AEB5CA;padding:20px">Failed to load tools.</p>';
+                });
         }
 
-        fetch('/tools/api/?filter=popular')
-            .then(function(r){ return r.json(); })
-            .then(function(data){
-                allPopularTools = data.tools || [];
-                renderPopularCards('all');
+        loadPopularTools('all');
 
-                pwTabs.forEach(function(tab){
-                    tab.addEventListener('click', function(){
-                        pwTabs.forEach(function(t){ t.classList.remove('active'); });
-                        tab.classList.add('active');
-                        var filter = tab.getAttribute('data-filter');
-                        var currentCards = pwGrid.querySelectorAll('.tt-card');
-                        currentCards.forEach(function(c){ c.classList.add('filtered-out'); });
-                        setTimeout(function(){ renderPopularCards(filter); }, 250);
-                    });
-                });
-            })
-            .catch(function(){
-                pwGrid.innerHTML = '<p style="color:#AEB5CA;padding:20px">Failed to load tools.</p>';
+        pwTabs.forEach(function(tab){
+            tab.addEventListener('click', function(){
+                pwTabs.forEach(function(t){ t.classList.remove('active'); });
+                tab.classList.add('active');
+                var filter = tab.getAttribute('data-filter');
+                pwGrid.innerHTML = '<p style="color:#AEB5CA;padding:20px"><i class="fas fa-spinner fa-spin"></i> Loading tools...</p>';
+                loadPopularTools(filter);
             });
+        });
     }
 
     // ═══════════════════════════════════

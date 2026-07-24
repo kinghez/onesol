@@ -8,8 +8,13 @@ from .models import HeroSlide
 
 def home(request):
     """Render the home page."""
+    from products.models import Category
     hero_slides = HeroSlide.objects.filter(is_active=True).order_by('order')
-    return render(request, 'home/index.html', {'hero_slides': hero_slides})
+    categories = Category.objects.filter(tools__is_active=True).distinct()
+    return render(request, 'home/index.html', {
+        'hero_slides': hero_slides,
+        'categories': categories,
+    })
 
 
 def api_currency_rates(request):

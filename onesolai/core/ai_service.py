@@ -2,9 +2,45 @@ import json
 import time
 import requests
 import logging
+import re
 from core.models import SiteSettings
 
 logger = logging.getLogger(__name__)
+
+
+def clean_tool_title(title):
+    """
+    Cleans up title duration abbreviations and removes warranty jargon:
+    - 12m / 12M -> 12 Months
+    - 1m / 1M / 1mo -> 1 Month
+    - 1y / 1Y / 1yr -> 1 Year
+    - 7d / 7D -> 7 Days
+    - Strips 'FW', 'FW-', 'Warranty', etc.
+    """
+    if not title:
+        return title
+
+    # Remove warranty jargon from title
+    title = re.sub(r'(?i)\b(fw|fw-|full\s*warranty|warranty|24h-warranty|24h\s*warranty)\b', '', title)
+
+    # Expand duration abbreviations (e.g. 12m -> 12 Months, 1m -> 1 Month, 1y -> 1 Year, 7d -> 7 Days)
+    def replace_duration(match):
+        num = match.group(1)
+        unit = match.group(2).lower()
+        if unit.startswith('y'):
+            return f"{num} Year" if num == '1' else f"{num} Years"
+        elif unit.startswith('m'):
+            return f"{num} Month" if num == '1' else f"{num} Months"
+        elif unit.startswith('d'):
+            return f"{num} Day" if num == '1' else f"{num} Days"
+        return match.group(0)
+
+    title = re.sub(r'\b(\d+)\s*([mMyYdD](?:yr|mo|days|months)?)\b', replace_duration, title)
+
+    # Clean double spaces, dashes, or trailing characters
+    title = re.sub(r'\s+', ' ', title).strip(' -_,')
+    return title
+
 
 def refine_product_copy(raw_name, raw_desc, available_categories=None):
     """
@@ -35,14 +71,21 @@ Your job is to rewrite it into a clean, compelling, and professional B2C retail 
 
 Rules:
 1. TITLE FORMAT: The title MUST enable the user to immediately identify the core product provider (e.g., ChatGPT, Claude, Canva, Adobe, Gemini).
-2. TITLE DURATION: The title MUST include the subscription duration if present in the raw data (e.g., 12M, 30d, 1yr, 1 Month).
-3. NO WARRANTY IN TITLE: The word "warranty" (or any variation like "full warranty", "no warranty", "24h warranty") MUST NEVER appear in the generated title. Move all warranty information into the description instead.
+2. EXPAND DURATION IN TITLE: Convert all duration abbreviations in titles into full, clear words so users easily understand the plan duration:
+   - "12m" / "12M" -> "12 Months"
+   - "1m" / "1M" / "1mo" -> "1 Month"
+   - "3m" / "3M" -> "3 Months"
+   - "6m" / "6M" -> "6 Months"
+   - "1y" / "1Y" / "1yr" -> "1 Year"
+   - "7d" / "7D" -> "7 Days"
+   - "30d" / "30D" -> "30 Days"
+3. NO WARRANTY OR FW IN TITLE: The terms "warranty", "FW", "FW-", "full warranty", "24h warranty" MUST NEVER appear in the title. Move all warranty details into the description instead.
 4. REMOVE JARGON: Remove all B2B/wholesale jargon (e.g., "login with 2 devices", "no refunds", "change pass freely", "API base URL", "KEY check page", "telegram links", "Source3", "canboso").
 5. REMOVE LINKS: Do NOT include any URLs, contact info, or external links.
-6. BULLETED FEATURES & DESCRIPTION: Format the description using clean HTML bullet points (e.g. <ul><li>✓ Feature 1</li><li>✓ Feature 2</li></ul> or ✓ Feature 1<br>✓ Feature 2) to clearly separate different features, plan specifications, and access rules (e.g., Premium Access, Warranty, Account Type).
-7. SHORT DESCRIPTION: Create a very brief 'short_description' (max 150 chars).
+6. DESCRIPTION STRUCTURE: The 'description' MUST start with a short 1-2 sentence introductory summary (<p>...</p>), followed immediately by clean HTML bullet points (<ul><li>✓ Feature 1</li><li>✓ Feature 2</li>...</ul>) listing key features, plan specifications, access rules, and warranty.
+7. SHORT DESCRIPTION: Create a plain text short description (1 sentence, max 150 chars) for card summaries.
 8. CATEGORY SELECTION: Choose the single best matching category for this product from this exact list of categories: [{categories_str}]. If none fit perfectly, choose the closest match.
-9. JSON ONLY: Output ONLY valid JSON, with exactly these four keys: "name", "short_description", "description", "category". No markdown blocks or extra text.
+9. JSON ONLY: Output ONLY valid JSON with exactly these four keys: "name", "short_description", "description", "category". No markdown blocks or extra text.
 
 Raw Name: {raw_name}
 Raw Description: {raw_desc}
@@ -71,7 +114,6 @@ Raw Description: {raw_desc}
             response = requests.post("https://openrouter.ai/api/v1/chat/completions", headers=headers, json=payload, timeout=30)
             
             if response.status_code == 429:
-                # Rate limited
                 delay = base_delay * (2 ** attempt)
                 logger.warning(f"OpenRouter rate limit hit. Retrying in {delay} seconds...")
                 time.sleep(delay)
@@ -80,10 +122,7 @@ Raw Description: {raw_desc}
             response.raise_for_status()
             data = response.json()
             
-            content = data['choices'][0]['message']['content']
-            
-            # OpenRouter might wrap in markdown blocks despite instructions
-            content = content.strip()
+            content = data['choices'][0]['message']['content'].strip()
             if content.startswith('```json'):
                 content = content[7:]
             if content.startswith('```'):
@@ -93,10 +132,22 @@ Raw Description: {raw_desc}
                 
             result = json.loads(content)
             
+            ai_name = result.get("name", raw_name)
+            ai_name = clean_tool_title(ai_name)
+            
+            short_desc = result.get("short_description", "").strip()
+            desc_body = result.get("description", raw_desc).strip()
+            
+            # Ensure description starts with the short intro paragraph before bulleted list
+            if short_desc and not desc_body.startswith(short_desc) and not desc_body.startswith('<p>' + short_desc):
+                full_description = f"<p>{short_desc}</p>\n{desc_body}"
+            else:
+                full_description = desc_body
+            
             return {
-                "name": result.get("name", raw_name),
-                "short_description": result.get("short_description", ""),
-                "description": result.get("description", raw_desc),
+                "name": ai_name,
+                "short_description": short_desc,
+                "description": full_description,
                 "category": result.get("category", "")
             }
             
@@ -106,7 +157,5 @@ Raw Description: {raw_desc}
                 time.sleep(base_delay * (2 ** attempt))
             else:
                 return None
-    
-    return None
     
     return None

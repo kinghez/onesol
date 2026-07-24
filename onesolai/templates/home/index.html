@@ -280,15 +280,9 @@
             <div class="pw-tabs-container">
                 <div class="pw-tabs" id="pwTabs">
                     <button class="pw-tab active" data-filter="all">All</button>
-                    <button class="pw-tab" data-filter="AI Chatbots">AI Chatbots</button>
-                    <button class="pw-tab" data-filter="Writing">Writing</button>
-                    <button class="pw-tab" data-filter="Design">Design</button>
-                    <button class="pw-tab" data-filter="Productivity">Productivity</button>
-                    <button class="pw-tab" data-filter="Marketing">Marketing</button>
-                    <button class="pw-tab" data-filter="Video Creation">Video Creation</button>
-                    <button class="pw-tab" data-filter="Audio &amp; Video Editor">Audio Editor</button>
-                    <button class="pw-tab" data-filter="AI Voice Generation">Voice</button>
-                    <button class="pw-tab" data-filter="AI Music Generation">Music</button>
+                    {% for cat in categories %}
+                        <button class="pw-tab" data-filter="{{ cat.name }}">{{ cat.name }}</button>
+                    {% endfor %}
                 </div>
             </div>
 
