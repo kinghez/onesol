@@ -1,0 +1,403 @@
+{% extends 'base_public.html' %}
+{% load static %}
+
+{% block title %}About Us - OneSol AI Hub{% endblock %}
+{% block meta_description %}OneSol AI Hub is a digital marketplace that gives you access to the world's best AI tools, software and online services at a fraction of the original price.{% endblock %}
+{% block nav_about %}active{% endblock %}
+
+{% block extra_css %}
+<style>
+    .about-page-section {
+        padding: 50px 20px 90px;
+        max-width: 1320px;
+        margin: 0 auto;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+    }
+
+    .about-card-container {
+        width: 100%;
+        background: rgba(10, 13, 24, 0.85);
+        backdrop-filter: blur(25px);
+        -webkit-backdrop-filter: blur(25px);
+        border: 1px solid rgba(139, 61, 255, 0.25);
+        box-shadow: 0 25px 70px rgba(0, 0, 0, 0.7), inset 0 1px 1px rgba(255, 255, 255, 0.12);
+        border-radius: 28px;
+        padding: 56px 56px;
+        display: grid;
+        grid-template-columns: 1.15fr 0.85fr;
+        gap: 48px;
+        align-items: center;
+        position: relative;
+        overflow: hidden;
+    }
+
+    /* Ambient background glow inside container */
+    .about-card-container::before {
+        content: '';
+        position: absolute;
+        top: -150px;
+        left: -150px;
+        width: 400px;
+        height: 400px;
+        background: radial-gradient(circle, rgba(139, 61, 255, 0.18) 0%, rgba(0, 0, 0, 0) 70%);
+        pointer-events: none;
+        z-index: 0;
+    }
+
+    .about-content-col {
+        position: relative;
+        z-index: 1;
+    }
+
+    /* Pill Badge */
+    .about-pill {
+        display: inline-block;
+        padding: 6px 18px;
+        border-radius: 50px;
+        border: 1px solid rgba(139, 61, 255, 0.5);
+        background: rgba(139, 61, 255, 0.12);
+        color: #FFFFFF;
+        font-size: 11px;
+        font-weight: 700;
+        letter-spacing: 1.5px;
+        text-transform: uppercase;
+        margin-bottom: 24px;
+        box-shadow: 0 0 15px rgba(139, 61, 255, 0.25);
+    }
+
+    /* Headline Title */
+    .about-title {
+        font-size: 46px;
+        font-weight: 800;
+        color: #FFFFFF;
+        line-height: 1.16;
+        letter-spacing: -0.5px;
+        margin-bottom: 20px;
+        font-family: 'Inter', system-ui, -apple-system, sans-serif;
+    }
+
+    .about-gradient-text {
+        background: linear-gradient(135deg, #7C3AED 0%, #8B3DFF 40%, #5B63F6 80%, #60A5FA 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        display: inline-block;
+    }
+
+    /* Subtitle Description */
+    .about-subtitle {
+        color: #9CA3AF;
+        font-size: 15px;
+        line-height: 1.65;
+        margin-bottom: 36px;
+        max-width: 580px;
+        font-weight: 400;
+    }
+
+    /* 3 Features Row */
+    .about-features-row {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 20px;
+        margin-bottom: 40px;
+    }
+
+    .about-feature-item {
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+    }
+
+    .about-feature-icon-box {
+        width: 44px;
+        height: 44px;
+        border-radius: 12px;
+        background: rgba(139, 61, 255, 0.15);
+        border: 1px solid rgba(139, 61, 255, 0.4);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: #8B3DFF;
+        font-size: 18px;
+        box-shadow: 0 0 15px rgba(139, 61, 255, 0.25);
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+
+    .about-feature-item:hover .about-feature-icon-box {
+        transform: translateY(-3px);
+        box-shadow: 0 0 22px rgba(139, 61, 255, 0.45);
+    }
+
+    .about-feature-icon-box.tag-box {
+        background: rgba(59, 130, 246, 0.15);
+        border-color: rgba(59, 130, 246, 0.4);
+        color: #3B82F6;
+        box-shadow: 0 0 15px rgba(59, 130, 246, 0.25);
+    }
+
+    .about-feature-item:hover .about-feature-icon-box.tag-box {
+        box-shadow: 0 0 22px rgba(59, 130, 246, 0.45);
+    }
+
+    .about-feature-icon-box.shield-box {
+        background: rgba(139, 61, 255, 0.15);
+        border-color: rgba(139, 61, 255, 0.4);
+        color: #8B3DFF;
+        box-shadow: 0 0 15px rgba(139, 61, 255, 0.25);
+    }
+
+    .about-feature-title {
+        font-size: 15px;
+        font-weight: 700;
+        color: #FFFFFF;
+        margin: 0;
+    }
+
+    .about-feature-desc {
+        font-size: 12px;
+        color: #8E9BB0;
+        line-height: 1.5;
+        margin: 0;
+    }
+
+    /* Bottom Stats Card */
+    .about-stats-card {
+        background: rgba(18, 23, 42, 0.65);
+        border: 1px solid rgba(255, 255, 255, 0.08);
+        border-radius: 18px;
+        padding: 22px 28px;
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 16px;
+        align-items: center;
+        box-shadow: inset 0 1px 1px rgba(255, 255, 255, 0.05);
+    }
+
+    .about-stat-col {
+        display: flex;
+        align-items: center;
+        gap: 14px;
+    }
+
+    .about-stat-icon {
+        color: #3B82F6;
+        font-size: 22px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: 38px;
+        height: 38px;
+    }
+
+    .about-stat-data {
+        display: flex;
+        flex-direction: column;
+    }
+
+    .about-stat-number {
+        font-size: 22px;
+        font-weight: 800;
+        color: #FFFFFF;
+        line-height: 1.1;
+        letter-spacing: -0.3px;
+    }
+
+    .about-stat-label {
+        font-size: 11px;
+        color: #8E9BB0;
+        margin-top: 3px;
+        white-space: nowrap;
+    }
+
+    /* Right Graphic Column */
+    .about-graphic-col {
+        position: relative;
+        z-index: 1;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+    }
+
+    .about-image-wrapper {
+        position: relative;
+        width: 100%;
+        max-width: 520px;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+    }
+
+    .about-globe-img {
+        width: 100%;
+        height: auto;
+        object-fit: contain;
+        filter: drop-shadow(0 0 45px rgba(139, 61, 255, 0.35));
+        transition: transform 0.6s ease;
+    }
+
+    .about-globe-img:hover {
+        transform: scale(1.02);
+    }
+
+    /* Responsive Design */
+    @media (max-width: 1100px) {
+        .about-card-container {
+            grid-template-columns: 1fr;
+            padding: 40px 32px;
+            gap: 40px;
+        }
+        .about-title {
+            font-size: 38px;
+        }
+        .about-graphic-col {
+            order: -1; /* Display graphic above text on medium screens if desired, or keep default */
+            order: 0;
+        }
+        .about-image-wrapper {
+            max-width: 440px;
+        }
+    }
+
+    @media (max-width: 768px) {
+        .about-page-section {
+            padding: 30px 16px 60px;
+        }
+        .about-card-container {
+            padding: 28px 20px;
+            border-radius: 20px;
+        }
+        .about-title {
+            font-size: 30px;
+        }
+        .about-subtitle {
+            font-size: 14px;
+        }
+        .about-features-row {
+            grid-template-columns: 1fr;
+            gap: 20px;
+        }
+        .about-stats-card {
+            grid-template-columns: repeat(2, 1fr);
+            gap: 20px 12px;
+            padding: 18px 16px;
+        }
+        .about-stat-col {
+            gap: 10px;
+        }
+        .about-stat-number {
+            font-size: 18px;
+        }
+        .about-stat-label {
+            font-size: 10px;
+        }
+    }
+
+    @media (max-width: 480px) {
+        .about-stats-card {
+            grid-template-columns: 1fr;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="about-page-section">
+    <div class="about-card-container">
+        <!-- Left Side Content -->
+        <div class="about-content-col">
+            <!-- Pill Badge -->
+            <div class="about-pill">ABOUT US</div>
+
+            <!-- Title -->
+            <h1 class="about-title">
+                We Make Premium <br>
+                <span class="about-gradient-text">AI Affordable</span> for Everyone.
+            </h1>
+
+            <!-- Subtitle -->
+            <p class="about-subtitle">
+                OneSol AI Hub is a digital marketplace that gives you access to the world's best AI tools, software and online services at a fraction of the original price.
+            </p>
+
+            <!-- 3 Features Row -->
+            <div class="about-features-row">
+                <!-- Feature 1: Bulk Power -->
+                <div class="about-feature-item">
+                    <div class="about-feature-icon-box">
+                        <i class="fa-solid fa-cart-shopping"></i>
+                    </div>
+                    <div class="about-feature-info">
+                        <h3 class="about-feature-title">Bulk Power</h3>
+                        <p class="about-feature-desc">We buy subscriptions in bulk directly from official providers.</p>
+                    </div>
+                </div>
+
+                <!-- Feature 2: Better Prices -->
+                <div class="about-feature-item">
+                    <div class="about-feature-icon-box tag-box">
+                        <i class="fa-solid fa-tag"></i>
+                    </div>
+                    <div class="about-feature-info">
+                        <h3 class="about-feature-title">Better Prices</h3>
+                        <p class="about-feature-desc">Our strong partnerships help us offer the lowest prices possible.</p>
+                    </div>
+                </div>
+
+                <!-- Feature 3: Trusted Access -->
+                <div class="about-feature-item">
+                    <div class="about-feature-icon-box shield-box">
+                        <i class="fa-solid fa-shield-halved"></i>
+                    </div>
+                    <div class="about-feature-info">
+                        <h3 class="about-feature-title">Trusted Access</h3>
+                        <p class="about-feature-desc">You get genuine access, instant activation and reliable support.</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Bottom Stats Bar -->
+            <div class="about-stats-card">
+                <div class="about-stat-col">
+                    <div class="about-stat-icon"><i class="fa-solid fa-user-group"></i></div>
+                    <div class="about-stat-data">
+                        <span class="about-stat-number">15K+</span>
+                        <span class="about-stat-label">Happy Customers</span>
+                    </div>
+                </div>
+
+                <div class="about-stat-col">
+                    <div class="about-stat-icon"><i class="fa-solid fa-cube"></i></div>
+                    <div class="about-stat-data">
+                        <span class="about-stat-number">500+</span>
+                        <span class="about-stat-label">AI Tools</span>
+                    </div>
+                </div>
+
+                <div class="about-stat-col">
+                    <div class="about-stat-icon"><i class="fa-solid fa-globe"></i></div>
+                    <div class="about-stat-data">
+                        <span class="about-stat-number">30+</span>
+                        <span class="about-stat-label">Countries Served</span>
+                    </div>
+                </div>
+
+                <div class="about-stat-col">
+                    <div class="about-stat-icon"><i class="fa-regular fa-star"></i></div>
+                    <div class="about-stat-data">
+                        <span class="about-stat-number">99.5%</span>
+                        <span class="about-stat-label">Customer Satisfaction</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Right Side Graphic -->
+        <div class="about-graphic-col">
+            <div class="about-image-wrapper">
+                <img src="{% static 'images/about_globe.png' %}" alt="OneSol AI Hub Global Tools" class="about-globe-img">
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

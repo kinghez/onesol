@@ -22,10 +22,70 @@ def get_secret_key():
     return key
 
 
+from django.core.cache import cache
+
+def _get_v4_access_token():
+    cfg = _get_settings()
+    client_id = cfg.flutterwave_public_key.strip()
+    client_secret = cfg.flutterwave_secret_key.strip()
+    if not client_id or not client_secret:
+        raise ValueError("Flutterwave V4 Client ID and Client Secret are required in Site Settings.")
+
+    cache_key = 'flutterwave_v4_access_token'
+    token = cache.get(cache_key)
+    if token:
+        return token
+
+    url = 'https://idp.flutterwave.com/realms/flutterwave/protocol/openid-connect/token'
+    
+    # Flutterwave IdP uses Keycloak, which often prefers HTTP Basic Auth for client credentials
+    payload = {
+        'grant_type': 'client_credentials',
+    }
+    
+    # Try basic auth first
+    try:
+        resp = requests.post(
+            url, 
+            data=payload, 
+            auth=(client_id, client_secret),
+            timeout=15
+        )
+        if resp.status_code == 401:
+            # Fallback to putting them in the body if basic auth fails
+            payload['client_id'] = client_id
+            payload['client_secret'] = client_secret
+            headers = {'Content-Type': 'application/x-www-form-urlencoded'}
+            resp = requests.post(url, data=payload, headers=headers, timeout=15)
+            
+        if resp.status_code != 200:
+            raise ValueError(f"Failed to authenticate with Flutterwave V4: HTTP {resp.status_code} - {resp.text}")
+            
+        data = resp.json()
+        token = data.get('access_token')
+        if not token:
+            raise ValueError(f"No access_token found in V4 auth response. Response: {resp.text}")
+        
+        # Cache for 9 minutes (540 seconds)
+        cache.set(cache_key, token, 540)
+        return token
+    except requests.RequestException as e:
+        error_msg = f"Network error during V4 auth: {e}"
+        if hasattr(e, 'response') and e.response is not None:
+            error_msg += f" | Body: {e.response.text}"
+        raise ValueError(error_msg)
+
 def get_headers():
-    key = get_secret_key()
+    cfg = _get_settings()
+    api_version = getattr(cfg, 'flutterwave_api_version', 'v3')
+    
+    if api_version == 'v4':
+        token = _get_v4_access_token()
+    else:
+        token = get_secret_key()
+
     return {
-        'Authorization': f'Bearer {key}',
+        'Authorization': f'Bearer {token}',
         'Content-Type': 'application/json',
     }
 

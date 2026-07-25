@@ -17,6 +17,17 @@ def home(request):
     })
 
 
+def about_us(request):
+    """Redirect to homepage about section."""
+    from django.shortcuts import redirect
+    return redirect('/#aboutUs')
+
+
+def features_page(request):
+    """Render the features page."""
+    return render(request, 'home/features.html')
+
+
 def api_currency_rates(request):
     """
     Returns currency conversion rates from NGN as JSON.

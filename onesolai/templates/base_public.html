@@ -126,8 +126,8 @@
                 <li><a href="{% url 'home' %}" class="nav-a {% block nav_home %}{% endblock %}">Home</a></li>
                 <li><a href="{% url 'tools:tools_list' %}" class="nav-a {% block nav_tools %}{% endblock %}">Tools</a></li>
                 <li><a href="#" class="nav-a">Pricing</a></li>
-                <li><a href="#" class="nav-a">Features</a></li>
-                <li><a href="#" class="nav-a">About Us</a></li>
+                <li><a href="{% url 'features' %}" class="nav-a {% block nav_features %}{% endblock %}">Features</a></li>
+                <li><a href="{% url 'home' %}#aboutUs" class="nav-a">About Us</a></li>
                 {% if user.is_authenticated %}
                 <li class="nav-mobile-only"><a href="{% url 'accounts:logout' %}" class="nav-a">Logout</a></li>
                 {% else %}
@@ -176,8 +176,8 @@
                 <div class="cta-left">
                     <div class="cta-badge">READY TO GET STARTED?</div>
                     <h2 class="cta-title">
-                        <span style="display: block; white-space: nowrap;">Unlock Premium AI Tools</span>
-                        <span class="cta-gradient-text" style="display: block; white-space: nowrap;">Without Premium Prices.</span>
+                        <span style="display: block;">Unlock Premium AI Tools</span>
+                        <span class="cta-gradient-text" style="display: block;">Without Premium Prices.</span>
                     </h2>
                     <p class="cta-desc">Join thousands of smart users saving money while enjoying the best AI tools in the world.</p>
                 </div>
@@ -268,7 +268,7 @@
             <!-- Col 3: Company -->
             <div class="footer-col">
                 <h4 class="footer-title">Company</h4>
-                <a href="{% url 'home' %}#trustFeatures" class="footer-link">About Us</a>
+                <a href="{% url 'home' %}#aboutUs" class="footer-link">About Us</a>
                 <a href="{% url 'home' %}#trustFeatures" class="footer-link">How It Works</a>
                 <a href="mailto:{{ site_settings.support_email|default:'support@onesolai.com' }}" class="footer-link">Support</a>
                 <a href="mailto:{{ site_settings.support_email|default:'support@onesolai.com' }}" class="footer-link">Contact Us</a>
@@ -523,10 +523,18 @@
     </script>
     <!-- Floating WhatsApp Button -->
     <style>
-        .floating-whatsapp {
+        .floating-whatsapp-container {
             position: fixed;
             bottom: 24px;
             right: 24px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 6px;
+            z-index: 9999;
+            animation: waDropIn 0.6s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+        }
+        .floating-whatsapp {
             width: 60px;
             height: 60px;
             background: linear-gradient(135deg, #5B63F6 0%, #6D56F8 35%, #8B3DF8 70%, #A11CF6 100%);
@@ -538,16 +546,24 @@
             justify-content: center;
             font-size: 30px;
             box-shadow: 0 4px 18px rgba(139, 61, 248, 0.45);
-            z-index: 9999;
             text-decoration: none;
-            animation: waDropIn 0.6s cubic-bezier(0.22, 1, 0.36, 1) forwards, waSlowRotate 12s linear 0.6s infinite;
+            animation: waSlowRotate 12s linear 0.6s infinite;
             transition: box-shadow 0.3s ease, filter 0.3s ease;
         }
-        .floating-whatsapp i {
+        .floating-whatsapp-inner {
             animation: waCounterRotate 12s linear 0.6s infinite;
             display: flex;
             align-items: center;
             justify-content: center;
+        }
+        .floating-whatsapp-label {
+            font-size: 11px;
+            font-weight: 700;
+            color: #25D366;
+            letter-spacing: 0.5px;
+            text-transform: uppercase;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.6);
+            pointer-events: none;
         }
         .floating-whatsapp:hover {
             filter: brightness(1.15);
@@ -555,38 +571,26 @@
             color: #FFF;
         }
         @keyframes waDropIn {
-            0% {
-                transform: translateY(-100vh) rotate(0deg);
-                opacity: 0;
-            }
-            80% {
-                opacity: 1;
-            }
-            100% {
-                transform: translateY(0) rotate(0deg);
-                opacity: 1;
-            }
+            0% { transform: translateY(150%) scale(0.8); opacity: 0; }
+            100% { transform: translateY(0) scale(1); opacity: 1; }
         }
         @keyframes waSlowRotate {
-            0% {
-                transform: rotate(0deg);
-            }
-            100% {
-                transform: rotate(360deg);
-            }
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
         }
         @keyframes waCounterRotate {
-            0% {
-                transform: rotate(0deg);
-            }
-            100% {
-                transform: rotate(-360deg);
-            }
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(-360deg); }
         }
     </style>
-    <a href="https://wa.me/2349110585508" class="floating-whatsapp" target="_blank" rel="noopener noreferrer">
-        <i class="fa-brands fa-whatsapp"></i>
-    </a>
+    <div class="floating-whatsapp-container">
+        <a href="https://wa.me/{{ site_settings.whatsapp_number|default:'+2349110585508' }}" class="floating-whatsapp" target="_blank" rel="noopener noreferrer">
+            <div class="floating-whatsapp-inner">
+                <i class="fa-brands fa-whatsapp"></i>
+            </div>
+        </a>
+        <span class="floating-whatsapp-label">WhatsApp</span>
+    </div>
 
     {% block extra_js %}{% endblock %}
 </body>

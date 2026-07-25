@@ -116,11 +116,17 @@ def initiate_gateway_payment(order, tool, price_ngn, local_amount, user_currency
     if not gateway_sequence:
         raise ValueError("No active payment gateway is currently configured for this currency. Please contact support.")
 
+    import logging
+    logger = logging.getLogger(__name__)
+    
     errors = []
     for g_name, g_func in gateway_sequence:
         try:
             return g_func()
         except Exception as e:
+            import traceback
+            print(f"\\n[GATEWAY ERROR] {g_name} failed: {e}\\n{traceback.format_exc()}")
+            logger.error(f"Payment gateway {g_name} failed: {e}\\n{traceback.format_exc()}")
             errors.append(f"{g_name}: {e}")
 
     raise ValueError(f"Payment gateway initialization failed: {'; '.join(errors)}")

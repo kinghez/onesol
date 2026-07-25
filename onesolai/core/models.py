@@ -188,15 +188,26 @@ class SiteSettings(models.Model):
         help_text='Paystack secret key (sk_test_... or sk_live_...)')
     
     # Flutterwave Keys
+    flutterwave_api_version = models.CharField(max_length=10, default='v3', choices=[
+        ('v3', 'V3 API Keys (Standard)'),
+        ('v4', 'V4 API Keys (OAuth 2.0)'),
+    ], help_text='Select the API version for the keys pasted below.')
     flutterwave_public_key = models.CharField(max_length=200, blank=True, default='',
-        help_text='Flutterwave public key (FLWPUBK_TEST-... or FLWPUBK_LIVE-...)')
+        verbose_name="Flutterwave Public Key / Client ID",
+        help_text='For V3: Paste your Public Key (FLWPUBK_...). For V4: Paste your Client ID.')
     flutterwave_secret_key = models.CharField(max_length=200, blank=True, default='',
-        help_text='Flutterwave secret key (FLWSECK_TEST-... or FLWSECK_LIVE-...)')
+        verbose_name="Flutterwave Secret Key / Client Secret",
+        help_text='For V3: Paste your Secret Key (FLWSECK_...). For V4: Paste your Client Secret.')
     flutterwave_encryption_key = models.CharField(max_length=200, blank=True, default='',
-        help_text='Flutterwave encryption key (optional)')
+        verbose_name="Flutterwave Encryption Key",
+        help_text='Paste your Flutterwave Encryption key here (optional).')
 
-    is_live_mode = models.BooleanField(default=False,
-        help_text='When enabled, live payment gateway keys are used. Keep OFF during testing.')
+    paystack_is_live_mode = models.BooleanField(default=False,
+        verbose_name="Paystack Live Mode",
+        help_text='Check if using Paystack Live keys. Uncheck for Test keys.')
+    flutterwave_is_live_mode = models.BooleanField(default=False,
+        verbose_name="Flutterwave Live Mode",
+        help_text='Check if using Flutterwave Live keys. Uncheck for Test keys.')
     transaction_fee_percent = models.DecimalField(max_digits=5, decimal_places=2, default=1.50,
         help_text='% fee added to each transaction (e.g. 1.50 = 1.5%)')
 
@@ -226,6 +237,10 @@ class SiteSettings(models.Model):
 
     # Support email
     support_email = models.EmailField(default='support@onesolai.com')
+
+    # About Us Page Image
+    about_us_image = models.ImageField(upload_to='site/', blank=True, null=True,
+        help_text='Image to display on the right side of the About Us section on the homepage.')
 
     # Site name / branding
     site_name = models.CharField(max_length=100, default='OneSol AI Hub')
@@ -269,8 +284,9 @@ class SiteSettings(models.Model):
         verbose_name_plural = 'Site Settings'
 
     def __str__(self):
-        mode = 'LIVE' if self.is_live_mode else 'TEST'
-        return f'Site Settings [{mode} MODE]'
+        ps_mode = 'LIVE' if self.paystack_is_live_mode else 'TEST'
+        fw_mode = 'LIVE' if self.flutterwave_is_live_mode else 'TEST'
+        return f'Site Settings [PS: {ps_mode} | FW: {fw_mode}]'
 
     @classmethod
     def get(cls):

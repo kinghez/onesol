@@ -1,0 +1,698 @@
+{% extends "base_public.html" %}
+{% load static %}
+
+{% block title %}Features | OneSol AI Hub{% endblock %}
+{% block nav_features %}active{% endblock %}
+
+{% block extra_css %}
+<style>
+    /* =============================================
+       FEATURES PAGE - PIXEL PERFECT REPLICA STYLES
+       ============================================= */
+    .features-page-container {
+        position: relative;
+        z-index: 5;
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 120px 24px 60px 24px;
+        color: #ffffff;
+        font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    }
+
+    /* Badges */
+    .ft-badge {
+        display: inline-block;
+        padding: 5px 14px;
+        border-radius: 20px;
+        font-size: 11px;
+        font-weight: 700;
+        letter-spacing: 1.5px;
+        color: #8C9EFF;
+        text-transform: uppercase;
+        background: rgba(80, 100, 255, 0.08);
+        border: 1px solid rgba(120, 140, 255, 0.35);
+        margin-bottom: 20px;
+    }
+
+    /* Gradient Text */
+    .ft-gold-text {
+        color: #E8C877;
+    }
+    .ft-purple-text {
+        background: linear-gradient(135deg, #B388FF 0%, #8C9EFF 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+    }
+
+    /* ══════ HERO SECTION ══════ */
+    .ft-hero-section {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 40px;
+        margin-bottom: 90px;
+    }
+
+    .ft-hero-left {
+        flex: 1.1;
+        max-width: 580px;
+    }
+
+    .ft-hero-title {
+        font-size: 46px;
+        font-weight: 800;
+        line-height: 1.12;
+        margin-bottom: 18px;
+        letter-spacing: -0.5px;
+        color: #ffffff;
+    }
+
+    .ft-hero-desc {
+        font-size: 15px;
+        color: #A7ABC3;
+        line-height: 1.6;
+        margin-bottom: 36px;
+        max-width: 480px;
+    }
+
+    .ft-hero-points {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 16px;
+    }
+
+    .ft-point-item {
+        display: flex;
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    .ft-point-icon {
+        width: 42px;
+        height: 42px;
+        border-radius: 12px;
+        background: rgba(20, 26, 60, 0.7);
+        border: 1px solid rgba(80, 120, 255, 0.25);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 18px;
+        margin-bottom: 10px;
+    }
+
+    .ft-point-icon.icon-blue {
+        color: #64B5F6;
+        box-shadow: 0 0 15px rgba(100, 181, 246, 0.15);
+    }
+    .ft-point-icon.icon-purple {
+        color: #B388FF;
+        border-color: rgba(179, 136, 255, 0.3);
+        box-shadow: 0 0 15px rgba(179, 136, 255, 0.15);
+    }
+
+    .ft-point-title {
+        font-size: 13px;
+        font-weight: 700;
+        color: #ffffff;
+        margin-bottom: 4px;
+    }
+
+    .ft-point-sub {
+        font-size: 11px;
+        color: #7885A0;
+        line-height: 1.45;
+    }
+
+    .ft-hero-right {
+        flex: 0.9;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+    }
+
+    .ft-hero-img {
+        max-width: 100%;
+        width: 500px;
+        height: auto;
+        filter: drop-shadow(0 20px 40px rgba(80, 50, 255, 0.3));
+        animation: ftFloat 6s ease-in-out infinite alternate;
+    }
+
+    @keyframes ftFloat {
+        0% { transform: translateY(0px); }
+        100% { transform: translateY(-12px); }
+    }
+
+    /* ══════ EXPLORE SECTION ══════ */
+    .ft-explore-section {
+        text-align: center;
+        margin-bottom: 90px;
+    }
+
+    .ft-sec-title {
+        font-size: 34px;
+        font-weight: 800;
+        color: #ffffff;
+        margin-bottom: 12px;
+    }
+
+    .ft-sec-desc {
+        font-size: 15px;
+        color: #A7ABC3;
+        margin-bottom: 48px;
+        max-width: 600px;
+        margin-left: auto;
+        margin-right: auto;
+    }
+
+    .ft-grid {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 24px;
+    }
+
+    .ft-card {
+        background: linear-gradient(180deg, rgba(14, 17, 45, 0.8) 0%, rgba(9, 11, 32, 0.9) 100%);
+        border: 1px solid rgba(255, 255, 255, 0.08);
+        border-radius: 18px;
+        padding: 32px 24px;
+        text-align: left;
+        display: flex;
+        flex-direction: column;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        position: relative;
+        overflow: hidden;
+    }
+
+    .ft-card:hover {
+        transform: translateY(-6px);
+        border-color: rgba(120, 140, 255, 0.4);
+        box-shadow: 0 20px 40px rgba(0, 0, 0, 0.5), 0 0 25px rgba(80, 100, 255, 0.15);
+    }
+
+    .ft-card-icon {
+        width: 54px;
+        height: 54px;
+        border-radius: 50%;
+        background: rgba(20, 26, 60, 0.6);
+        border: 1px solid rgba(255, 255, 255, 0.08);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 22px;
+        margin-bottom: 22px;
+    }
+
+    .ft-card-icon.ico-purple {
+        color: #B388FF;
+        border-color: rgba(179, 136, 255, 0.3);
+        box-shadow: 0 0 20px rgba(179, 136, 255, 0.2);
+    }
+    .ft-card-icon.ico-blue {
+        color: #64B5F6;
+        border-color: rgba(100, 181, 246, 0.3);
+        box-shadow: 0 0 20px rgba(100, 181, 246, 0.2);
+    }
+    .ft-card-icon.ico-green {
+        color: #81C784;
+        border-color: rgba(129, 199, 132, 0.3);
+        box-shadow: 0 0 20px rgba(129, 199, 132, 0.2);
+    }
+
+    .ft-card h3 {
+        font-size: 18px;
+        font-weight: 700;
+        color: #ffffff;
+        margin-bottom: 10px;
+    }
+
+    .ft-card p {
+        font-size: 13.5px;
+        color: #7885A0;
+        line-height: 1.55;
+        margin-bottom: 24px;
+        flex-grow: 1;
+    }
+
+    .ft-card-link {
+        color: #8C9EFF;
+        font-size: 13px;
+        font-weight: 600;
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        transition: gap 0.2s, color 0.2s;
+    }
+
+    .ft-card-link:hover {
+        color: #B388FF;
+        gap: 10px;
+    }
+
+    /* ══════ STATS BAR ══════ */
+    .ft-stats-bar {
+        background: linear-gradient(90deg, rgba(14, 18, 48, 0.85) 0%, rgba(10, 13, 36, 0.95) 100%);
+        border: 1px solid rgba(80, 120, 255, 0.25);
+        border-radius: 16px;
+        padding: 30px 40px;
+        margin-bottom: 90px;
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 20px;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+    }
+
+    .ft-stat-item {
+        display: flex;
+        align-items: center;
+        gap: 18px;
+    }
+
+    .ft-stat-ico {
+        font-size: 26px;
+        color: #64B5F6;
+        width: 48px;
+        height: 48px;
+        border-radius: 12px;
+        background: rgba(100, 181, 246, 0.1);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .ft-stat-num {
+        font-size: 24px;
+        font-weight: 800;
+        color: #ffffff;
+        line-height: 1.1;
+    }
+
+    .ft-stat-lbl {
+        font-size: 13px;
+        color: #A7ABC3;
+        margin-top: 2px;
+    }
+
+    /* ══════ PROCESS CARD SECTION ══════ */
+    .ft-process-card {
+        background: linear-gradient(180deg, rgba(14, 17, 45, 0.7) 0%, rgba(8, 10, 28, 0.8) 100%);
+        border: 1px solid rgba(255, 255, 255, 0.08);
+        border-radius: 20px;
+        padding: 48px 40px;
+        margin-bottom: 80px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 40px;
+    }
+
+    .ft-proc-left {
+        flex: 0.9;
+        max-width: 320px;
+    }
+
+    .ft-proc-title {
+        font-size: 32px;
+        font-weight: 800;
+        line-height: 1.2;
+        margin-bottom: 12px;
+        color: #ffffff;
+    }
+
+    .ft-proc-desc {
+        font-size: 14px;
+        color: #A7ABC3;
+        line-height: 1.55;
+        margin-bottom: 28px;
+    }
+
+    .ft-btn-outline {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        padding: 10px 22px;
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        border-radius: 8px;
+        color: #ffffff;
+        font-size: 13px;
+        font-weight: 600;
+        text-decoration: none;
+        transition: all 0.25s;
+        background: rgba(255, 255, 255, 0.03);
+    }
+
+    .ft-btn-outline:hover {
+        background: rgba(255, 255, 255, 0.1);
+        border-color: rgba(255, 255, 255, 0.4);
+        color: #ffffff;
+    }
+
+    .ft-proc-right {
+        flex: 1.8;
+        display: flex;
+        justify-content: space-between;
+        position: relative;
+    }
+
+    .ft-proc-line {
+        position: absolute;
+        top: 28px;
+        left: 40px;
+        right: 40px;
+        height: 2px;
+        border-top: 2px dashed rgba(80, 120, 255, 0.3);
+        z-index: 1;
+    }
+
+    .ft-step-item {
+        position: relative;
+        z-index: 2;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        text-align: center;
+        max-width: 110px;
+    }
+
+    .ft-step-ico {
+        width: 56px;
+        height: 56px;
+        border-radius: 50%;
+        background: #0A0D28;
+        border: 2px solid #5C25FF;
+        color: #8C9EFF;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 20px;
+        margin-bottom: 12px;
+        box-shadow: 0 0 20px rgba(92, 37, 255, 0.3);
+    }
+
+    .ft-step-ico.step-2 { border-color: #3D5AFE; color: #64B5F6; box-shadow: 0 0 20px rgba(61, 90, 254, 0.3); }
+    .ft-step-ico.step-3 { border-color: #00E676; color: #00E676; box-shadow: 0 0 20px rgba(0, 230, 118, 0.3); }
+    .ft-step-ico.step-4 { border-color: #81C784; color: #81C784; box-shadow: 0 0 20px rgba(129, 199, 132, 0.3); }
+
+    .ft-step-num {
+        font-size: 12px;
+        font-weight: 800;
+        color: #64B5F6;
+        margin-bottom: 4px;
+    }
+
+    .ft-step-title {
+        font-size: 13.5px;
+        font-weight: 700;
+        color: #ffffff;
+        margin-bottom: 4px;
+    }
+
+    .ft-step-desc {
+        font-size: 11.5px;
+        color: #7885A0;
+        line-height: 1.4;
+    }
+
+    /* Responsive */
+    @media (max-width: 1024px) {
+        .ft-grid {
+            grid-template-columns: repeat(2, 1fr);
+        }
+        .ft-hero-section {
+            flex-direction: column;
+            text-align: center;
+        }
+        .ft-hero-left {
+            max-width: 100%;
+        }
+        .ft-hero-desc {
+            margin-left: auto;
+            margin-right: auto;
+        }
+        .ft-hero-points {
+            justify-content: center;
+        }
+        .ft-point-item {
+            align-items: center;
+        }
+        .ft-stats-bar {
+            grid-template-columns: repeat(2, 1fr);
+            gap: 30px;
+        }
+        .ft-process-card {
+            flex-direction: column;
+            text-align: center;
+        }
+        .ft-proc-left {
+            max-width: 100%;
+        }
+        .ft-proc-right {
+            width: 100%;
+        }
+    }
+
+    @media (max-width: 640px) {
+        .ft-grid {
+            grid-template-columns: 1fr;
+        }
+        .ft-hero-title {
+            font-size: 32px;
+        }
+        .ft-hero-points {
+            grid-template-columns: repeat(2, 1fr);
+        }
+        .ft-stats-bar {
+            grid-template-columns: 1fr;
+        }
+        .ft-proc-right {
+            flex-direction: column;
+            gap: 24px;
+            align-items: center;
+        }
+        .ft-proc-line {
+            display: none;
+        }
+        .ft-step-item {
+            max-width: 100%;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="features-page-container">
+
+    <!-- ══════ HERO SECTION ══════ -->
+    <section class="ft-hero-section">
+        <div class="ft-hero-left">
+            <div class="ft-badge">FEATURES</div>
+            <h1 class="ft-hero-title">
+                Powerful Features,<br>
+                <span class="ft-gold-text">Built</span> <span class="ft-purple-text">for You.</span>
+            </h1>
+            <p class="ft-hero-desc">
+                OneSol AI Hub is designed to give you a smooth, secure, and affordable experience from payment to activation and beyond.
+            </p>
+
+            <div class="ft-hero-points">
+                <div class="ft-point-item">
+                    <div class="ft-point-icon icon-blue"><i class="fa-solid fa-bolt"></i></div>
+                    <div class="ft-point-title">Instant Activation</div>
+                    <div class="ft-point-sub">Get access instantly after purchase.</div>
+                </div>
+                <div class="ft-point-item">
+                    <div class="ft-point-icon icon-blue"><i class="fa-solid fa-shield-halved"></i></div>
+                    <div class="ft-point-title">Secure Payments</div>
+                    <div class="ft-point-sub">Your payments and data are safe.</div>
+                </div>
+                <div class="ft-point-item">
+                    <div class="ft-point-icon icon-blue"><i class="fa-solid fa-tags"></i></div>
+                    <div class="ft-point-title">Lowest Prices</div>
+                    <div class="ft-point-sub">Enjoy premium tools at the best rates.</div>
+                </div>
+                <div class="ft-point-item">
+                    <div class="ft-point-icon icon-purple"><i class="fa-solid fa-headset"></i></div>
+                    <div class="ft-point-title">24/7 Support</div>
+                    <div class="ft-point-sub">Our team is always here to help.</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="ft-hero-right">
+            <img src="{% static 'assets/images/features_hero.png' %}" alt="OneSol AI Hub Features" class="ft-hero-img">
+        </div>
+    </section>
+
+    <!-- ══════ EXPLORE FEATURES GRID ══════ -->
+    <section class="ft-explore-section">
+        <div class="ft-badge">EVERYTHING YOU NEED</div>
+        <h2 class="ft-sec-title">Explore Our Powerful Features</h2>
+        <p class="ft-sec-desc">All the tools and features you need to access premium AI services seamlessly and affordably.</p>
+
+        <div class="ft-grid">
+            <!-- Card 1 -->
+            <div class="ft-card">
+                <div class="ft-card-icon ico-purple">
+                    <i class="fa-solid fa-bolt"></i>
+                </div>
+                <h3>Instant Activation</h3>
+                <p>Your subscription is activated instantly. No waiting, no delays. Start using your tools right away.</p>
+                <a href="{% url 'tools:tools_list' %}" class="ft-card-link">Learn more <i class="fa-solid fa-arrow-right"></i></a>
+            </div>
+
+            <!-- Card 2 -->
+            <div class="ft-card">
+                <div class="ft-card-icon ico-blue">
+                    <i class="fa-solid fa-shield-halved"></i>
+                </div>
+                <h3>Secure Payments</h3>
+                <p>We use industry-leading encryption and trusted payment gateways to keep you safe.</p>
+                <a href="{% url 'home' %}" class="ft-card-link">Learn more <i class="fa-solid fa-arrow-right"></i></a>
+            </div>
+
+            <!-- Card 3 -->
+            <div class="ft-card">
+                <div class="ft-card-icon ico-blue">
+                    <i class="fa-solid fa-tags"></i>
+                </div>
+                <h3>Lowest Prices</h3>
+                <p>We offer the lowest prices on premium AI tools without compromising on quality.</p>
+                <a href="{% url 'tools:tools_list' %}" class="ft-card-link">Learn more <i class="fa-solid fa-arrow-right"></i></a>
+            </div>
+
+            <!-- Card 4 -->
+            <div class="ft-card">
+                <div class="ft-card-icon ico-purple">
+                    <i class="fa-solid fa-headset"></i>
+                </div>
+                <h3>24/7 Customer Support</h3>
+                <p>Our friendly support team is always available to assist you anytime, anywhere.</p>
+                <a href="{% url 'home' %}#aboutUs" class="ft-card-link">Learn more <i class="fa-solid fa-arrow-right"></i></a>
+            </div>
+
+            <!-- Card 5 -->
+            <div class="ft-card">
+                <div class="ft-card-icon ico-blue">
+                    <i class="fa-solid fa-envelope"></i>
+                </div>
+                <h3>Email Delivery</h3>
+                <p>Activation details are sent directly to your email immediately after payment.</p>
+                <a href="{% url 'home' %}" class="ft-card-link">Learn more <i class="fa-solid fa-arrow-right"></i></a>
+            </div>
+
+            <!-- Card 6 -->
+            <div class="ft-card">
+                <div class="ft-card-icon ico-purple">
+                    <i class="fa-solid fa-wallet"></i>
+                </div>
+                <h3>Referral Rewards</h3>
+                <p>Earn money by referring friends and grow your earnings effortlessly.</p>
+                <a href="{% url 'dashboard:referrals' %}" class="ft-card-link">Learn more <i class="fa-solid fa-arrow-right"></i></a>
+            </div>
+
+            <!-- Card 7 -->
+            <div class="ft-card">
+                <div class="ft-card-icon ico-blue">
+                    <i class="fa-solid fa-globe"></i>
+                </div>
+                <h3>Local Currency</h3>
+                <p>Pay in your local currency with multiple payment options across Africa.</p>
+                <a href="{% url 'home' %}" class="ft-card-link">Learn more <i class="fa-solid fa-arrow-right"></i></a>
+            </div>
+
+            <!-- Card 8 -->
+            <div class="ft-card">
+                <div class="ft-card-icon ico-green">
+                    <i class="fa-solid fa-shield-check"></i>
+                </div>
+                <h3>Trusted & Reliable</h3>
+                <p>We partner with trusted vendors to deliver genuine and reliable subscriptions.</p>
+                <a href="{% url 'home' %}#aboutUs" class="ft-card-link">Learn more <i class="fa-solid fa-arrow-right"></i></a>
+            </div>
+        </div>
+    </section>
+
+    <!-- ══════ STATS BAR ══════ -->
+    <section class="ft-stats-bar">
+        <div class="ft-stat-item">
+            <div class="ft-stat-ico"><i class="fa-solid fa-users"></i></div>
+            <div>
+                <div class="ft-stat-num">15,000+</div>
+                <div class="ft-stat-lbl">Happy Customers</div>
+            </div>
+        </div>
+        <div class="ft-stat-item">
+            <div class="ft-stat-ico"><i class="fa-solid fa-cube"></i></div>
+            <div>
+                <div class="ft-stat-num">500+</div>
+                <div class="ft-stat-lbl">Premium Tools</div>
+            </div>
+        </div>
+        <div class="ft-stat-item">
+            <div class="ft-stat-ico"><i class="fa-solid fa-globe"></i></div>
+            <div>
+                <div class="ft-stat-num">30+</div>
+                <div class="ft-stat-lbl">Countries Served</div>
+            </div>
+        </div>
+        <div class="ft-stat-item">
+            <div class="ft-stat-ico"><i class="fa-solid fa-star"></i></div>
+            <div>
+                <div class="ft-stat-num">99.5%</div>
+                <div class="ft-stat-lbl">Customer Satisfaction</div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ══════ PROCESS CARD SECTION ══════ -->
+    <section class="ft-process-card">
+        <div class="ft-proc-left">
+            <div class="ft-badge">EASY PROCESS</div>
+            <h2 class="ft-proc-title">
+                Simple. Fast.<br>
+                <span class="ft-purple-text">Reliable.</span>
+            </h2>
+            <p class="ft-proc-desc">
+                Get started in just a few simple steps and enjoy premium AI tools instantly.
+            </p>
+            <a href="{% url 'home' %}#howItWorks" class="ft-btn-outline">
+                How It Works <i class="fa-solid fa-arrow-right"></i>
+            </a>
+        </div>
+
+        <div class="ft-proc-right">
+            <div class="ft-proc-line"></div>
+
+            <div class="ft-step-item">
+                <div class="ft-step-ico step-1"><i class="fa-solid fa-cart-shopping"></i></div>
+                <div class="ft-step-num">01</div>
+                <div class="ft-step-title">Choose a Tool</div>
+                <div class="ft-step-desc">Browse and select the tool you need.</div>
+            </div>
+
+            <div class="ft-step-item">
+                <div class="ft-step-ico step-2"><i class="fa-regular fa-credit-card"></i></div>
+                <div class="ft-step-num">02</div>
+                <div class="ft-step-title">Make Payment</div>
+                <div class="ft-step-desc">Pay securely using our payment options.</div>
+            </div>
+
+            <div class="ft-step-item">
+                <div class="ft-step-ico step-3"><i class="fa-regular fa-paper-plane"></i></div>
+                <div class="ft-step-num">03</div>
+                <div class="ft-step-title">Get Activated</div>
+                <div class="ft-step-desc">Receive activation details via email instantly.</div>
+            </div>
+
+            <div class="ft-step-item">
+                <div class="ft-step-ico step-4"><i class="fa-solid fa-shield-check"></i></div>
+                <div class="ft-step-num">04</div>
+                <div class="ft-step-title">Enjoy Access</div>
+                <div class="ft-step-desc">Sign in and start enjoying premium features.</div>
+            </div>
+        </div>
+    </section>
+
+</div>
+{% endblock %}
