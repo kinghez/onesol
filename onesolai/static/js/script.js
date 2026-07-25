@@ -666,6 +666,53 @@ document.addEventListener('DOMContentLoaded', function () {
 
         if (!grid) return;
 
+        // Auto-scroll when section is in view (1.5s initial delay after scrolling into view)
+        let autoScrollTimer = null;
+        let initialDelayTimeout = null;
+
+        const startAutoScroll = () => {
+            if (autoScrollTimer || initialDelayTimeout) return;
+            initialDelayTimeout = setTimeout(() => {
+                initialDelayTimeout = null;
+                autoScrollTimer = setInterval(() => {
+                    if (grid.scrollLeft + grid.clientWidth >= grid.scrollWidth - 15) {
+                        grid.scrollTo({ left: 0, behavior: 'smooth' });
+                    } else {
+                        grid.scrollBy({ left: 300, behavior: 'smooth' });
+                    }
+                }, 4500);
+            }, 1500);
+        };
+
+        const stopAutoScroll = () => {
+            if (initialDelayTimeout) {
+                clearTimeout(initialDelayTimeout);
+                initialDelayTimeout = null;
+            }
+            if (autoScrollTimer) {
+                clearInterval(autoScrollTimer);
+                autoScrollTimer = null;
+            }
+        };
+
+        if ('IntersectionObserver' in window) {
+            const observer = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        startAutoScroll();
+                    } else {
+                        stopAutoScroll();
+                    }
+                });
+            }, { threshold: 0.15 });
+            observer.observe(wrapper);
+        } else {
+            startAutoScroll();
+        }
+
+        wrapper.addEventListener('mouseenter', stopAutoScroll);
+        wrapper.addEventListener('mouseleave', startAutoScroll);
+
         // Scroll event to toggle prev button visibility
         grid.addEventListener('scroll', () => {
             if (btnPrev) {

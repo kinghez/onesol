@@ -1,28 +1,71 @@
+import logging
+import traceback
+import json
+
 from django.shortcuts import render, get_object_or_404
 from django.http import JsonResponse
+from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 from .models import Tool, Category
+
+# Dedicated logger for the tools page — shows up in Django's runserver output
+logger = logging.getLogger('products.tools')
 
 
 def tools_list(request):
-    """Render the all-tools listing page with real DB data."""
-    tools = Tool.objects.filter(is_active=True).select_related('category')
-    categories = Category.objects.all()
+    """
+    Render the all-tools listing page.
+    Uses Django's Paginator (server-side) – no JS grid injection, no race conditions.
+    Detailed logging is active so any error will appear in the console.
+    """
+    logger.info("=== tools_list called | user=%s | GET=%s ===", request.user, dict(request.GET))
 
-    # Filter by category slug
-    category_slug = request.GET.get('category')
+    # ── 1. Fetch & validate categories ──────────────────────────────────────
+    try:
+        categories = list(Category.objects.all().order_by('order', 'name'))
+        logger.info("Categories loaded: %d", len(categories))
+    except Exception as exc:
+        logger.error("ERROR loading categories: %s\n%s", exc, traceback.format_exc())
+        categories = []
+
+    # ── 2. Base queryset ─────────────────────────────────────────────────────
+    try:
+        qs = Tool.objects.filter(is_active=True).select_related('category', 'vendor_product')
+        total_all = qs.count()
+        logger.info("Active tools in DB (total): %d", total_all)
+    except Exception as exc:
+        logger.error("ERROR building base queryset: %s\n%s", exc, traceback.format_exc())
+        qs = Tool.objects.none()
+        total_all = 0
+
+    # ── 3. Category filter ───────────────────────────────────────────────────
+    category_slug = request.GET.get('category', '').strip()
     active_category = None
     if category_slug:
         try:
             active_category = Category.objects.get(slug=category_slug)
-            tools = tools.filter(category=active_category)
+            qs = qs.filter(category=active_category)
+            logger.info("Filtered by category slug=%s → %s", category_slug, active_category.name)
         except Category.DoesNotExist:
-            pass
+            logger.warning("Category slug '%s' not found, ignoring filter", category_slug)
+        except Exception as exc:
+            logger.error("ERROR in category filter: %s\n%s", exc, traceback.format_exc())
 
-    # Filter popular only
-    if request.GET.get('popular_only'):
-        tools = tools.filter(is_popular=True)
+    # ── 4. Search ────────────────────────────────────────────────────────────
+    q = request.GET.get('q', '').strip()
+    if q:
+        try:
+            qs = qs.filter(name__icontains=q) | qs.filter(short_description__icontains=q)
+            logger.info("Search q='%s' applied", q)
+        except Exception as exc:
+            logger.error("ERROR in search filter: %s\n%s", exc, traceback.format_exc())
 
-    # Sort
+    # ── 5. Popular-only checkbox ─────────────────────────────────────────────
+    popular_only = bool(request.GET.get('popular_only'))
+    if popular_only:
+        qs = qs.filter(is_popular=True)
+        logger.info("popular_only filter applied")
+
+    # ── 6. Sort ──────────────────────────────────────────────────────────────
     sort = request.GET.get('sort', 'popular')
     sort_map = {
         'price_asc': 'sell_price_usd',
@@ -30,50 +73,100 @@ def tools_list(request):
         'newest': '-created_at',
         'popular': '-is_popular',
     }
-    tools = tools.order_by(sort_map.get(sort, '-is_popular'))
+    order_by = sort_map.get(sort, '-is_popular')
+    try:
+        qs = qs.order_by(order_by)
+        logger.info("Sort applied: sort=%s → order_by=%s", sort, order_by)
+    except Exception as exc:
+        logger.error("ERROR applying sort: %s\n%s", exc, traceback.format_exc())
 
-    # Search
-    q = request.GET.get('q', '').strip()
-    if q:
-        tools = tools.filter(name__icontains=q) | tools.filter(description__icontains=q)
+    # ── 7. Evaluate queryset & compute prices ────────────────────────────────
+    try:
+        tools_list_qs = list(qs)
+        filtered_total = len(tools_list_qs)
+        logger.info("Queryset evaluated: %d tools after filters", filtered_total)
+    except Exception as exc:
+        logger.error("ERROR evaluating queryset: %s\n%s", exc, traceback.format_exc())
+        tools_list_qs = []
+        filtered_total = 0
 
-    import json
+    # Attach computed prices — use non-underscore names so Django templates can access them
+    for tool in tools_list_qs:
+        try:
+            tool.price_ngn_display = tool.get_ngn_price()
+            tool.price_usd_display = tool.get_usd_price()
+        except Exception as exc:
+            logger.warning("Price calc failed for tool id=%s '%s': %s", tool.id, tool.name, exc)
+            tool.price_ngn_display = 0.0
+            tool.price_usd_display = 0.0
 
-    # Pre-serialize tools for JS
-    tools_data = []
-    for tool in tools:
-        tools_data.append({
-            'id': tool.id,
-            'name': tool.name,
-            'slug': tool.slug,
-            'category': tool.category.name,
-            'description': tool.short_description or tool.description[:150],
-            'image_url': tool.image_url or '',
-            'developer': tool.developer,
-            'base_price_usd': tool.get_usd_price(),
-            'price_ngn': tool.get_ngn_price(),
-            'in_stock': tool.is_in_stock,
-            'is_new': tool.is_new,
-            'is_popular': tool.is_popular,
-            'is_featured': tool.is_featured,
-            'badge': ('Best Seller' if tool.is_featured and tool.is_popular else
-                      'Popular' if tool.is_popular else
-                      'New' if tool.is_new else None),
-            'rating': float(tool.rating),
-            'review_count': tool.review_count,
-            'users_count': tool.users_count,
-            'detail_url': f'/tools/{tool.slug}/',
-        })
+    # ── 8. Pagination ────────────────────────────────────────────────────────
+    PAGE_SIZE = 12
+    paginator = Paginator(tools_list_qs, PAGE_SIZE)
+    page_param = request.GET.get('page', 1)
+    try:
+        page_obj = paginator.page(page_param)
+    except PageNotAnInteger:
+        logger.warning("page param '%s' is not an integer, defaulting to page 1", page_param)
+        page_obj = paginator.page(1)
+    except EmptyPage:
+        logger.warning("page param '%s' is out of range, defaulting to last page", page_param)
+        page_obj = paginator.page(paginator.num_pages)
 
+    logger.info(
+        "Pagination: page=%s of %s | PAGE_SIZE=%d | items_on_page=%d",
+        page_obj.number, paginator.num_pages, PAGE_SIZE, len(page_obj.object_list)
+    )
+
+    # ── 9. Page range helper (e.g. for numbered buttons) ────────────────────
+    # Show at most 5 page number buttons around current page
+    current = page_obj.number
+    total_pages = paginator.num_pages
+    half = 2
+    page_range_start = max(1, current - half)
+    page_range_end = min(total_pages, current + half)
+    # Expand if near start/end
+    if page_range_end - page_range_start < 4:
+        if page_range_start == 1:
+            page_range_end = min(total_pages, 5)
+        elif page_range_end == total_pages:
+            page_range_start = max(1, total_pages - 4)
+    page_range = list(range(page_range_start, page_range_end + 1))
+
+    # ── 10. Wishlist IDs (for authenticated users) ───────────────────────────
+    wishlist_ids = set()
+    if request.user.is_authenticated:
+        try:
+            from .models import Wishlist
+            wishlist_ids = set(
+                Wishlist.objects.filter(user=request.user)
+                .values_list('tool_id', flat=True)
+            )
+            logger.info("Wishlist IDs for user %s: %s", request.user, wishlist_ids)
+        except Exception as exc:
+            logger.error("ERROR fetching wishlist: %s\n%s", exc, traceback.format_exc())
+
+    # Tag tools on current page with wishlist flag (non-underscore so Django template can read it)
+    for tool in page_obj.object_list:
+        tool.in_wishlist_flag = tool.id in wishlist_ids
+
+    # ── 11. Build context ────────────────────────────────────────────────────
     context = {
-        'tools': tools,
-        'tools_json': json.dumps(tools_data),
+        'page_obj': page_obj,
+        'paginator': paginator,
+        'page_range': page_range,
+        'total_all': total_all,           # Total active tools in DB (unfiltered)
+        'filtered_total': filtered_total, # Tools matching current filters
         'categories': categories,
         'active_category': active_category,
         'sort': sort,
         'q': q,
+        'popular_only': popular_only,
+        'page_size': PAGE_SIZE,
         'hide_header_footer': request.user.is_authenticated,
     }
+
+    logger.info("=== tools_list rendering complete, context keys: %s ===", list(context.keys()))
     return render(request, 'tools/tools.html', context)
 
 

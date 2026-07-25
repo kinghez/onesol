@@ -125,7 +125,6 @@
             <ul class="nav-links" id="navLinks">
                 <li><a href="{% url 'home' %}" class="nav-a {% block nav_home %}{% endblock %}">Home</a></li>
                 <li><a href="{% url 'tools:tools_list' %}" class="nav-a {% block nav_tools %}{% endblock %}">Tools</a></li>
-                <li><a href="#" class="nav-a">Pricing</a></li>
                 <li><a href="{% url 'features' %}" class="nav-a {% block nav_features %}{% endblock %}">Features</a></li>
                 <li><a href="{% url 'home' %}#aboutUs" class="nav-a">About Us</a></li>
                 {% if user.is_authenticated %}
@@ -261,8 +260,7 @@
                 <h4 class="footer-title">Quick Links</h4>
                 <a href="{% url 'home' %}" class="footer-link">Home</a>
                 <a href="{% url 'tools:tools_list' %}" class="footer-link">Tools</a>
-                <a href="{% url 'tools:tools_list' %}" class="footer-link">Categories</a>
-                <a href="{% url 'tools:tools_list' %}" class="footer-link">Pricing</a>
+                <a href="{% url 'features' %}" class="footer-link">Features</a>
             </div>
 
             <!-- Col 3: Company -->
@@ -557,7 +555,8 @@
             justify-content: center;
         }
         .floating-whatsapp-label {
-            font-size: 11px;
+            font-size: 7px;
+            font-style: italic;
             font-weight: 700;
             color: #25D366;
             letter-spacing: 0.5px;

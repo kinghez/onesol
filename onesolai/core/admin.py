@@ -7,7 +7,25 @@ admin.site.site_header = "OneSol AI Hub – Admin"
 admin.site.site_title = "OneSol Admin"
 admin.site.index_title = "Site Management Dashboard"
 
-from .models import SiteSettings, HeroSlide, NewsletterSubscriber
+from .models import SiteSettings, HeroSlide, NewsletterSubscriber, Testimonial, FAQ
+
+
+@admin.register(Testimonial)
+class TestimonialAdmin(admin.ModelAdmin):
+    list_display = ('name', 'location', 'rating', 'is_active', 'order')
+    list_editable = ('is_active', 'order', 'rating')
+    list_filter = ('is_active', 'rating')
+    search_fields = ('name', 'location', 'review_text')
+    ordering = ('order', '-id')
+
+
+@admin.register(FAQ)
+class FAQAdmin(admin.ModelAdmin):
+    list_display = ('question', 'is_active', 'order')
+    list_editable = ('is_active', 'order')
+    list_filter = ('is_active',)
+    search_fields = ('question', 'answer')
+    ordering = ('order', 'id')
 
 
 @admin.register(HeroSlide)
@@ -61,6 +79,10 @@ class SiteSettingsAdmin(admin.ModelAdmin):
         ('💱 Dynamic Pricing', {
             'fields': ('global_markup_percent', 'global_markup_fixed_usd', 'usd_to_ngn_rate'),
             'description': 'Configure profit margins and currency conversion for dynamic Vendor products.',
+        }),
+        ('🌟 Homepage Trust Bar', {
+            'fields': ('trust_bar_left_text', 'trust_bar_rating_score', 'trust_bar_right_text'),
+            'description': 'Customize the text and rating score displayed in the homepage trust bar.',
         }),
         ('📄 Editable Legal Pages Content', {
             'fields': ('privacy_policy_content', 'terms_of_service_content', 'refund_policy_content'),

@@ -4,16 +4,22 @@ from . import currency
 from . import dashboard_views  # re-export
 
 
-from .models import HeroSlide
+from .models import HeroSlide, Testimonial, FAQ
 
 def home(request):
     """Render the home page."""
-    from products.models import Category
+    from products.models import Category, Tool
     hero_slides = HeroSlide.objects.filter(is_active=True).order_by('order')
     categories = Category.objects.filter(tools__is_active=True).distinct()
+    total_tools_count = Tool.objects.filter(is_active=True).count()
+    testimonials = Testimonial.objects.filter(is_active=True).order_by('order', '-id')
+    faqs = FAQ.objects.filter(is_active=True).order_by('order', 'id')
     return render(request, 'home/index.html', {
         'hero_slides': hero_slides,
         'categories': categories,
+        'total_tools_count': total_tools_count,
+        'testimonials': testimonials,
+        'faqs': faqs,
     })
 
 

@@ -64,12 +64,24 @@
 
                             <div class="hero-btns {% if forloop.first %}hero2-btns{% endif %}">
                                 {% if slide.primary_button_text %}
-                                <a href="#how-it-works" class="{% if forloop.first %}btn-pri-2{% else %}btn-pri{% endif %}">
+                                {% if slide.primary_button_url %}
+                                <a href="{{ slide.primary_button_url }}" class="{% if forloop.first %}btn-pri-2{% else %}btn-pri{% endif %}">
+                                {% elif "how" in slide.primary_button_text|lower %}
+                                <a href="#trustFeatures" class="{% if forloop.first %}btn-pri-2{% else %}btn-pri{% endif %}">
+                                {% else %}
+                                <a href="{% url 'tools:tools_list' %}" class="{% if forloop.first %}btn-pri-2{% else %}btn-pri{% endif %}">
+                                {% endif %}
                                     {% if slide.primary_button_icon %}<i class="{{ slide.primary_button_icon }}"></i> {% endif %}{{ slide.primary_button_text }}
                                 </a>
                                 {% endif %}
                                 {% if slide.secondary_button_text %}
-                                <a href="#how-it-works" class="{% if forloop.first %}btn-sec-2{% else %}btn-sec{% endif %}">{{ slide.secondary_button_text }}</a>
+                                {% if slide.secondary_button_url %}
+                                <a href="{{ slide.secondary_button_url }}" class="{% if forloop.first %}btn-sec-2{% else %}btn-sec{% endif %}">{{ slide.secondary_button_text }}</a>
+                                {% elif "how" in slide.secondary_button_text|lower %}
+                                <a href="#trustFeatures" class="{% if forloop.first %}btn-sec-2{% else %}btn-sec{% endif %}">{{ slide.secondary_button_text }}</a>
+                                {% else %}
+                                <a href="{% url 'tools:tools_list' %}" class="{% if forloop.first %}btn-sec-2{% else %}btn-sec{% endif %}">{{ slide.secondary_button_text }}</a>
+                                {% endif %}
                                 {% endif %}
                             </div>
                         </div>
@@ -122,7 +134,7 @@
 
             <!-- Trust Bar -->
             <div class="trust-bar">
-                <span class="trust-text">Trusted by <strong>1,000+</strong> users across Africa</span>
+                <span class="trust-text">{{ site_settings.trust_bar_left_text|default:'Trusted by <strong>1,000+</strong> users across Africa'|safe }}</span>
                 <div class="trust-avatars">
                     <img src="https://api.dicebear.com/9.x/notionists/svg?seed=Felix&backgroundColor=b6e3f4" alt="User" class="trust-av">
                     <img src="https://api.dicebear.com/9.x/notionists/svg?seed=Aneka&backgroundColor=ffd5dc" alt="User" class="trust-av">
@@ -131,9 +143,9 @@
                 </div>
                 <div class="trust-rating">
                     <span class="trust-stars">★★★★★</span>
-                    <span class="trust-score">4.9/5</span>
+                    <span class="trust-score">{{ site_settings.trust_bar_rating_score|default:'4.9/5' }}</span>
                 </div>
-                <span class="trust-text">from <strong>500+</strong> reviews</span>
+                <span class="trust-text">{{ site_settings.trust_bar_right_text|default:'from <strong>500+</strong> reviews'|safe }}</span>
             </div>
 
             <!-- Section Heading -->
@@ -220,7 +232,7 @@
         <div class="tt-wrap">
             <div class="tt-header">
                 <h2 class="tt-title">Top &amp; Best Selling Tools</h2>
-                <a href="{% url 'tools:tools_list' %}" class="tt-view-all">View all tools <i class="fas fa-arrow-right"></i></a>
+                <a href="{% url 'tools:tools_list' %}" class="tt-view-all">View all {% if total_tools_count %}{{ total_tools_count }} {% endif %}tools <i class="fas fa-arrow-right"></i></a>
             </div>
 
             <div class="tt-grid-wrapper">
@@ -236,9 +248,8 @@
     <!-- ══════ POPULAR THIS WEEK SECTION ══════ -->
     <section class="popular-week" id="popularWeek">
         <div class="pw-wrap">
-            <div class="pw-header">
-                <span class="pw-icon">🔥</span>
-                <h2 class="pw-title">Popular This Week</h2>
+            <div class="pw-header" style="justify-content: flex-start; text-align: left;">
+                <h2 class="pw-title" style="text-align: left;">Popular This Week</h2>
             </div>
 
             <style>
@@ -295,10 +306,336 @@
             </div>
 
             <div class="pw-browse">
-                <button onclick="window.location.href='{% url 'tools:tools_list' %}'" class="pw-browse-btn">Browse All Tools <i class="fas fa-arrow-right"></i></button>
+                <button onclick="window.location.href='{% url 'tools:tools_list' %}'" class="pw-browse-btn">Browse All {% if total_tools_count %}{{ total_tools_count }} {% endif %}Tools <i class="fas fa-arrow-right"></i></button>
             </div>
         </div>
     </section>
+
+    <!-- ══════ CUSTOMER TESTIMONIALS SECTION ══════ -->
+    {% if testimonials %}
+    <section class="testimonials-section" id="testimonials">
+        <style>
+            .testimonials-section {
+                padding: 60px 20px;
+                max-width: 1200px;
+                margin: 0 auto;
+                position: relative;
+                z-index: 5;
+            }
+            .tm-header-tag {
+                font-size: 12px;
+                font-weight: 700;
+                letter-spacing: 1.5px;
+                color: #8C9EFF;
+                text-transform: uppercase;
+                text-align: center;
+                margin-bottom: 8px;
+            }
+            .tm-title {
+                font-size: 32px;
+                font-weight: 800;
+                color: #ffffff;
+                text-align: center;
+                margin-bottom: 32px;
+            }
+            .tm-card-wrapper {
+                background: linear-gradient(180deg, rgba(14, 18, 48, 0.7) 0%, rgba(8, 10, 28, 0.85) 100%);
+                border: 1px solid rgba(80, 120, 255, 0.2);
+                border-radius: 20px;
+                padding: 36px 48px;
+                position: relative;
+                box-shadow: 0 15px 40px rgba(0,0,0,0.3);
+            }
+            .tm-carousel {
+                display: flex;
+                gap: 20px;
+                overflow-x: auto;
+                scroll-behavior: smooth;
+                -ms-overflow-style: none;
+                scrollbar-width: none;
+            }
+            .tm-carousel::-webkit-scrollbar {
+                display: none;
+            }
+            .tm-card {
+                flex: 0 0 calc(33.333% - 14px);
+                min-width: 280px;
+                background: rgba(16, 22, 56, 0.6);
+                border: 1px solid rgba(255, 255, 255, 0.08);
+                border-radius: 14px;
+                padding: 24px 20px;
+                display: flex;
+                flex-direction: column;
+                gap: 14px;
+                transition: transform 0.3s, border-color 0.3s;
+            }
+            .tm-card:hover {
+                transform: translateY(-4px);
+                border-color: rgba(140, 158, 255, 0.35);
+            }
+            .tm-user-info {
+                display: flex;
+                align-items: center;
+                gap: 14px;
+            }
+            .tm-avatar {
+                width: 44px;
+                height: 44px;
+                border-radius: 50%;
+                object-fit: cover;
+                border: 2px solid rgba(140, 158, 255, 0.3);
+                background: #0A0D28;
+            }
+            .tm-name {
+                font-size: 15px;
+                font-weight: 700;
+                color: #ffffff;
+                margin: 0;
+            }
+            .tm-location {
+                font-size: 12px;
+                color: #8C9EFF;
+                margin: 2px 0 0 0;
+            }
+            .tm-stars {
+                color: #FFB74D;
+                font-size: 13px;
+                letter-spacing: 2px;
+            }
+            .tm-quote {
+                font-size: 13.5px;
+                color: #A7ABC3;
+                line-height: 1.5;
+                margin: 0;
+            }
+            .tm-nav-btn {
+                position: absolute;
+                top: 50%;
+                transform: translateY(-50%);
+                width: 38px;
+                height: 38px;
+                border-radius: 50%;
+                border: 1px solid rgba(255,255,255,0.15);
+                background: rgba(10, 12, 30, 0.85);
+                color: #8C9EFF;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                cursor: pointer;
+                z-index: 6;
+                transition: all 0.25s;
+            }
+            .tm-nav-btn:hover {
+                background: rgba(80, 100, 255, 0.3);
+                color: #ffffff;
+                border-color: rgba(140, 158, 255, 0.5);
+            }
+            .tm-nav-btn.prev { left: 8px; }
+            .tm-nav-btn.next { right: 8px; }
+
+            @media (max-width: 900px) {
+                .tm-card {
+                    flex: 0 0 calc(50% - 10px);
+                }
+            }
+            @media (max-width: 600px) {
+                .tm-card {
+                    flex: 0 0 100%;
+                }
+                .tm-card-wrapper {
+                    padding: 24px 36px;
+                }
+            }
+        </style>
+
+        <div class="tm-header-tag">WHAT OUR CUSTOMERS SAY</div>
+        <h2 class="tm-title">Trusted by Thousands</h2>
+
+        <div class="tm-card-wrapper">
+            <button class="tm-nav-btn prev" id="tmPrev" aria-label="Previous Testimonials"><i class="fas fa-chevron-left"></i></button>
+            <div class="tm-carousel" id="tmCarousel">
+                {% for item in testimonials %}
+                <div class="tm-card">
+                    <div class="tm-user-info">
+                        {% if item.avatar %}
+                            <img src="{{ item.avatar.url }}" alt="{{ item.name }}" class="tm-avatar">
+                        {% elif item.avatar_url_override %}
+                            <img src="{{ item.avatar_url_override }}" alt="{{ item.name }}" class="tm-avatar">
+                        {% else %}
+                            <img src="https://api.dicebear.com/9.x/notionists/svg?seed={{ item.name|urlencode }}&backgroundColor=b6e3f4" alt="{{ item.name }}" class="tm-avatar">
+                        {% endif %}
+                        <div>
+                            <h4 class="tm-name">{{ item.name }}</h4>
+                            <p class="tm-location">{{ item.location }}</p>
+                        </div>
+                    </div>
+                    <div class="tm-stars">★★★★★</div>
+                    <p class="tm-quote">"{{ item.review_text }}"</p>
+                </div>
+                {% endfor %}
+            </div>
+            <button class="tm-nav-btn next" id="tmNext" aria-label="Next Testimonials"><i class="fas fa-chevron-right"></i></button>
+        </div>
+
+        <script>
+            document.addEventListener("DOMContentLoaded", () => {
+                const carousel = document.getElementById("tmCarousel");
+                const prevBtn = document.getElementById("tmPrev");
+                const nextBtn = document.getElementById("tmNext");
+                if (carousel && prevBtn && nextBtn) {
+                    prevBtn.addEventListener("click", () => {
+                        carousel.scrollBy({ left: -320, behavior: 'smooth' });
+                    });
+                    nextBtn.addEventListener("click", () => {
+                        carousel.scrollBy({ left: 320, behavior: 'smooth' });
+                    });
+
+                    // Auto slide every 5 seconds
+                    let tmInterval = null;
+                    const startTmAuto = () => {
+                        if (tmInterval) return;
+                        tmInterval = setInterval(() => {
+                            if (carousel.scrollLeft + carousel.clientWidth >= carousel.scrollWidth - 15) {
+                                carousel.scrollTo({ left: 0, behavior: 'smooth' });
+                            } else {
+                                carousel.scrollBy({ left: 320, behavior: 'smooth' });
+                            }
+                        }, 5000);
+                    };
+                    const stopTmAuto = () => {
+                        if (tmInterval) {
+                            clearInterval(tmInterval);
+                            tmInterval = null;
+                        }
+                    };
+
+                    startTmAuto();
+                    carousel.addEventListener("mouseenter", stopTmAuto);
+                    carousel.addEventListener("mouseleave", startTmAuto);
+                }
+            });
+        </script>
+    </section>
+    {% endif %}
+
+    <!-- ══════ FREQUENTLY ASKED QUESTIONS SECTION ══════ -->
+    {% if faqs %}
+    <section class="faq-section" id="faq">
+        <style>
+            .faq-section {
+                padding: 40px 20px 80px;
+                max-width: 1200px;
+                margin: 0 auto;
+                position: relative;
+                z-index: 5;
+            }
+            .faq-header-tag {
+                font-size: 12px;
+                font-weight: 700;
+                letter-spacing: 1.5px;
+                color: #8C9EFF;
+                text-transform: uppercase;
+                text-align: center;
+                margin-bottom: 32px;
+            }
+            .faq-grid {
+                display: grid;
+                grid-template-columns: repeat(2, 1fr);
+                gap: 16px;
+            }
+            .faq-item {
+                background: linear-gradient(180deg, rgba(14, 18, 48, 0.7) 0%, rgba(9, 11, 30, 0.8) 100%);
+                border: 1px solid rgba(80, 120, 255, 0.2);
+                border-radius: 12px;
+                overflow: hidden;
+                transition: border-color 0.3s;
+            }
+            .faq-item.active {
+                border-color: rgba(140, 158, 255, 0.5);
+                box-shadow: 0 0 20px rgba(80, 100, 255, 0.15);
+            }
+            .faq-btn {
+                width: 100%;
+                padding: 18px 24px;
+                display: flex;
+                align-items: center;
+                justify-content: space-between;
+                background: transparent;
+                border: none;
+                color: #ffffff;
+                font-size: 15px;
+                font-weight: 700;
+                text-align: left;
+                cursor: pointer;
+                font-family: inherit;
+            }
+            .faq-toggle-icon {
+                color: #8C9EFF;
+                font-size: 16px;
+                transition: transform 0.3s ease, color 0.3s;
+                margin-left: 12px;
+            }
+            .faq-item.active .faq-toggle-icon {
+                transform: rotate(45deg);
+                color: #B388FF;
+            }
+            .faq-body {
+                display: none;
+                padding: 0 24px 20px 24px;
+                font-size: 13.5px;
+                color: #A7ABC3;
+                line-height: 1.6;
+                border-top: 1px solid rgba(255, 255, 255, 0.05);
+                margin-top: 4px;
+                padding-top: 14px;
+            }
+
+            @media (max-width: 768px) {
+                .faq-grid {
+                    grid-template-columns: 1fr;
+                }
+            }
+        </style>
+
+        <div class="faq-header-tag">FREQUENTLY ASKED QUESTIONS</div>
+
+        <div class="faq-grid">
+            {% for item in faqs %}
+            <div class="faq-item">
+                <button class="faq-btn">
+                    <span>{{ item.question }}</span>
+                    <i class="fa-solid fa-plus faq-toggle-icon"></i>
+                </button>
+                <div class="faq-body">
+                    {{ item.answer }}
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+
+        <script>
+            document.addEventListener("DOMContentLoaded", () => {
+                const faqButtons = document.querySelectorAll(".faq-btn");
+                faqButtons.forEach(btn => {
+                    btn.addEventListener("click", () => {
+                        const item = btn.parentElement;
+                        const body = item.querySelector(".faq-body");
+                        const isOpen = item.classList.contains("active");
+
+                        // Close others optional or toggle current
+                        if (isOpen) {
+                            item.classList.remove("active");
+                            body.style.display = "none";
+                        } else {
+                            item.classList.add("active");
+                            body.style.display = "block";
+                        }
+                    });
+                });
+            });
+        </script>
+    </section>
+    {% endif %}
 
     <!-- ══════ ABOUT US SECTION ══════ -->
     <style>

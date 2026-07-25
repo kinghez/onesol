@@ -238,6 +238,14 @@ class SiteSettings(models.Model):
     # Support email
     support_email = models.EmailField(default='support@onesolai.com')
 
+    # Trust Bar Content (Homepage)
+    trust_bar_left_text = models.CharField(max_length=255, default='Trusted by <strong>1,000+</strong> users across Africa',
+        help_text='Left text in trust bar (HTML allowed, e.g. <strong>1,000+</strong>)')
+    trust_bar_rating_score = models.CharField(max_length=50, default='4.9/5',
+        help_text='Rating score display in trust bar (e.g. 4.9/5)')
+    trust_bar_right_text = models.CharField(max_length=255, default='from <strong>500+</strong> reviews',
+        help_text='Right text in trust bar (HTML allowed, e.g. <strong>500+</strong>)')
+
     # About Us Page Image
     about_us_image = models.ImageField(upload_to='site/', blank=True, null=True,
         help_text='Image to display on the right side of the About Us section on the homepage.')
@@ -353,3 +361,37 @@ class HeroSlide(models.Model):
 
     def __str__(self):
         return self.title_line_1 or f"Hero Slide {self.id}"
+
+
+class Testimonial(models.Model):
+    name = models.CharField(max_length=100)
+    location = models.CharField(max_length=100, help_text="e.g. Lagos, Nigeria")
+    avatar = models.ImageField(upload_to='testimonials/', blank=True, null=True)
+    avatar_url_override = models.URLField(blank=True, help_text="Optional external avatar image URL (e.g. dicebear)")
+    rating = models.IntegerField(default=5, help_text="1 to 5 stars")
+    review_text = models.TextField()
+    is_active = models.BooleanField(default=True)
+    order = models.IntegerField(default=0)
+
+    class Meta:
+        ordering = ['order', '-id']
+        verbose_name = 'Testimonial'
+        verbose_name_plural = 'Testimonials'
+
+    def __str__(self):
+        return f"{self.name} ({self.location})"
+
+
+class FAQ(models.Model):
+    question = models.CharField(max_length=255)
+    answer = models.TextField()
+    is_active = models.BooleanField(default=True)
+    order = models.IntegerField(default=0)
+
+    class Meta:
+        ordering = ['order', 'id']
+        verbose_name = 'FAQ'
+        verbose_name_plural = 'FAQs'
+
+    def __str__(self):
+        return self.question
