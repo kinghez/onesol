@@ -131,11 +131,23 @@ from django.utils import timezone
 
 @admin.register(WithdrawalRequest)
 class WithdrawalRequestAdmin(admin.ModelAdmin):
-    list_display = ('user', 'amount_ngn', 'bank_name', 'account_number', 'account_name', 'status', 'created_at')
-    list_filter = ('status', 'created_at')
-    search_fields = ('user__email', 'account_number', 'account_name', 'bank_name')
+    list_display = ('user', 'amount_ngn', 'method_badge', 'payout_details_display', 'status', 'created_at')
+    list_filter = ('withdrawal_method', 'status', 'created_at')
+    search_fields = ('user__email', 'account_number', 'account_name', 'bank_name', 'crypto_wallet_address')
     readonly_fields = ('created_at', 'processed_at')
     actions = ['approve_withdrawals', 'reject_withdrawals']
+
+    @admin.display(description='Method')
+    def method_badge(self, obj):
+        if obj.withdrawal_method == 'crypto':
+            return format_html('<span style="background:#5B63F6;color:#fff;padding:2px 8px;border-radius:4px;font-size:11px;font-weight:bold;">🪙 CRYPTO</span>')
+        return format_html('<span style="background:#28a745;color:#fff;padding:2px 8px;border-radius:4px;font-size:11px;font-weight:bold;">🏦 BANK</span>')
+
+    @admin.display(description='Payout Destination')
+    def payout_details_display(self, obj):
+        if obj.withdrawal_method == 'crypto':
+            return format_html('<strong>{}</strong><br><small style="color:#6c757d;">{}</small>', obj.crypto_network, obj.crypto_wallet_address)
+        return format_html('<strong>{}</strong> ({})<br><small style="color:#6c757d;">{}</small>', obj.bank_name, obj.account_number, obj.account_name)
 
     @admin.display(description='Amount (NGN)')
     def amount_ngn(self, obj):
@@ -144,6 +156,7 @@ class WithdrawalRequestAdmin(admin.ModelAdmin):
     @admin.action(description='✅ Approve selected withdrawals (deduct balance)')
     def approve_withdrawals(self, request, queryset):
         from accounts.models import Profile
+        from analytics.models import ActivityLog
         updated = 0
         for wr in queryset.filter(status='pending'):
             try:
@@ -155,15 +168,31 @@ class WithdrawalRequestAdmin(admin.ModelAdmin):
                     wr.processed_at = timezone.now()
                     wr.save()
                     updated += 1
+                    ActivityLog.log(
+                        action_type='withdrawal_approved',
+                        title=f"Withdrawal Approved for {wr.user.email} (NGN {wr.amount:,.2f})",
+                        details=f"Bank: {wr.bank_name} | Acc: {wr.account_number} ({wr.account_name})",
+                        user=wr.user,
+                        severity='success'
+                    )
             except Exception:
                 pass
         self.message_user(request, f'{updated} withdrawal(s) approved and balances deducted.')
 
     @admin.action(description='❌ Reject selected withdrawals')
     def reject_withdrawals(self, request, queryset):
-        count = queryset.filter(status='pending').update(
-            status='rejected',
-            processed_at=timezone.now()
-        )
-        self.message_user(request, f'{count} withdrawal(s) rejected.')
+        from analytics.models import ActivityLog
+        for wr in queryset.filter(status='pending'):
+            wr.status = 'rejected'
+            wr.processed_at = timezone.now()
+            wr.save()
+            ActivityLog.log(
+                action_type='withdrawal_rejected',
+                title=f"Withdrawal Rejected for {wr.user.email} (NGN {wr.amount:,.2f})",
+                details=f"Bank: {wr.bank_name} | Acc: {wr.account_number}",
+                user=wr.user,
+                severity='warning'
+            )
+        self.message_user(request, f'Selected withdrawal(s) rejected.')
+
 

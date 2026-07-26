@@ -45,9 +45,28 @@ class NewsletterSubscriberAdmin(admin.ModelAdmin):
     ordering = ('-created_at',)
 
 
+from django import forms
+
+
+class SiteSettingsAdminForm(forms.ModelForm):
+    class Meta:
+        model = SiteSettings
+        fields = '__all__'
+        widgets = {
+            'paystack_public_key': forms.PasswordInput(render_value=True, attrs={'autocomplete': 'new-password'}),
+            'paystack_secret_key': forms.PasswordInput(render_value=True, attrs={'autocomplete': 'new-password'}),
+            'flutterwave_public_key': forms.PasswordInput(render_value=True, attrs={'autocomplete': 'new-password'}),
+            'flutterwave_secret_key': forms.PasswordInput(render_value=True, attrs={'autocomplete': 'new-password'}),
+            'flutterwave_encryption_key': forms.PasswordInput(render_value=True, attrs={'autocomplete': 'new-password'}),
+            'openrouter_api_key': forms.PasswordInput(render_value=True, attrs={'autocomplete': 'new-password'}),
+            'google_client_secret': forms.PasswordInput(render_value=True, attrs={'autocomplete': 'new-password'}),
+        }
+
+
 @admin.register(SiteSettings)
 class SiteSettingsAdmin(admin.ModelAdmin):
     """Singleton admin — edit site settings from admin panel."""
+    form = SiteSettingsAdminForm
 
     fieldsets = [
         ('💳 Payment Gateways Configuration & Priority', {
@@ -66,6 +85,19 @@ class SiteSettingsAdmin(admin.ModelAdmin):
                 'flutterwave_encryption_key',
             ),
             'description': 'Configure Paystack & Flutterwave API keys, toggle active status, and select primary payment gateway. The platform automatically falls back to secondary gateway if primary gateway is disabled or does not support the user currency.',
+        }),
+        ('🪙 Crypto Payment Gateway (USDT)', {
+            'fields': (
+                'is_crypto_enabled',
+                'crypto_usdt_address',
+                'crypto_usdt_network',
+                'crypto_instructions',
+            ),
+            'description': 'Configure Crypto (USDT) receiving wallet address and checkout payment instructions.',
+        }),
+        ('🌐 Google Social Sign-In (OAuth 2.0)', {
+            'fields': ('google_client_id', 'google_client_secret'),
+            'description': 'Configure Google Client ID and Secret to enable "Sign in with Google" on the login and registration pages.',
         }),
         ('🤝 Referral & Withdrawal Settings', {
             'fields': (

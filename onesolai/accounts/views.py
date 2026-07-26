@@ -188,3 +188,129 @@ def update_location_session(request):
         'currency': currency or request.session.get('detected_currency', 'NGN'),
         'country_code': country_code or request.session.get('detected_country_code', ''),
     })
+
+
+import secrets
+import requests
+from django.urls import reverse
+from core.models import SiteSettings
+from analytics.models import ActivityLog
+
+
+def google_login_view(request):
+    """Initiate Google OAuth 2.0 Login redirect."""
+    cfg = SiteSettings.get()
+    client_id = (cfg.google_client_id or '').strip()
+
+    if not client_id:
+        messages.error(request, 'Google Sign-In is not configured yet. Please configure Google Client ID in Site Settings.')
+        return redirect('accounts:login')
+
+    # Construct redirect URI
+    redirect_uri = request.build_absolute_uri(reverse('accounts:google_callback'))
+    if request.headers.get('x-forwarded-proto') == 'https' or (not ('127.0.0.1' in redirect_uri or 'localhost' in redirect_uri) and redirect_uri.startswith('http://')):
+        redirect_uri = redirect_uri.replace('http://', 'https://')
+
+    state = secrets.token_urlsafe(16)
+    request.session['google_oauth_state'] = state
+
+    google_auth_url = (
+        'https://accounts.google.com/o/oauth2/v2/auth?'
+        f'client_id={client_id}&'
+        f'response_type=code&'
+        f'scope=openid%20email%20profile&'
+        f'redirect_uri={redirect_uri}&'
+        f'state={state}&'
+        'prompt=select_account'
+    )
+    return redirect(google_auth_url)
+
+
+def google_callback_view(request):
+    """Handle callback from Google OAuth 2.0."""
+    code = request.GET.get('code')
+    state = request.GET.get('state')
+    saved_state = request.session.pop('google_oauth_state', None)
+
+    if not code or not state or state != saved_state:
+        messages.error(request, 'Authentication failed or request timed out. Please try again.')
+        return redirect('accounts:login')
+
+    cfg = SiteSettings.get()
+    client_id = (cfg.google_client_id or '').strip()
+    client_secret = (cfg.google_client_secret or '').strip()
+    redirect_uri = request.build_absolute_uri(reverse('accounts:google_callback'))
+    if request.headers.get('x-forwarded-proto') == 'https' or (not ('127.0.0.1' in redirect_uri or 'localhost' in redirect_uri) and redirect_uri.startswith('http://')):
+        redirect_uri = redirect_uri.replace('http://', 'https://')
+
+    # Exchange code for access token
+    token_url = 'https://oauth2.googleapis.com/token'
+    token_data = {
+        'code': code,
+        'client_id': client_id,
+        'client_secret': client_secret,
+        'redirect_uri': redirect_uri,
+        'grant_type': 'authorization_code',
+    }
+
+    try:
+        token_res = requests.post(token_url, data=token_data, timeout=10)
+        token_json = token_res.json()
+        access_token = token_json.get('access_token')
+
+        if not access_token:
+            messages.error(request, 'Failed to obtain access token from Google.')
+            return redirect('accounts:login')
+
+        # Fetch user info from Google
+        user_info_url = 'https://www.googleapis.com/oauth2/v2/userinfo'
+        user_info_res = requests.get(user_info_url, headers={'Authorization': f'Bearer {access_token}'}, timeout=10)
+        user_info = user_info_res.json()
+
+        email = (user_info.get('email') or '').strip().lower()
+        first_name = (user_info.get('given_name') or '').strip()
+        last_name = (user_info.get('family_name') or '').strip()
+
+        if not email:
+            messages.error(request, 'Could not retrieve email from your Google account.')
+            return redirect('accounts:login')
+
+        # Get or create user
+        user, created = User.objects.get_or_create(
+            email=email,
+            defaults={
+                'username': email,
+                'first_name': first_name,
+                'last_name': last_name,
+                'is_active': True,
+            }
+        )
+
+        if created:
+            user.set_unusable_password()
+            user.save()
+            ActivityLog.log(
+                action_type='user_signup',
+                title='New User Registered via Google',
+                details=f'User {user.email} signed up using Google OAuth 2.0',
+                user=user,
+                severity='success'
+            )
+        else:
+            ActivityLog.log(
+                action_type='user_login',
+                title='User Logged In via Google',
+                details=f'User {user.email} signed in using Google OAuth 2.0',
+                user=user,
+                severity='info'
+            )
+
+        # Log in the user
+        login(request, user, backend='django.contrib.auth.backends.ModelBackend')
+        messages.success(request, f'Welcome back, {user.first_name or user.email}!')
+        return redirect('dashboard:home')
+
+    except Exception as e:
+        messages.error(request, f'Google Sign-In error: {e}')
+        return redirect('accounts:login')
+

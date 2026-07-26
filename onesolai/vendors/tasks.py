@@ -76,3 +76,72 @@ def fulfill_order_via_vendors(order_id: int):
 
     order.save()
     logger.info(f"Fulfillment completed for Order {order_id}. Status: {order.delivery_status}")
+
+
+@shared_task
+def sync_all_vendor_products():
+    """
+    Background Celery task to fetch and sync products across all active vendors.
+    """
+    from .models import Vendor
+    from analytics.models import ActivityLog
+
+    active_vendors = Vendor.objects.filter(is_active=True)
+    if not active_vendors.exists():
+        logger.info("No active vendors found to sync products.")
+        return {'status': 'no_active_vendors'}
+
+    total_created = 0
+    total_updated = 0
+    synced_details = []
+
+    for vendor in active_vendors:
+        try:
+            service = get_vendor_service(vendor)
+            products = service.fetch_products()
+
+            created = 0
+            updated = 0
+            for p_data in products:
+                obj, is_new = VendorProduct.objects.update_or_create(
+                    vendor=vendor,
+                    vendor_product_id=p_data['vendor_product_id'],
+                    defaults={
+                        'name': p_data['name'],
+                        'description': p_data['description'],
+                        'price': p_data['price'],
+                        'stock': p_data['stock'],
+                        'is_manual': p_data['is_manual'],
+                        'raw_data': p_data['raw_data'],
+                    }
+                )
+                if is_new:
+                    created += 1
+                else:
+                    updated += 1
+
+            total_created += created
+            total_updated += updated
+            detail_str = f"{vendor.name}: {created} new, {updated} updated"
+            synced_details.append(detail_str)
+            logger.info(f"Synced {vendor.name}: {created} created, {updated} updated.")
+
+        except Exception as e:
+            error_msg = f"Failed to sync products for vendor {vendor.name}: {e}"
+            logger.error(error_msg)
+            ActivityLog.log(
+                action_type='vendor_sync',
+                severity='error',
+                title=f"Vendor Product Sync Failed ({vendor.name})",
+                details=error_msg
+            )
+
+    summary_msg = f"Vendor Product Sync complete. Total: {total_created} created, {total_updated} updated. ({', '.join(synced_details)})"
+    ActivityLog.log(
+        action_type='vendor_sync',
+        severity='success',
+        title="Background Vendor Products Synced",
+        details=summary_msg
+    )
+    return {'total_created': total_created, 'total_updated': total_updated, 'details': synced_details}
+

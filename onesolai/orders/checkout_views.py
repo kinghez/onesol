@@ -180,6 +180,25 @@ def checkout_view(request):
     )
 
     pay_with_wallet = request.POST.get('pay_with_wallet') == 'true'
+    payment_method = request.POST.get('payment_method', '').strip().lower()
+
+    if payment_method == 'crypto':
+        from core.models import SiteSettings
+        cfg = SiteSettings.get()
+        if not cfg.is_crypto_enabled:
+            messages.error(request, "Crypto payment gateway is currently disabled.")
+            return redirect(reverse('tools:tool_detail', kwargs={'slug': tool_slug}))
+
+        PaymentTransaction.objects.create(
+            order=order,
+            gateway='crypto',
+            transaction_id=f"CRYPTO_PENDING_{order.id}",
+            reference=f"CRYPTO_REF_{order.id}",
+            status='pending',
+            amount_paid=usd_price,
+            currency_paid='USDT',
+        )
+        return redirect('orders:crypto_checkout', order_id=order.id)
 
     if pay_with_wallet:
         profile = request.user.profile
@@ -380,3 +399,72 @@ def order_confirmation_view(request, order_id):
         user=request.user,
     )
     return render(request, 'orders/confirmation.html', {'order': order})
+
+
+# ─────────────────────────────────────────────────────────────
+#  CRYPTO CHECKOUT – USDT manual & gateway checkout
+# ─────────────────────────────────────────────────────────────
+@login_required(login_url='/auth/login/')
+def crypto_checkout_view(request, order_id):
+    """Render Crypto payment page with USDT wallet address and instructions."""
+    from core.models import SiteSettings
+    cfg = SiteSettings.get()
+    order = get_object_or_404(Order, id=order_id, user=request.user)
+
+    first_item = order.items.first()
+    tool = first_item.tool if first_item else None
+    usd_amount = tool.get_usd_price() if tool else order.local_amount
+
+    context = {
+        'order': order,
+        'tool': tool,
+        'usdt_address': cfg.crypto_usdt_address,
+        'usdt_network': cfg.crypto_usdt_network,
+        'instructions': cfg.crypto_instructions,
+        'usd_amount': usd_amount,
+    }
+    return render(request, 'orders/crypto_payment.html', context)
+
+
+@login_required(login_url='/auth/login/')
+@require_POST
+def submit_crypto_payment_view(request, order_id):
+    """Process user TxID submission for Crypto payment."""
+    order = get_object_or_404(Order, id=order_id, user=request.user)
+    tx_hash = request.POST.get('transaction_hash', '').strip()
+
+    if not tx_hash:
+        messages.error(request, "Please enter a valid Transaction Hash / TxID.")
+        return redirect('orders:crypto_checkout', order_id=order.id)
+
+    tx = PaymentTransaction.objects.filter(order=order, gateway='crypto').first()
+    if not tx:
+        tx = PaymentTransaction.objects.create(
+            order=order,
+            gateway='crypto',
+            transaction_id=tx_hash,
+            reference=tx_hash,
+            status='pending',
+            amount_paid=order.total_amount_ngn,
+            currency_paid='USDT'
+        )
+    else:
+        tx.transaction_id = tx_hash
+        tx.reference = tx_hash
+        tx.status = 'pending'
+        tx.save()
+
+    # Log Activity
+    try:
+        from analytics.models import ActivityLog
+        ActivityLog.objects.create(
+            user=request.user,
+            activity_type='order_created',
+            description=f'Submitted Crypto TxID ({tx_hash[:12]}...) for Order #{order.id}',
+            ip_address=request.META.get('REMOTE_ADDR')
+        )
+    except Exception:
+        pass
+
+    messages.success(request, f"Your Crypto transaction hash (TxID) for Order #{order.id} has been submitted for verification!")
+    return redirect('orders:confirmation', order_id=order.id)

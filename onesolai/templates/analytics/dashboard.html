@@ -224,6 +224,82 @@
 
 </div>
 
+<!-- ══════ RECENT ACTIVITY LOGS & AUDIT ══════ -->
+<div class="admin-card" style="margin-top: 24px;">
+    <div class="admin-card-header" style="display: flex; justify-content: space-between; align-items: center;">
+        <div>
+            <i class="fa-solid fa-list-check" style="color: var(--admin-accent-green);"></i> Live Activity Log &amp; Audit Monitor
+        </div>
+        <a href="{% url 'analytics:activity_logs' %}" style="color: var(--admin-accent-purple); text-decoration: none; font-size: 13px; font-weight: 600;">
+            View All Activity Logs <i class="fa-solid fa-arrow-right"></i>
+        </a>
+    </div>
+
+    <div class="table-responsive-wrapper">
+        <table class="admin-table">
+            <thead>
+                <tr>
+                    <th>Timestamp</th>
+                    <th>Severity</th>
+                    <th>Action</th>
+                    <th>Event Description</th>
+                    <th>User</th>
+                    <th>IP Address</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for log in recent_activity_logs %}
+                <tr>
+                    <td style="white-space: nowrap; font-size: 12px; color: var(--admin-text-muted);">
+                        {{ log.timestamp|date:"Y-m-d H:i:s" }}
+                    </td>
+                    <td>
+                        {% if log.severity == 'success' %}
+                            <span style="background: rgba(16, 185, 129, 0.15); color: #10B981; border: 1px solid rgba(16, 185, 129, 0.3); padding: 3px 8px; border-radius: 12px; font-weight: 700; font-size: 11px; text-transform: uppercase;">Success</span>
+                        {% elif log.severity == 'error' %}
+                            <span style="background: rgba(239, 68, 68, 0.15); color: #EF4444; border: 1px solid rgba(239, 68, 68, 0.3); padding: 3px 8px; border-radius: 12px; font-weight: 700; font-size: 11px; text-transform: uppercase;">Error</span>
+                        {% elif log.severity == 'warning' %}
+                            <span style="background: rgba(245, 158, 11, 0.15); color: #F59E0B; border: 1px solid rgba(245, 158, 11, 0.3); padding: 3px 8px; border-radius: 12px; font-weight: 700; font-size: 11px; text-transform: uppercase;">Warning</span>
+                        {% else %}
+                            <span style="background: rgba(59, 130, 246, 0.15); color: #3B82F6; border: 1px solid rgba(59, 130, 246, 0.3); padding: 3px 8px; border-radius: 12px; font-weight: 700; font-size: 11px; text-transform: uppercase;">Info</span>
+                        {% endif %}
+                    </td>
+                    <td>
+                        <span style="background: rgba(255,255,255,0.06); padding: 4px 8px; border-radius: 4px; font-size: 12px; font-weight: 500;">
+                            {{ log.get_action_type_display }}
+                        </span>
+                    </td>
+                    <td>
+                        <div style="font-weight: 600; color: #FFF;">{{ log.title }}</div>
+                        {% if log.details %}
+                        <div style="font-size: 12px; color: var(--admin-text-muted); margin-top: 2px;">{{ log.details }}</div>
+                        {% endif %}
+                    </td>
+                    <td>
+                        {% if log.user %}
+                            <a href="/admin/accounts/user/{{ log.user.id }}/change/" target="_blank" style="color: var(--admin-accent-purple); text-decoration: none; font-weight: 500;">
+                                {{ log.user.email }}
+                            </a>
+                        {% else %}
+                            <span style="color: var(--admin-text-muted); font-style: italic;">System / Guest</span>
+                        {% endif %}
+                    </td>
+                    <td style="font-size: 12px; font-family: monospace; color: var(--admin-text-muted);">
+                        {{ log.ip_address|default:"—" }}
+                    </td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="6" style="text-align: center; color: var(--admin-text-muted); padding: 25px;">
+                        No activity log entries recorded yet.
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+
 {% endblock %}
 
 {% block extra_js %}

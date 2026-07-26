@@ -57,13 +57,22 @@
                     <input type="hidden" name="tool_slug" value="{{ tool.slug }}">
                     
                     {% if user.is_authenticated and user.profile.wallet_balance > 0 %}
-                    <div class="th-wallet-pay mb-3" style="margin-bottom:16px;">
+                    <div class="th-wallet-pay" style="margin-bottom:12px;">
                         <label class="wallet-checkbox flex items-center" style="display:flex; align-items:center; gap:8px; cursor:pointer;">
                             <input type="checkbox" name="pay_with_wallet" value="true" style="accent-color:#5B63F6;">
                             <span style="font-size:13px; color:#AEB5CA;">Pay with Wallet (Bal: ₦{{ user.profile.wallet_balance|floatformat:0 }})</span>
                         </label>
                     </div>
                     {% endif %}
+
+                    <div style="margin-bottom: 14px;">
+                        <label style="font-size:12px; color:#AEB5CA; display:block; margin-bottom:4px; font-weight:600;">Payment Gateway</label>
+                        <select name="payment_method" style="background:#0f1535; border:1px solid rgba(255,255,255,0.2); color:#fff; font-size:13px; padding:10px 12px; border-radius:8px; width:100%; cursor:pointer;">
+                            <option value="card" style="background:#0f1535; color:#ffffff;">💳 Card / Bank Transfer</option>
+                            <option value="crypto" style="background:#0f1535; color:#ffffff;">🪙 Crypto (USDT TRC20 / BEP20)</option>
+                        </select>
+                    </div>
+
                     {% if user.is_authenticated %}
                         <button type="submit" class="btn-pri-2 th-buy-btn" style="width:100%;">Pay Now</button>
                     {% else %}

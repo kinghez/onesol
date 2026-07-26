@@ -34,6 +34,19 @@ class Profile(models.Model):
     currency_preference = models.CharField(max_length=10, default='NGN')
     avatar_url = models.URLField(blank=True, null=True)
     avatar = models.ImageField(upload_to='avatars/', blank=True, null=True)
+    
+    # Financial & Payout Details
+    bank_name = models.CharField(max_length=100, blank=True, default='')
+    account_number = models.CharField(max_length=30, blank=True, default='')
+    account_name = models.CharField(max_length=150, blank=True, default='')
+    crypto_wallet_address = models.CharField(max_length=300, blank=True, default='')
+    crypto_network = models.CharField(max_length=50, blank=True, default='USDT (TRC20)')
+    preferred_withdrawal_method = models.CharField(
+        max_length=20, 
+        choices=[('bank', 'Bank Transfer'), ('crypto', 'Crypto (USDT)')], 
+        default='bank'
+    )
+    
     created_at = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
@@ -47,6 +60,13 @@ class Profile(models.Model):
     @property
     def referral_link(self):
         return f"/auth/signup/?ref={self.referral_code}"
+
+    @property
+    def has_payout_details(self):
+        """Returns True if user has configured bank details or crypto wallet."""
+        has_bank = bool(self.bank_name and self.account_number and self.account_name)
+        has_crypto = bool(self.crypto_wallet_address)
+        return has_bank or has_crypto
 
 
 class Referral(models.Model):
@@ -71,11 +91,18 @@ WITHDRAWAL_STATUS = [
 ]
 
 class WithdrawalRequest(models.Model):
+    METHOD_CHOICES = [
+        ('bank', 'Bank Transfer'),
+        ('crypto', 'Crypto (USDT)'),
+    ]
     user = models.ForeignKey(User, related_name='withdrawal_requests', on_delete=models.CASCADE)
     amount = models.DecimalField(max_digits=10, decimal_places=2)
-    bank_name = models.CharField(max_length=100)
-    account_number = models.CharField(max_length=20)
-    account_name = models.CharField(max_length=150)
+    withdrawal_method = models.CharField(max_length=20, choices=METHOD_CHOICES, default='bank')
+    bank_name = models.CharField(max_length=100, blank=True, default='')
+    account_number = models.CharField(max_length=30, blank=True, default='')
+    account_name = models.CharField(max_length=150, blank=True, default='')
+    crypto_wallet_address = models.CharField(max_length=300, blank=True, default='')
+    crypto_network = models.CharField(max_length=50, blank=True, default='USDT (TRC20)')
     status = models.CharField(max_length=20, choices=WITHDRAWAL_STATUS, default='pending')
     admin_note = models.TextField(blank=True, help_text='Note from admin on rejection or approval')
     created_at = models.DateTimeField(auto_now_add=True)
@@ -85,7 +112,8 @@ class WithdrawalRequest(models.Model):
         ordering = ['-created_at']
 
     def __str__(self):
-        return f'{self.user.email} – NGN {self.amount:,.0f} [{self.status.upper()}]'
+        method_str = 'Crypto' if self.withdrawal_method == 'crypto' else 'Bank'
+        return f'{self.user.email} – NGN {self.amount:,.0f} [{method_str}] [{self.status.upper()}]'
 
 
 class WalletTransaction(models.Model):
@@ -110,13 +138,42 @@ class WalletTransaction(models.Model):
 
 
 from django.db.models.signals import post_save
+from django.contrib.auth.signals import user_logged_in, user_login_failed
 from django.dispatch import receiver
 
 @receiver(post_save, sender=User)
 def create_user_profile(sender, instance, created, **kwargs):
     if created:
         Profile.objects.create(user=instance)
+        try:
+            from analytics.models import ActivityLog
+            ActivityLog.log('user_signup', f"New user registered: {instance.email}", user=instance, severity='success')
+        except Exception:
+            pass
 
 @receiver(post_save, sender=User)
 def save_user_profile(sender, instance, **kwargs):
-    instance.profile.save()
+    if hasattr(instance, 'profile'):
+        instance.profile.save()
+
+@receiver(user_logged_in)
+def log_user_login(sender, request, user, **kwargs):
+    try:
+        from analytics.models import ActivityLog
+        from accounts.utils import get_client_ip
+        ip = get_client_ip(request) if request else None
+        ActivityLog.log('user_login', f"User logged in: {user.email}", user=user, severity='info', ip_address=ip)
+    except Exception:
+        pass
+
+@receiver(user_login_failed)
+def log_user_login_failed(sender, credentials, request, **kwargs):
+    try:
+        from analytics.models import ActivityLog
+        from accounts.utils import get_client_ip
+        ip = get_client_ip(request) if request else None
+        email = credentials.get('username') or credentials.get('email') or 'Unknown'
+        ActivityLog.log('user_login', f"Failed login attempt for: {email}", severity='warning', ip_address=ip)
+    except Exception:
+        pass
+

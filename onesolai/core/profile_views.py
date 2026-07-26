@@ -22,15 +22,29 @@ def profile_settings_view(request):
         country_preference = request.POST.get('country_preference', '').strip()
         phone_number = request.POST.get('phone_number', '').strip()
         
+        # Payout & Financial Settings
+        bank_name = request.POST.get('bank_name', '').strip()
+        account_number = request.POST.get('account_number', '').strip()
+        account_name = request.POST.get('account_name', '').strip()
+        crypto_wallet_address = request.POST.get('crypto_wallet_address', '').strip()
+        crypto_network = request.POST.get('crypto_network', 'USDT (TRC20)').strip()
+        preferred_withdrawal_method = request.POST.get('preferred_withdrawal_method', 'bank').strip()
+        
         profile.currency_preference = currency_preference
         profile.country_preference = country_preference
         profile.phone_number = phone_number
+        profile.bank_name = bank_name
+        profile.account_number = account_number
+        profile.account_name = account_name
+        profile.crypto_wallet_address = crypto_wallet_address
+        profile.crypto_network = crypto_network
+        profile.preferred_withdrawal_method = preferred_withdrawal_method
         
         if 'avatar' in request.FILES:
             profile.avatar = request.FILES['avatar']
             
         profile.save()
-        messages.success(request, "Your profile has been updated successfully.")
+        messages.success(request, "Your profile and payout settings have been updated successfully.")
         return redirect('dashboard:profile')
 
     # Comprehensive list of major world and African currencies

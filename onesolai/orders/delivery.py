@@ -23,8 +23,8 @@ def trigger_delivery(order):
         site_name = 'OneSol AI Hub'
 
     # Build context for email
-    items = order.items.select_related('tool', 'plan').all()
-    tool_name = items.first().tool.name if items.exists() else 'Your Tool'
+    items = order.items.select_related('tool').all()
+    tool_name = items.first().tool.name if (items.exists() and items.first().tool) else 'Your Tool'
 
     context = {
         'order': order,

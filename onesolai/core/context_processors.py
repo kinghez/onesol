@@ -43,11 +43,12 @@ def currency_settings(request):
     symbols = settings.CURRENCY_SYMBOLS
 
     # 1. Check if session already has IP geolocation stored
-    detected_currency = request.session.get('detected_currency')
-    detected_country_code = request.session.get('detected_country_code')
+    session = getattr(request, 'session', {})
+    detected_currency = session.get('detected_currency') if hasattr(session, 'get') else None
+    detected_country_code = session.get('detected_country_code') if hasattr(session, 'get') else None
 
     # If not in session, perform server-side IP lookup immediately
-    if not detected_currency or not detected_country_code:
+    if (not detected_currency or not detected_country_code) and hasattr(request, 'session'):
         ip = get_client_ip(request)
         loc = get_location_data_from_ip(ip)
         if loc.get('currency'):

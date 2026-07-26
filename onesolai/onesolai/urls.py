@@ -1,5 +1,6 @@
 from django.contrib import admin
 from django.urls import path, include
+from accounts import views as accounts_views
 
 urlpatterns = [
     path('admin/', admin.site.urls),
@@ -9,6 +10,10 @@ urlpatterns = [
 
     # Auth
     path('auth/', include('accounts.urls')),
+    
+    # Auth Direct Aliases
+    path('auth/google/login/', accounts_views.google_login_view, name='google_login'),
+    path('auth/google/callback/', accounts_views.google_callback_view, name='google_callback'),
 
     # Tools / Products
     path('tools/', include('products.urls')),

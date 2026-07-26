@@ -240,8 +240,9 @@ JAZZMIN_SETTINGS = {
     # Whether to show the UI customizer on the sidebar
     "show_ui_builder": False,
     
-    # Custom CSS for the admin
+    # Custom CSS & JS for the admin
     "custom_css": "css/admin_jazzmin_custom.css",
+    "custom_js": "js/admin_jazzmin_custom.js",
     
     "topmenu_links": [
         {"name": "Home",  "url": "admin:index", "permissions": ["auth.view_user"]},
@@ -297,6 +298,11 @@ JAZZMIN_UI_TWEAKS = {
         "success": "btn-success"
     }
 }
+
+# Reverse Proxy & HTTPS Settings (for ngrok / SSL production)
+SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
+USE_X_FORWARDED_HOST = True
+
 
 # ─── Logging ─────────────────────────────────────────────────────────────────
 # Shows tools page debug info in the runserver console (DEBUG=True).

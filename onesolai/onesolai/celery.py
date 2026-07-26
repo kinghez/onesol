@@ -22,4 +22,9 @@ app.conf.beat_schedule = {
         'task': 'analytics.tasks.fetch_vendor_balances',
         'schedule': crontab(minute=0, hour='*'), # Run every hour at the top of the hour
     },
+    'sync-vendor-products-every-30-minutes': {
+        'task': 'vendors.tasks.sync_all_vendor_products',
+        'schedule': crontab(minute='*/30'), # Run every 30 minutes
+    },
 }
+

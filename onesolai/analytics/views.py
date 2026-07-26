@@ -122,6 +122,10 @@ def admin_analytics_dashboard(request):
     all_countries = Profile.objects.exclude(country_preference__isnull=True).exclude(country_preference='').values_list('country_preference', flat=True).distinct()
     all_tools = Tool.objects.filter(is_active=True).values('id', 'name')
 
+    # 9. Recent Activity Logs
+    from .models import ActivityLog
+    recent_activity_logs = ActivityLog.objects.all().select_related('user')[:10]
+
     context = {
         'total_users': total_users,
         'active_users': active_users,
@@ -139,6 +143,7 @@ def admin_analytics_dashboard(request):
         
         'top_tools': top_tools,
         'top_referrers': top_referrers,
+        'recent_activity_logs': recent_activity_logs,
         
         # Chart Data
         'rev_labels': rev_labels,
@@ -300,3 +305,63 @@ def platform_wallet_view(request):
     }
 
     return render(request, 'analytics/platform_wallet.html', context)
+
+
+@staff_member_required
+def activity_logs_view(request):
+    """
+    Full Activity Logs & Audit Monitor view for staff/admins.
+    Includes filtering by severity, action type, search query, and pagination.
+    """
+    from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
+    from .models import ActivityLog
+
+    logs_qs = ActivityLog.objects.all().select_related('user')
+
+    # Filters
+    severity_filter = request.GET.get('severity', '').strip()
+    action_filter = request.GET.get('action_type', '').strip()
+    search_q = request.GET.get('q', '').strip()
+
+    if severity_filter:
+        logs_qs = logs_qs.filter(severity=severity_filter)
+    if action_filter:
+        logs_qs = logs_qs.filter(action_type=action_filter)
+    if search_q:
+        logs_qs = logs_qs.filter(
+            Q(title__icontains=search_q) |
+            Q(details__icontains=search_q) |
+            Q(user__email__icontains=search_q) |
+            Q(ip_address__icontains=search_q)
+        )
+
+    # Statistics
+    total_logs_count = ActivityLog.objects.count()
+    error_count = ActivityLog.objects.filter(severity='error').count()
+    warning_count = ActivityLog.objects.filter(severity='warning').count()
+    success_count = ActivityLog.objects.filter(severity='success').count()
+
+    # Pagination
+    paginator = Paginator(logs_qs, 30) # 30 logs per page
+    page = request.GET.get('page', 1)
+    try:
+        page_obj = paginator.page(page)
+    except (PageNotAnInteger, EmptyPage):
+        page_obj = paginator.page(1)
+
+    context = {
+        'page_obj': page_obj,
+        'logs': page_obj.object_list,
+        'total_logs_count': total_logs_count,
+        'error_count': error_count,
+        'warning_count': warning_count,
+        'success_count': success_count,
+        'current_severity': severity_filter,
+        'current_action': action_filter,
+        'search_q': search_q,
+        'action_choices': ActivityLog.ACTION_TYPES,
+        'severity_choices': ActivityLog.SEVERITY_LEVELS,
+    }
+
+    return render(request, 'analytics/activity_logs.html', context)
+

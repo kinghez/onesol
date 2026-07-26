@@ -176,10 +176,23 @@ class SiteSettings(models.Model):
     # Payment Gateways Configuration
     is_paystack_enabled = models.BooleanField(default=True, help_text='Enable Paystack payment gateway on checkout.')
     is_flutterwave_enabled = models.BooleanField(default=True, help_text='Enable Flutterwave payment gateway on checkout.')
+    is_crypto_enabled = models.BooleanField(default=True, help_text='Enable Crypto (USDT) payment gateway on checkout.')
     primary_payment_gateway = models.CharField(max_length=20, default='paystack', choices=[
         ('paystack', 'Paystack (Primary)'),
         ('flutterwave', 'Flutterwave (Primary)'),
+        ('crypto', 'Crypto USDT (Primary)'),
     ], help_text='Primary gateway used for payments. Platform will fallback to secondary gateway if primary fails, is disabled, or does not support user currency.')
+
+    # Crypto USDT Settings
+    crypto_usdt_address = models.CharField(max_length=200, blank=True, default='',
+        verbose_name="Crypto USDT Receiving Wallet Address",
+        help_text='Platform USDT wallet address for receiving crypto checkout payments.')
+    crypto_usdt_network = models.CharField(max_length=50, default='USDT (TRC20)',
+        verbose_name="Crypto USDT Network",
+        help_text='Network e.g. USDT (TRC20) or USDT (BEP20).')
+    crypto_instructions = models.TextField(blank=True,
+        default='Send the exact amount in USDT to the wallet address below, then copy and paste your Transaction Hash (TxID) to verify your payment.',
+        help_text='Instructions displayed to users paying with crypto.')
 
     # Paystack Keys
     paystack_public_key = models.CharField(max_length=200, blank=True, default='',
@@ -272,6 +285,12 @@ class SiteSettings(models.Model):
         help_text='OpenRouter API Key for refining product descriptions')
     openrouter_model = models.CharField(max_length=100, default='openrouter/free',
         help_text='OpenRouter Model ID (e.g., openrouter/free, openrouter/auto, google/gemini-2.5-flash)')
+
+    # Google OAuth 2.0 Settings
+    google_client_id = models.CharField(max_length=300, blank=True, default='',
+        help_text='Google Client ID from Google Cloud Console (e.g., xxx.apps.googleusercontent.com)')
+    google_client_secret = models.CharField(max_length=300, blank=True, default='',
+        help_text='Google Client Secret from Google Cloud Console')
 
     # Social Media Links
     facebook_url = models.URLField(max_length=500, blank=True, default='https://www.facebook.com/share/189F1zob2d/?mibextid=wwXIfr',

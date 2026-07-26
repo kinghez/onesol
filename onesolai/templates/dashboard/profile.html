@@ -75,7 +75,57 @@
           </div>
         </div>
 
-        <div class="form-actions">
+        <hr style="border:0; border-top:1px solid rgba(255,255,255,0.08); margin: 30px 0;">
+
+        <!-- 💳 Financial & Payout Settings -->
+        <div class="section-title" style="margin-bottom: 20px;">
+          <h2 style="font-size: 18px; font-weight: 700; color: var(--text-primary); display:flex; align-items:center; gap:8px;">
+            <i class="fa-solid fa-building-columns" style="color:#8E6CFF;"></i> Payout & Withdrawal Settings
+          </h2>
+          <p style="font-size: 13px; color: #AEB5CA; margin-top:4px;">Configure your bank account and crypto wallet details for referral earnings payouts.</p>
+        </div>
+
+        <div class="form-grid">
+          <div class="form-group">
+            <label>Preferred Payout Method</label>
+            <select name="preferred_withdrawal_method" class="form-control">
+              <option value="bank" {% if user.profile.preferred_withdrawal_method == 'bank' %}selected{% endif %}>🏦 Bank Transfer (NGN / Local Bank)</option>
+              <option value="crypto" {% if user.profile.preferred_withdrawal_method == 'crypto' %}selected{% endif %}>🪙 Crypto Wallet (USDT)</option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label>Bank Name</label>
+            <input type="text" name="bank_name" class="form-control" value="{{ user.profile.bank_name }}" placeholder="e.g. Access Bank, GTBank, Kuda">
+          </div>
+
+          <div class="form-group">
+            <label>Account Number</label>
+            <input type="text" name="account_number" class="form-control" value="{{ user.profile.account_number }}" placeholder="e.g. 0123456789">
+          </div>
+
+          <div class="form-group">
+            <label>Account Name</label>
+            <input type="text" name="account_name" class="form-control" value="{{ user.profile.account_name }}" placeholder="e.g. John Doe">
+          </div>
+
+          <div class="form-group">
+            <label>Crypto Wallet Address (USDT)</label>
+            <input type="text" name="crypto_wallet_address" class="form-control" value="{{ user.profile.crypto_wallet_address }}" placeholder="e.g. TX123... or 0xabc...">
+          </div>
+
+          <div class="form-group">
+            <label>Crypto Network</label>
+            <select name="crypto_network" class="form-control">
+              <option value="USDT (TRC20)" {% if user.profile.crypto_network == 'USDT (TRC20)' %}selected{% endif %}>USDT (TRC20 - Tron Network)</option>
+              <option value="USDT (BEP20)" {% if user.profile.crypto_network == 'USDT (BEP20)' %}selected{% endif %}>USDT (BEP20 - BNB Smart Chain)</option>
+              <option value="USDT (ERC20)" {% if user.profile.crypto_network == 'USDT (ERC20)' %}selected{% endif %}>USDT (ERC20 - Ethereum)</option>
+              <option value="USDT (Polygon)" {% if user.profile.crypto_network == 'USDT (Polygon)' %}selected{% endif %}>USDT (Polygon)</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="form-actions" style="margin-top:24px;">
           <button type="submit" class="btn-primary">Save Changes</button>
         </div>
       </form>

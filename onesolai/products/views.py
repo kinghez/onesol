@@ -17,7 +17,7 @@ def tools_list(request):
     Uses Django's Paginator (server-side) – no JS grid injection, no race conditions.
     Detailed logging is active so any error will appear in the console.
     """
-    logger.info("=== tools_list called | user=%s | GET=%s ===", request.user, dict(request.GET))
+    logger.info("=== tools_list called | user=%s | GET=%s ===", getattr(request, 'user', 'Anonymous'), dict(request.GET))
 
     # ── 1. Fetch & validate categories ──────────────────────────────────────
     try:
@@ -54,7 +54,8 @@ def tools_list(request):
     q = request.GET.get('q', '').strip()
     if q:
         try:
-            qs = qs.filter(name__icontains=q) | qs.filter(short_description__icontains=q)
+            from django.db.models import Q
+            qs = qs.filter(Q(name__icontains=q) | Q(short_description__icontains=q) | Q(description__icontains=q))
             logger.info("Search q='%s' applied", q)
         except Exception as exc:
             logger.error("ERROR in search filter: %s\n%s", exc, traceback.format_exc())
@@ -65,22 +66,7 @@ def tools_list(request):
         qs = qs.filter(is_popular=True)
         logger.info("popular_only filter applied")
 
-    # ── 6. Sort ──────────────────────────────────────────────────────────────
-    sort = request.GET.get('sort', 'popular')
-    sort_map = {
-        'price_asc': 'sell_price_usd',
-        'price_desc': '-sell_price_usd',
-        'newest': '-created_at',
-        'popular': '-is_popular',
-    }
-    order_by = sort_map.get(sort, '-is_popular')
-    try:
-        qs = qs.order_by(order_by)
-        logger.info("Sort applied: sort=%s → order_by=%s", sort, order_by)
-    except Exception as exc:
-        logger.error("ERROR applying sort: %s\n%s", exc, traceback.format_exc())
-
-    # ── 7. Evaluate queryset & compute prices ────────────────────────────────
+    # ── 6. Evaluate queryset & compute prices ────────────────────────────────
     try:
         tools_list_qs = list(qs)
         filtered_total = len(tools_list_qs)
@@ -99,6 +85,25 @@ def tools_list(request):
             logger.warning("Price calc failed for tool id=%s '%s': %s", tool.id, tool.name, exc)
             tool.price_ngn_display = 0.0
             tool.price_usd_display = 0.0
+
+    # ── 7. Sort tools accurately by computed price / criteria ────────────────
+    sort = request.GET.get('sort', 'newest').strip().lower()
+    try:
+        if sort == 'price_asc':
+            tools_list_qs.sort(key=lambda t: t.price_usd_display)
+        elif sort == 'price_desc':
+            tools_list_qs.sort(key=lambda t: t.price_usd_display, reverse=True)
+        elif sort == 'name_asc':
+            tools_list_qs.sort(key=lambda t: t.name.lower())
+        elif sort == 'name_desc':
+            tools_list_qs.sort(key=lambda t: t.name.lower(), reverse=True)
+        elif sort == 'popular':
+            tools_list_qs.sort(key=lambda t: (not t.is_popular, not t.is_featured, t.name.lower()))
+        else: # newest (default)
+            tools_list_qs.sort(key=lambda t: t.created_at, reverse=True)
+        logger.info("Sort applied successfully: sort=%s", sort)
+    except Exception as exc:
+        logger.error("ERROR applying sort: %s\n%s", exc, traceback.format_exc())
 
     # ── 8. Pagination ────────────────────────────────────────────────────────
     PAGE_SIZE = 12

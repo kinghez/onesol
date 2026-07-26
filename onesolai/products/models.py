@@ -19,7 +19,13 @@ class Category(models.Model):
 
     def save(self, *args, **kwargs):
         if not self.slug:
-            self.slug = slugify(self.name)
+            base_slug = slugify(self.name) or 'category'
+            slug = base_slug
+            count = 1
+            while Category.objects.filter(slug=slug).exclude(pk=self.pk).exists():
+                slug = f"{base_slug}-{count}"
+                count += 1
+            self.slug = slug
         super().save(*args, **kwargs)
 
 
@@ -65,7 +71,23 @@ class Tool(models.Model):
 
     def save(self, *args, **kwargs):
         if not self.slug:
-            self.slug = slugify(self.name)
+            base_slug = slugify(self.name) or 'tool'
+            slug = base_slug
+            count = 1
+            while Tool.objects.filter(slug=slug).exclude(pk=self.pk).exists():
+                slug = f"{base_slug}-{count}"
+                count += 1
+            self.slug = slug
+        else:
+            # Ensure manually set or inherited slug is unique
+            slug = self.slug
+            base_slug = slug
+            count = 1
+            while Tool.objects.filter(slug=slug).exclude(pk=self.pk).exists():
+                slug = f"{base_slug}-{count}"
+                count += 1
+            self.slug = slug
+
         if not self.short_description and self.description:
             self.short_description = self.description[:297] + '...' if len(self.description) > 300 else self.description
         super().save(*args, **kwargs)

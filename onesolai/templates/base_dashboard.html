@@ -249,7 +249,7 @@
                         </span>
                         {% endif %}
                     </button>
-                    <div class="user-profile">
+                    <a href="{% url 'dashboard:profile' %}" class="user-profile" style="text-decoration:none;cursor:pointer;" title="Go to Profile Settings">
                         <div class="avatar flex items-center justify-center bg-transparent">
                             {% if user.profile.avatar %}
                                 <img src="{{ user.profile.avatar.url }}" alt="Avatar" style="width: 36px; height: 36px; border-radius: 50%; object-fit: cover;">
@@ -259,11 +259,11 @@
                                 <i class="fa-solid fa-circle-user" style="font-size: 36px; color: var(--text-secondary);"></i>
                             {% endif %}
                         </div>
-                        <span class="user-name">
+                        <span class="user-name" style="color: var(--text-primary);">
                             {% if user.is_authenticated %}{{ user.get_full_name|default:user.username }}{% else %}Guest{% endif %}
                             <i class="fa-solid fa-chevron-down" style="font-size: 10px;"></i>
                         </span>
-                    </div>
+                    </a>
                 </div>
             </header>
 

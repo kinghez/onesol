@@ -106,3 +106,12 @@ h1, .page-title, .content-header h1 {
 .nav-link.active, .nav-link:hover {
     color: #FFFFFF !important;
 }
+
+/* Disable browser & theme password reveal toggles for API keys */
+input[type="password"]::-ms-reveal,
+input[type="password"]::-ms-clear,
+input[type="password"]::-webkit-contacts-auto-fill-button,
+input[type="password"]::-webkit-credentials-auto-fill-button {
+    display: none !important;
+}
+

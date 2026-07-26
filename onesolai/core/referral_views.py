@@ -57,7 +57,7 @@ def referrals_view(request):
 @login_required(login_url='/auth/login/')
 @require_POST
 def withdrawal_request_view(request):
-    """Handle withdrawal request form submission."""
+    """Handle withdrawal request form submission pulling saved profile payout details."""
     user = request.user
     profile = user.profile
     cfg = SiteSettings.get()
@@ -84,22 +84,39 @@ def withdrawal_request_view(request):
         messages.error(request, 'Insufficient earnings balance for this withdrawal amount.')
         return redirect('dashboard:referrals')
 
-    bank_name = request.POST.get('bank_name', '').strip()
-    account_number = request.POST.get('account_number', '').strip()
-    account_name = request.POST.get('account_name', '').strip()
+    withdrawal_method = request.POST.get('withdrawal_method', profile.preferred_withdrawal_method or 'bank').strip()
 
-    if not all([bank_name, account_number, account_name]):
-        messages.error(request, 'Please fill in all bank details.')
-        return redirect('dashboard:referrals')
+    if withdrawal_method == 'crypto':
+        crypto_wallet = (request.POST.get('crypto_wallet_address') or profile.crypto_wallet_address or '').strip()
+        crypto_net = (request.POST.get('crypto_network') or profile.crypto_network or 'USDT (TRC20)').strip()
+        if not crypto_wallet:
+            messages.error(request, 'Please set up your Crypto Wallet address in Profile Settings before requesting a crypto withdrawal.')
+            return redirect('dashboard:profile')
 
-    # Create withdrawal request
-    WithdrawalRequest.objects.create(
-        user=user,
-        amount=amount,
-        bank_name=bank_name,
-        account_number=account_number,
-        account_name=account_name,
-    )
+        WithdrawalRequest.objects.create(
+            user=user,
+            amount=amount,
+            withdrawal_method='crypto',
+            crypto_wallet_address=crypto_wallet,
+            crypto_network=crypto_net,
+        )
+    else: # bank
+        bank_name = (request.POST.get('bank_name') or profile.bank_name or '').strip()
+        account_number = (request.POST.get('account_number') or profile.account_number or '').strip()
+        account_name = (request.POST.get('account_name') or profile.account_name or '').strip()
+
+        if not all([bank_name, account_number, account_name]):
+            messages.error(request, 'Please set up your Bank Account details in Profile Settings before requesting a bank withdrawal.')
+            return redirect('dashboard:profile')
+
+        WithdrawalRequest.objects.create(
+            user=user,
+            amount=amount,
+            withdrawal_method='bank',
+            bank_name=bank_name,
+            account_number=account_number,
+            account_name=account_name,
+        )
 
     messages.success(request, f'Withdrawal request for NGN {amount:,.0f} submitted! We will process it within 24 hours.')
     return redirect('dashboard:referrals')

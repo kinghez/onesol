@@ -30,7 +30,7 @@ class Command(BaseCommand):
                 expires_at__gte=start_window,
                 expires_at__lt=end_window,
                 order__status='paid'
-            ).select_related('order__user', 'tool', 'plan')
+            ).select_related('order__user', 'tool')
             
             for item in expiring_items:
                 user = item.order.user

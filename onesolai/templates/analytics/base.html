@@ -45,6 +45,14 @@
         <a href="{% url 'analytics:platform_wallet' %}" class="admin-menu-link {% block nav_platform_wallet %}{% endblock %}">
             <i class="fa-solid fa-building-columns"></i> Platform Wallet
         </a>
+        <a href="{% url 'analytics:activity_logs' %}" class="admin-menu-link {% block nav_activity_logs %}{% endblock %}">
+            <i class="fa-solid fa-list-check"></i> Activity Logs &amp; Audit
+        </a>
+
+        <div class="admin-menu-section" style="margin-top: 16px;">Dashboard</div>
+        <a href="/admin/" class="admin-menu-link" target="_blank" style="color: #FF3B30;">
+            <i class="fa-solid fa-screwdriver-wrench" style="color: #FF3B30;"></i> Control Panel
+        </a>
         <a href="{% url 'dashboard:home' %}" class="admin-menu-link">
             <i class="fa-solid fa-house"></i> Return to Frontend
         </a>

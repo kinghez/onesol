@@ -10,8 +10,22 @@ class VendorProductInline(admin.TabularInline):
     can_delete = False
     max_num = 0
 
+from django import forms
+
+
+class VendorAdminForm(forms.ModelForm):
+    class Meta:
+        model = Vendor
+        fields = '__all__'
+        widgets = {
+            'api_key': forms.PasswordInput(render_value=True, attrs={'autocomplete': 'new-password'}),
+            'webhook_secret': forms.PasswordInput(render_value=True, attrs={'autocomplete': 'new-password'}),
+        }
+
+
 @admin.register(Vendor)
 class VendorAdmin(admin.ModelAdmin):
+    form = VendorAdminForm
     list_display = ('name', 'api_type', 'is_active', 'created_at')
     list_filter = ('api_type', 'is_active')
     search_fields = ('name',)
@@ -91,35 +105,40 @@ class VendorProductAdmin(admin.ModelAdmin):
                 skipped += 1
                 continue
             
-            tool_name = vp.name
-            tool_desc = vp.description or f"Purchase {vp.name} securely and instantly."
-            tool_short_desc = ""
+            try:
+                tool_name = vp.name
+                tool_desc = vp.description or f"Purchase {vp.name} securely and instantly."
+                tool_short_desc = ""
 
-            # Try AI Refinement
-            categories = list(Category.objects.values_list('name', flat=True))
-            refined = refine_product_copy(tool_name, tool_desc, available_categories=categories)
-            assigned_cat = cat
-            if refined:
-                tool_name = refined.get('name', tool_name)
-                tool_short_desc = refined.get('short_description', '')
-                tool_desc = refined.get('description', tool_desc)
-                ai_cat_name = refined.get('category')
-                if ai_cat_name:
-                    matched_cat = Category.objects.filter(name__iexact=ai_cat_name.strip()).first()
-                    if matched_cat:
-                        assigned_cat = matched_cat
-                ai_refined += 1
-            
-            Tool.objects.create(
-                name=tool_name,
-                category=assigned_cat,
-                vendor_product=vp,
-                description=tool_desc,
-                short_description=tool_short_desc,
-                is_ai_refined=bool(refined),
-                is_active=True
-            )
-            created += 1
+                # Try AI Refinement
+                categories = list(Category.objects.values_list('name', flat=True))
+                refined = refine_product_copy(tool_name, tool_desc, available_categories=categories)
+                assigned_cat = cat
+                if refined:
+                    tool_name = refined.get('name', tool_name)
+                    tool_short_desc = refined.get('short_description', '')
+                    tool_desc = refined.get('description', tool_desc)
+                    ai_cat_name = refined.get('category')
+                    if ai_cat_name:
+                        matched_cat = Category.objects.filter(name__iexact=ai_cat_name.strip()).first()
+                        if matched_cat:
+                            assigned_cat = matched_cat
+                    ai_refined += 1
+                
+                Tool.objects.create(
+                    name=tool_name,
+                    category=assigned_cat,
+                    vendor_product=vp,
+                    description=tool_desc,
+                    short_description=tool_short_desc,
+                    is_ai_refined=bool(refined),
+                    is_active=True
+                )
+                created += 1
+            except Exception as e:
+                import logging
+                logging.getLogger(__name__).error(f"Error creating tool for VendorProduct '{vp.name}': {e}")
+
             
         msg = f"Successfully created {created} new Frontend Tools from Vendor Products."
         if ai_refined > 0:

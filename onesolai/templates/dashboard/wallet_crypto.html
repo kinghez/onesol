@@ -1,0 +1,104 @@
+{% extends 'base_dashboard.html' %}
+{% load static %}
+
+{% block title %}Crypto Wallet Top-up – OneSol AI Hub{% endblock %}
+{% block nav_wallet %}active{% endblock %}
+
+{% block content %}
+<div class="container" style="max-width: 680px; margin: 30px auto 60px; padding: 0 16px;">
+    
+    <div class="glass-card" style="background: rgba(15, 21, 53, 0.9); border: 1px solid rgba(255, 255, 255, 0.12); border-radius: 20px; padding: 32px; backdrop-filter: blur(16px); box-shadow: 0 20px 40px rgba(0,0,0,0.5);">
+        
+        <!-- Header -->
+        <div style="text-align: center; margin-bottom: 28px;">
+            <div style="width: 60px; height: 60px; border-radius: 50%; background: linear-gradient(135deg, #5B63F6, #8E6CFF); display: inline-flex; align-items: center; justify-content: center; font-size: 26px; color: #fff; margin-bottom: 16px; box-shadow: 0 8px 24px rgba(142, 108, 255, 0.4);">
+                <i class="fa-brands fa-bitcoin"></i>
+            </div>
+            <h1 style="font-size: 22px; font-weight: 700; color: #fff; margin: 0 0 6px;">Crypto Wallet Top-Up</h1>
+            <p style="color: #AEB5CA; font-size: 14px; margin: 0;">Ref: {{ reference }}</p>
+        </div>
+
+        <!-- Summary Box -->
+        <div style="background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.08); border-radius: 14px; padding: 20px; margin-bottom: 24px; display: flex; justify-content: space-between; align-items: center;">
+            <div>
+                <span style="font-size: 13px; color: #AEB5CA; display: block; margin-bottom: 4px;">Top-Up Amount in USDT:</span>
+                <span style="font-size: 26px; font-weight: 800; color: #4ade80;">${{ usd_amount|floatformat:2 }} USDT</span>
+            </div>
+            <div style="text-align: right;">
+                <span style="font-size: 13px; color: #8E6CFF; background: rgba(142,108,255,0.15); padding: 6px 12px; border-radius: 20px; font-weight: 600;">
+                    ₦{{ amount_ngn|floatformat:2 }} NGN
+                </span>
+            </div>
+        </div>
+
+        <!-- Instructions -->
+        <div style="background: rgba(91, 99, 246, 0.08); border-left: 4px solid #5B63F6; border-radius: 8px; padding: 16px; margin-bottom: 24px;">
+            <div style="font-size: 14px; font-weight: 600; color: #fff; margin-bottom: 4px; display: flex; align-items: center; gap: 8px;">
+                <i class="fa-solid fa-circle-info" style="color: #5B63F6;"></i> Payment Instructions
+            </div>
+            <p style="font-size: 13px; color: #CBD5E1; margin: 0; line-height: 1.5;">
+                {{ instructions|default:"Send the exact amount in USDT to the wallet address below, then copy and paste your Transaction Hash (TxID) to submit." }}
+            </p>
+        </div>
+
+        <!-- Wallet Address Box -->
+        <div style="margin-bottom: 24px;">
+            <label style="display: block; font-size: 13px; font-weight: 600; color: #AEB5CA; margin-bottom: 8px;">
+                USDT Network: <span style="color: #38bdf8; font-weight: 700;">{{ usdt_network|default:'USDT (TRC20)' }}</span>
+            </label>
+
+            <label style="display: block; font-size: 13px; font-weight: 600; color: #AEB5CA; margin-bottom: 8px;">
+                Platform Deposit Wallet Address
+            </label>
+            <div style="display: flex; gap: 8px; align-items: center;">
+                <input type="text" id="usdtWalletAddress" value="{{ usdt_address }}" readonly
+                       style="flex: 1; background: rgba(0,0,0,0.4); border: 1px solid rgba(255,255,255,0.15); color: #fff; font-family: monospace; font-size: 14px; padding: 14px; border-radius: 12px; font-weight: 600;">
+                <button type="button" onclick="copyCryptoAddress()" class="btn btn-primary"
+                        style="height: 48px; padding: 0 20px; border-radius: 12px; font-weight: 600; display: inline-flex; align-items: center; gap: 8px; flex-shrink: 0;">
+                    <i class="fa-regular fa-copy"></i> <span id="copyBtnText">Copy</span>
+                </button>
+            </div>
+        </div>
+
+        <!-- Submit Form -->
+        <form method="POST" action="{% url 'dashboard:wallet_crypto_submit' reference=reference %}">
+            {% csrf_token %}
+            <div style="margin-bottom: 24px;">
+                <label style="display: block; font-size: 14px; font-weight: 600; color: #fff; margin-bottom: 8px;">
+                    Transaction Hash / TxID <span style="color: #ef4444;">*</span>
+                </label>
+                <input type="text" name="transaction_hash" placeholder="Paste your blockchain Transaction Hash (TxID) here..." required
+                       style="width: 100%; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.18); color: #fff; font-size: 14px; padding: 14px; border-radius: 12px; font-family: monospace;">
+                <small style="color: #AEB5CA; font-size: 12px; margin-top: 6px; display: block;">
+                    Paste the TxID from your crypto wallet app after transferring.
+                </small>
+            </div>
+
+            <div style="display: flex; gap: 12px;">
+                <a href="{% url 'dashboard:wallet' %}" class="btn btn-secondary" style="flex: 1; height: 50px; display: inline-flex; align-items: center; justify-content: center; border-radius: 12px; text-decoration: none; color: #AEB5CA; background: rgba(255,255,255,0.08); font-weight: 600;">
+                    Cancel
+                </a>
+                <button type="submit" class="btn btn-primary" style="flex: 2; height: 50px; font-size: 15px; font-weight: 700; border-radius: 12px; background: linear-gradient(135deg, #5B63F6, #8E6CFF); box-shadow: 0 8px 24px rgba(142, 108, 255, 0.4);">
+                    <i class="fa-solid fa-paper-plane" style="margin-right: 8px;"></i> Submit TxID
+                </button>
+            </div>
+        </form>
+
+    </div>
+</div>
+
+<script>
+function copyCryptoAddress() {
+    var copyText = document.getElementById("usdtWalletAddress");
+    copyText.select();
+    copyText.setSelectionRange(0, 99999);
+    navigator.clipboard.writeText(copyText.value);
+    
+    var btnText = document.getElementById("copyBtnText");
+    btnText.textContent = "Copied!";
+    setTimeout(function() {
+        btnText.textContent = "Copy";
+    }, 2000);
+}
+</script>
+{% endblock %}

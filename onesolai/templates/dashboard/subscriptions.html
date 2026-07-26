@@ -70,7 +70,7 @@
           </div>
           
           <div class="sub-actions">
-            <button class="btn-sub-action" onclick="viewAccess('{{ item.order.id }}')">
+            <button class="btn-sub-action" onclick="viewAccess('{{ item.order_id|default:item.order.id }}')">
               <i class="fa-solid fa-key"></i> View Access Details
             </button>
           </div>
@@ -210,7 +210,46 @@
 .btn-primary:hover { transform: translateY(-2px); }
 
 /* Modal */
-.order-modal-box { max-width: 600px; padding: 24px; }
+.modal-backdrop {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background: rgba(10, 14, 35, 0.85);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  z-index: 99999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+}
+.order-modal-box {
+  background: #131835;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 20px;
+  width: 100%;
+  max-width: 650px;
+  position: relative;
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.6);
+  max-height: 90vh;
+  overflow-y: auto;
+  padding: 28px;
+}
+.modal-close {
+  position: absolute;
+  top: 16px;
+  right: 20px;
+  background: transparent;
+  border: none;
+  color: #AEB5CA;
+  font-size: 28px;
+  cursor: pointer;
+  z-index: 10;
+  line-height: 1;
+}
+.modal-close:hover { color: #fff; }
 </style>
 
 <script>
@@ -223,16 +262,20 @@ function switchTab(tab) {
 }
 
 function viewAccess(orderId) {
+  if (!orderId) {
+    alert("Order ID missing.");
+    return;
+  }
   var modal = document.getElementById('accessModal');
   var body = document.getElementById('accessModalBody');
   modal.style.display = 'flex';
   document.body.style.overflow = 'hidden';
-  body.innerHTML = '<div style="text-align:center;padding:40px;color:#7C83FA;"><i class="fa-solid fa-circle-notch fa-spin"></i> Loading...</div>';
+  body.innerHTML = '<div style="text-align:center;padding:40px;color:#7C83FA;"><i class="fa-solid fa-circle-notch fa-spin" style="font-size:28px;"></i><p style="margin-top:12px;color:#AEB5CA;">Loading access details...</p></div>';
   
   fetch('/dashboard/orders/' + orderId + '/')
-    .then(r => r.text())
-    .then(html => { body.innerHTML = html; })
-    .catch(err => { body.innerHTML = '<div class="empty-state"><p class="text-danger">Failed to load details.</p></div>'; });
+    .then(function(r) { return r.text(); })
+    .then(function(html) { body.innerHTML = html; })
+    .catch(function(err) { body.innerHTML = '<div class="empty-state"><p class="text-danger">Failed to load access details.</p></div>'; });
 }
 function closeAccessModal() {
   document.getElementById('accessModal').style.display = 'none';

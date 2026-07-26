@@ -110,9 +110,17 @@
         <button type="button" class="btn-quick" onclick="setAmount(5000)">₦5,000</button>
         <button type="button" class="btn-quick" onclick="setAmount(10000)">₦10,000</button>
       </div>
+
+      <div style="margin: 16px 0 8px; text-align: left;">
+        <label style="font-size:12px; color:#AEB5CA; display:block; margin-bottom:6px; font-weight:600;">Payment Method</label>
+        <select name="payment_method" style="background:#0f1535; border:1px solid rgba(255,255,255,0.2); color:#fff; font-size:13px; padding:10px 12px; border-radius:8px; width:100%; cursor:pointer;">
+          <option value="card" style="background:#0f1535; color:#ffffff;">💳 Card / Bank Transfer</option>
+          <option value="crypto" style="background:#0f1535; color:#ffffff;">🪙 Crypto (USDT TRC20 / BEP20)</option>
+        </select>
+      </div>
       
       <button type="submit" class="btn-primary w-100 mt-4">Proceed to Payment <i class="fa-solid fa-arrow-right"></i></button>
-      <div class="secure-badge"><i class="fa-solid fa-lock"></i> Secured by Paystack</div>
+      <div class="secure-badge"><i class="fa-solid fa-lock"></i> Secured 256-bit Encrypted Checkout</div>
     </form>
   </div>
 </div>
