@@ -19,15 +19,15 @@ html, body, .wrapper, .content-wrapper, .layout-navbar-fixed .wrapper .content-w
 /* Cards / Boxes */
 .card, .info-box {
     background-color: #2A1659 !important;
-    border: 1px solid rgba(255, 255, 255, 0.05) !important;
+    border: 1px solid rgba(255, 255, 255, 0.08) !important;
     box-shadow: none !important;
     color: #FFFFFF !important;
 }
 .card-header {
-    border-bottom: 1px solid rgba(255, 255, 255, 0.05) !important;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.08) !important;
 }
 .card-footer {
-    border-top: 1px solid rgba(255, 255, 255, 0.05) !important;
+    border-top: 1px solid rgba(255, 255, 255, 0.08) !important;
     background-color: transparent !important;
 }
 
@@ -36,7 +36,7 @@ html, body, .wrapper, .content-wrapper, .layout-navbar-fixed .wrapper .content-w
     flex-wrap: nowrap !important;
     overflow-x: auto !important;
     overflow-y: hidden !important;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.05) !important;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.08) !important;
 }
 .nav-tabs .nav-item {
     white-space: nowrap;
@@ -45,11 +45,11 @@ html, body, .wrapper, .content-wrapper, .layout-navbar-fixed .wrapper .content-w
     color: #FFFFFF !important;
 }
 .table td, .table th {
-    border-top: 1px solid rgba(255, 255, 255, 0.05) !important;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.05) !important;
+    border-top: 1px solid rgba(255, 255, 255, 0.08) !important;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.08) !important;
 }
 .table-striped tbody tr:nth-of-type(odd) {
-    background-color: rgba(255, 255, 255, 0.02) !important;
+    background-color: rgba(255, 255, 255, 0.03) !important;
 }
 
 /* Buttons */
@@ -63,23 +63,85 @@ html, body, .wrapper, .content-wrapper, .layout-navbar-fixed .wrapper .content-w
     border-color: #7C3AED !important;
 }
 
-/* Inputs / Selects */
-.form-control, .select2-selection, input[type="text"], input[type="search"], input[type="password"], input[type="email"], input[type="number"], select, textarea {
+/* ──────────────────────────────────────────────────────────── */
+/* 1. Editable Fields: Clean White Box + Dark Sharp Text        */
+/* ──────────────────────────────────────────────────────────── */
+.form-control:not([disabled]):not([readonly]),
+.select2-selection:not([disabled]):not([readonly]),
+input:not([disabled]):not([readonly]),
+select:not([disabled]):not([readonly]),
+textarea:not([disabled]):not([readonly]) {
     background-color: #FFFFFF !important;
-    border: 1px solid #ced4da !important;
-    color: #000000 !important;
-}
-.form-control:focus, input:focus, select:focus, textarea:focus {
-    border-color: #8B5CF6 !important;
-    background-color: #FFFFFF !important;
-    color: #000000 !important;
-    box-shadow: 0 0 0 0.2rem rgba(139, 92, 246, 0.25) !important;
+    border: 1px solid #CBD5E1 !important;
+    color: #0F1535 !important;
+    font-weight: 600 !important;
+    border-radius: 8px !important;
 }
 
-/* Select2 dropdowns specifically */
-.select2-dropdown, .select2-results__option, .select2-search__field {
+.form-control:not([disabled]):not([readonly]):focus,
+input:not([disabled]):not([readonly]):focus,
+select:not([disabled]):not([readonly]):focus,
+textarea:not([disabled]):not([readonly]):focus {
+    border-color: #8B5CF6 !important;
     background-color: #FFFFFF !important;
-    color: #000000 !important;
+    color: #0F1535 !important;
+    box-shadow: 0 0 0 0.2rem rgba(139, 92, 246, 0.3) !important;
+}
+
+/* ──────────────────────────────────────────────────────────── */
+/* 2. Disabled / Readonly Fields: Dark Box + Cyan High Contrast */
+/* ──────────────────────────────────────────────────────────── */
+.form-control[disabled],
+.form-control[readonly],
+fieldset[disabled] .form-control,
+input[disabled],
+input[readonly],
+textarea[disabled],
+textarea[readonly],
+select[disabled],
+select[readonly],
+.uneditable-input,
+.readonly,
+div.readonly,
+.field-box .readonly,
+.form-row .readonly,
+div.readonly div,
+.readonly p,
+.readonly span,
+.readonly input {
+    background-color: #1F0E45 !important;
+    border: 1px solid rgba(142, 108, 255, 0.4) !important;
+    color: #38BDF8 !important;
+    font-weight: 700 !important;
+    border-radius: 8px !important;
+    opacity: 1 !important;
+    padding: 8px 14px !important;
+}
+
+/* Links inside disabled/readonly fields (e.g. user email admin@onesolai.com) */
+.readonly a,
+div.readonly a,
+.form-control[disabled] a,
+.form-control[readonly] a,
+.field-box a {
+    color: #38BDF8 !important;
+    font-weight: 800 !important;
+    text-decoration: underline !important;
+}
+.readonly a:hover {
+    color: #7DD3FC !important;
+}
+
+/* Dropdown select options */
+select option {
+    background-color: #1F0E45 !important;
+    color: #FFFFFF !important;
+}
+
+/* Select2 dropdowns */
+.select2-dropdown, .select2-results__option, .select2-search__field {
+    background-color: #1F0E45 !important;
+    color: #FFFFFF !important;
 }
 .select2-results__option--highlighted {
     background-color: #8B5CF6 !important;
@@ -94,7 +156,7 @@ h1, .page-title, .content-header h1 {
     color: #FFFFFF !important;
     font-weight: 600;
 }
-.text-muted {
+.text-muted, .help-block, .help-inline, div.help {
     color: #A895D1 !important;
 }
 .text-dark {
@@ -114,4 +176,3 @@ input[type="password"]::-webkit-contacts-auto-fill-button,
 input[type="password"]::-webkit-credentials-auto-fill-button {
     display: none !important;
 }
-

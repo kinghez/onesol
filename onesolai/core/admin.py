@@ -7,7 +7,46 @@ admin.site.site_header = "OneSol AI Hub – Admin"
 admin.site.site_title = "OneSol Admin"
 admin.site.index_title = "Site Management Dashboard"
 
-from .models import SiteSettings, HeroSlide, NewsletterSubscriber, Testimonial, FAQ
+from django.utils.html import format_html
+from .models import SiteSettings, HeroSlide, NewsletterSubscriber, Testimonial, FAQ, ContactMessage
+
+
+@admin.register(ContactMessage)
+class ContactMessageAdmin(admin.ModelAdmin):
+    list_display = ('full_name', 'email', 'category', 'subject', 'status_badge', 'created_at')
+    list_filter = ('is_resolved', 'category', 'created_at')
+    search_fields = ('full_name', 'email', 'subject', 'message')
+    readonly_fields = ('created_at',)
+    ordering = ('-created_at',)
+    actions = ['mark_resolved', 'mark_unresolved']
+
+    fieldsets = (
+        ('Contact Info', {
+            'fields': ('full_name', 'email', 'category', 'subject', 'created_at')
+        }),
+        ('Message Content', {
+            'fields': ('message',)
+        }),
+        ('Status & Admin Resolution', {
+            'fields': ('is_resolved', 'admin_note')
+        }),
+    )
+
+    @admin.display(description='Status')
+    def status_badge(self, obj):
+        if obj.is_resolved:
+            return format_html('<span style="background:#10B981;color:#fff;padding:3px 12px;border-radius:20px;font-size:11px;font-weight:700;">RESOLVED</span>')
+        return format_html('<span style="background:#F59E0B;color:#fff;padding:3px 12px;border-radius:20px;font-size:11px;font-weight:700;">PENDING</span>')
+
+    @admin.action(description='Mark selected inquiries as Resolved')
+    def mark_resolved(self, request, queryset):
+        queryset.update(is_resolved=True)
+        self.message_user(request, f"{queryset.count()} contact inquiry(ies) marked as resolved.")
+
+    @admin.action(description='Mark selected inquiries as Pending')
+    def mark_unresolved(self, request, queryset):
+        queryset.update(is_resolved=False)
+        self.message_user(request, f"{queryset.count()} contact inquiry(ies) marked as pending.")
 
 
 @admin.register(Testimonial)

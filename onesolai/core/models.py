@@ -446,3 +446,24 @@ class FAQ(models.Model):
 
     def __str__(self):
         return self.question
+
+
+class ContactMessage(models.Model):
+    """Model to store contact form submissions from the Contact Us page."""
+    full_name = models.CharField(max_length=150)
+    email = models.EmailField()
+    subject = models.CharField(max_length=200)
+    category = models.CharField(max_length=50, default='General Inquiry')
+    message = models.TextField()
+    is_resolved = models.BooleanField(default=False, verbose_name="Resolved / Responded")
+    admin_note = models.TextField(blank=True, help_text="Internal notes for support staff")
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ['-created_at']
+        verbose_name = 'Contact Inquiry'
+        verbose_name_plural = 'Contact Inquiries'
+
+    def __str__(self):
+        status = "RESOLVED" if self.is_resolved else "PENDING"
+        return f"[{status}] {self.full_name} ({self.email}) – {self.subject}"

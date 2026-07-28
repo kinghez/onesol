@@ -4,7 +4,7 @@ from . import currency
 from . import dashboard_views  # re-export
 
 
-from .models import HeroSlide, Testimonial, FAQ
+from .models import HeroSlide, Testimonial, FAQ, ContactMessage, SiteSettings
 
 def home(request):
     """Render the home page."""
@@ -120,6 +120,15 @@ def contact_us(request):
         message_text = request.POST.get('message', '').strip()
 
         if full_name and email and message_text:
+            # Save Contact Inquiry to database table for Admin access
+            ContactMessage.objects.create(
+                full_name=full_name,
+                email=email,
+                subject=subject,
+                category=category or 'General Inquiry',
+                message=message_text,
+            )
+
             try:
                 from analytics.models import ActivityLog
                 ActivityLog.objects.create(

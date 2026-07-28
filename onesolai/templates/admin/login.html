@@ -1,0 +1,396 @@
+{% load i18n static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="robots" content="none, noarchive">
+    <title>Admin Login | OneSol AI Hub</title>
+    <link rel="stylesheet" href="{% static 'vendor/fontawesome-free/css/all.min.css' %}">
+    <style>
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap');
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            min-height: 100vh;
+            background: #0A0620;
+            display: flex;
+            align-items: stretch;
+            overflow: hidden;
+        }
+
+        /* ── Left Panel ── */
+        .login-left {
+            flex: 0 0 480px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            padding: 60px 50px;
+            background: linear-gradient(160deg, #0F0630 0%, #180836 50%, #0A0620 100%);
+            position: relative;
+            z-index: 2;
+        }
+
+        /* Animated orbs */
+        .login-left::before {
+            content: '';
+            position: absolute;
+            width: 350px; height: 350px;
+            border-radius: 50%;
+            background: radial-gradient(circle, rgba(139,92,246,0.15) 0%, transparent 70%);
+            top: -80px; left: -80px;
+            animation: pulse 5s ease-in-out infinite;
+        }
+        .login-left::after {
+            content: '';
+            position: absolute;
+            width: 250px; height: 250px;
+            border-radius: 50%;
+            background: radial-gradient(circle, rgba(56,189,248,0.10) 0%, transparent 70%);
+            bottom: -60px; right: 20px;
+            animation: pulse 7s ease-in-out infinite reverse;
+        }
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); opacity: 0.7; }
+            50% { transform: scale(1.15); opacity: 1; }
+        }
+
+        .login-inner {
+            width: 100%;
+            max-width: 360px;
+            position: relative;
+            z-index: 1;
+        }
+
+        .login-logo {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 36px;
+        }
+        .login-logo img {
+            width: 44px;
+            height: 44px;
+            object-fit: contain;
+        }
+        .login-logo-text {
+            font-size: 22px;
+            font-weight: 800;
+            color: #FFF;
+            letter-spacing: -0.5px;
+        }
+        .login-logo-text span {
+            background: linear-gradient(135deg, #8B5CF6, #38BDF8);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .login-heading {
+            font-size: 28px;
+            font-weight: 800;
+            color: #FFF;
+            margin-bottom: 6px;
+            letter-spacing: -0.5px;
+        }
+        .login-subheading {
+            font-size: 14px;
+            color: #A895D1;
+            margin-bottom: 36px;
+        }
+
+        /* Messages */
+        .login-messages {
+            margin-bottom: 20px;
+        }
+        .login-error {
+            background: rgba(239,68,68,0.12);
+            border: 1px solid rgba(239,68,68,0.35);
+            border-radius: 10px;
+            padding: 12px 16px;
+            color: #FCA5A5;
+            font-size: 13px;
+            font-weight: 600;
+        }
+
+        /* Form fields */
+        .form-group {
+            margin-bottom: 18px;
+        }
+        .form-label {
+            display: block;
+            font-size: 12px;
+            font-weight: 700;
+            color: #A895D1;
+            text-transform: uppercase;
+            letter-spacing: 0.8px;
+            margin-bottom: 8px;
+        }
+        .form-input-wrap {
+            position: relative;
+        }
+        .form-input-wrap .field-icon {
+            position: absolute;
+            left: 14px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #6B5FA6;
+            font-size: 15px;
+            pointer-events: none;
+        }
+        .form-input {
+            width: 100%;
+            background: rgba(255,255,255,0.05);
+            border: 1px solid rgba(255,255,255,0.12);
+            border-radius: 12px;
+            padding: 14px 16px 14px 42px;
+            color: #FFF !important;
+            font-size: 14px;
+            font-weight: 500;
+            font-family: inherit;
+            transition: border-color 0.2s, background 0.2s, box-shadow 0.2s;
+            outline: none;
+            -webkit-text-fill-color: #FFF !important;
+        }
+        .form-input::placeholder {
+            color: #6B5FA6;
+        }
+        .form-input:focus {
+            border-color: #8B5CF6;
+            background: rgba(139,92,246,0.08);
+            box-shadow: 0 0 0 3px rgba(139,92,246,0.2);
+            color: #FFF !important;
+            -webkit-text-fill-color: #FFF !important;
+        }
+
+        .btn-login {
+            width: 100%;
+            padding: 15px;
+            background: linear-gradient(135deg, #6D28D9 0%, #8B5CF6 50%, #7C3AED 100%);
+            border: none;
+            border-radius: 12px;
+            color: #FFF;
+            font-size: 15px;
+            font-weight: 700;
+            font-family: inherit;
+            cursor: pointer;
+            box-shadow: 0 8px 24px rgba(139,92,246,0.4);
+            transition: transform 0.2s, box-shadow 0.2s;
+            margin-top: 8px;
+            letter-spacing: 0.3px;
+        }
+        .btn-login:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 12px 32px rgba(139,92,246,0.55);
+        }
+        .btn-login:active {
+            transform: translateY(0);
+        }
+
+        .login-footer {
+            margin-top: 40px;
+            text-align: center;
+            font-size: 12px;
+            color: #5C5080;
+        }
+        .login-footer a {
+            color: #8B5CF6;
+            text-decoration: none;
+            font-weight: 600;
+        }
+
+        /* ── Right Panel ── */
+        .login-right {
+            flex: 1;
+            position: relative;
+            overflow: hidden;
+        }
+        .login-right-bg {
+            position: absolute;
+            inset: 0;
+            background-image: url('{% static "assets/hero-ai.png" %}');
+            background-size: cover;
+            background-position: center;
+        }
+        .login-right-overlay {
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(
+                270deg,
+                rgba(10,6,32,0.0) 0%,
+                rgba(10,6,32,0.2) 60%,
+                rgba(10,6,32,0.85) 100%
+            );
+        }
+        .login-right-content {
+            position: absolute;
+            bottom: 60px;
+            left: 60px;
+            right: 40px;
+        }
+        .login-right-content h2 {
+            font-size: 32px;
+            font-weight: 800;
+            color: #FFF;
+            line-height: 1.25;
+            margin-bottom: 14px;
+            text-shadow: 0 2px 16px rgba(0,0,0,0.6);
+        }
+        .login-right-content h2 span {
+            background: linear-gradient(135deg, #8B5CF6, #38BDF8);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        .login-right-content p {
+            font-size: 15px;
+            color: rgba(255,255,255,0.7);
+            max-width: 400px;
+            line-height: 1.65;
+        }
+
+        /* Stats row */
+        .login-stats {
+            display: flex;
+            gap: 24px;
+            margin-top: 28px;
+        }
+        .login-stat {
+            background: rgba(255,255,255,0.06);
+            border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 12px;
+            padding: 12px 20px;
+            backdrop-filter: blur(10px);
+        }
+        .login-stat-value {
+            font-size: 20px;
+            font-weight: 800;
+            color: #FFF;
+        }
+        .login-stat-label {
+            font-size: 11px;
+            color: rgba(255,255,255,0.5);
+            margin-top: 2px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .login-right { display: none; }
+            .login-left { flex: 1; min-height: 100vh; }
+            body { overflow: auto; }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Left Login Panel -->
+    <div class="login-left">
+        <div class="login-inner">
+
+            <!-- Logo -->
+            <div class="login-logo">
+                <img src="{% static 'assets/logo.png' %}" alt="OneSol Logo">
+                <div class="login-logo-text">OneSol <span>AI Hub</span></div>
+            </div>
+
+            <h1 class="login-heading">Admin Sign In</h1>
+            <p class="login-subheading">Secure access to the OneSol management portal</p>
+
+            <!-- Error messages -->
+            {% if form.errors %}
+            <div class="login-messages">
+                <div class="login-error">
+                    <i class="fas fa-triangle-exclamation" style="margin-right:6px;"></i>
+                    {% if form.non_field_errors %}
+                        {% for error in form.non_field_errors %}{{ error }}{% endfor %}
+                    {% else %}
+                        Invalid username or password. Please try again.
+                    {% endif %}
+                </div>
+            </div>
+            {% endif %}
+
+            <!-- Login Form -->
+            <form method="post" action="{{ request.path }}">
+                {% csrf_token %}
+                {% if next %}
+                    <input type="hidden" name="next" value="{{ next }}">
+                {% endif %}
+
+                <div class="form-group">
+                    <label class="form-label" for="id_username">Username / Email</label>
+                    <div class="form-input-wrap">
+                        <i class="fas fa-user field-icon"></i>
+                        <input
+                            type="text"
+                            id="id_username"
+                            name="username"
+                            class="form-input"
+                            placeholder="Enter your username"
+                            required
+                            autofocus
+                            autocomplete="username"
+                            value="{{ form.username.value|default_if_none:'' }}"
+                        >
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label" for="id_password">Password</label>
+                    <div class="form-input-wrap">
+                        <i class="fas fa-lock field-icon"></i>
+                        <input
+                            type="password"
+                            id="id_password"
+                            name="password"
+                            class="form-input"
+                            placeholder="Enter your password"
+                            required
+                            autocomplete="current-password"
+                        >
+                    </div>
+                </div>
+
+                <button type="submit" class="btn-login">
+                    <i class="fas fa-right-to-bracket" style="margin-right:8px;"></i>
+                    Sign In to Admin Panel
+                </button>
+            </form>
+
+            <div class="login-footer">
+                <a href="/">← Back to OneSol AI Hub</a><br><br>
+                © 2026 OneSol AI Hub Ltd. All rights reserved.
+            </div>
+        </div>
+    </div>
+
+    <!-- Right Visual Panel -->
+    <div class="login-right">
+        <div class="login-right-bg"></div>
+        <div class="login-right-overlay"></div>
+        <div class="login-right-content">
+            <h2>Powering AI Access<br>for <span>Everyone, Worldwide</span></h2>
+            <p>Manage subscriptions, tools, vendors and users — all from one powerful administration portal.</p>
+            <div class="login-stats">
+                <div class="login-stat">
+                    <div class="login-stat-value">1k+</div>
+                    <div class="login-stat-label">Active Users</div>
+                </div>
+                <div class="login-stat">
+                    <div class="login-stat-value">50+</div>
+                    <div class="login-stat-label">AI Tools</div>
+                </div>
+                <div class="login-stat">
+                    <div class="login-stat-value">99.9%</div>
+                    <div class="login-stat-label">Uptime</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</body>
+</html>
