@@ -116,9 +116,9 @@ class SiteSettingsAdmin(admin.ModelAdmin):
             'fields': ('trust_bar_left_text', 'trust_bar_rating_score', 'trust_bar_right_text'),
             'description': 'Customize the text and rating score displayed in the homepage trust bar.',
         }),
-        ('📄 Editable Legal Pages Content', {
-            'fields': ('privacy_policy_content', 'terms_of_service_content', 'refund_policy_content'),
-            'description': 'Customize text or HTML content for Privacy Policy, Terms of Service, and Refund Policy pages. Leave blank to use default built-in legal templates.',
+        ('📄 Editable Public Pages Content (Legal & Referral)', {
+            'fields': ('privacy_policy_content', 'terms_of_service_content', 'refund_policy_content', 'referral_page_content'),
+            'description': 'Customize text or HTML content for Privacy Policy, Terms of Service, Refund Policy, and Refer & Earn pages. Leave blank to use default built-in templates.',
         }),
         ('🤖 AI Settings (OpenRouter)', {
             'fields': ('openrouter_api_key', 'openrouter_model'),
@@ -128,8 +128,9 @@ class SiteSettingsAdmin(admin.ModelAdmin):
             'fields': ('facebook_url', 'twitter_url', 'instagram_url', 'linkedin_url', 'youtube_url', 'whatsapp_number'),
             'description': 'Configure social media links and WhatsApp support number shown on the site and footer.',
         }),
-        ('🌐 Site Information', {
-            'fields': ('site_name', 'site_url', 'support_email', 'site_logo', 'site_favicon'),
+        ('🌐 Site Information & Images', {
+            'fields': ('site_name', 'site_url', 'support_email', 'site_logo', 'site_favicon', 'about_us_image', 'contact_hero_image'),
+            'description': 'Configure site branding, logos, and custom hero images for the About Us and Contact Us pages.',
         }),
     ]
 

@@ -46,7 +46,12 @@ class Order(models.Model):
         ordering = ['-created_at']
 
     def __str__(self):
-        return f"Order #{self.id} – {self.user.email} – {self.status.upper()}"
+        return f"Order #{self.order_number} ({self.id}) – {self.user.email} – {self.status.upper()}"
+
+    @property
+    def order_number(self):
+        """Returns a standardized trackable order identifier like OS-00025."""
+        return f"OS-{self.id:05d}"
 
     @property
     def is_paid(self):

@@ -96,3 +96,44 @@ def refund_policy(request):
     """Render Refund Policy page."""
     cfg = SiteSettings.get()
     return render(request, 'legal/refund_policy.html', {'custom_content': cfg.refund_policy_content})
+
+
+def refer_and_earn(request):
+    """Render Refer & Earn page."""
+    cfg = SiteSettings.get()
+    return render(request, 'pages/refer_and_earn.html', {
+        'custom_content': cfg.referral_page_content,
+        'site_settings': cfg,
+    })
+
+
+from django.contrib import messages
+from django.shortcuts import redirect
+
+def contact_us(request):
+    """Render and handle Contact Us page."""
+    if request.method == 'POST':
+        full_name = request.POST.get('full_name', '').strip()
+        email = request.POST.get('email', '').strip()
+        subject = request.POST.get('subject', '').strip()
+        category = request.POST.get('category', '').strip()
+        message_text = request.POST.get('message', '').strip()
+
+        if full_name and email and message_text:
+            try:
+                from analytics.models import ActivityLog
+                ActivityLog.objects.create(
+                    user=request.user if request.user.is_authenticated else None,
+                    activity_type='user_signup',
+                    description=f'Contact Form Inquiry from {full_name} ({email}) - Category: {category} - Subject: {subject}',
+                    ip_address=request.META.get('REMOTE_ADDR')
+                )
+            except Exception:
+                pass
+
+            messages.success(request, f"Thank you {full_name}! Your message has been received. Our team will get back to you shortly.")
+            return redirect('contact_us')
+        else:
+            messages.error(request, "Please fill in all required fields.")
+
+    return render(request, 'pages/contact.html')

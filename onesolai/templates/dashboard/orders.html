@@ -39,7 +39,7 @@
             <tbody>
               {% for order in orders %}
               <tr class="order-row">
-                <td class="col-id">#{{ order.id }}</td>
+                <td class="col-id font-mono">#{{ order.order_number }}</td>
                 <td class="col-date">{{ order.created_at|date:"d M Y, H:i" }}</td>
                 <td class="col-amount font-mono">₦{{ order.total_amount_ngn|floatformat:0 }}</td>
                 <td class="col-status">

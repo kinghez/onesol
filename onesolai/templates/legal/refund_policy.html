@@ -7,21 +7,31 @@
 {% block extra_css %}
 <style>
     .legal-page {
-        padding: 60px 24px 100px;
-        max-width: 1100px;
+        padding: 140px 24px 100px;
+        max-width: 1050px;
         margin: 0 auto;
+    }
+    .legal-container-card {
+        background: rgba(15, 21, 53, 0.95);
+        border: 1px solid rgba(255, 255, 255, 0.12);
+        border-radius: 24px;
+        padding: 48px 40px;
+        backdrop-filter: blur(20px);
+        box-shadow: 0 20px 50px rgba(0,0,0,0.6);
     }
     .legal-hero {
         text-align: center;
-        margin-bottom: 48px;
+        margin-bottom: 36px;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        padding-bottom: 32px;
     }
     .legal-badge {
         display: inline-block;
         padding: 6px 16px;
-        background: rgba(142, 108, 255, 0.12);
-        border: 1px solid rgba(142, 108, 255, 0.3);
+        background: rgba(142, 108, 255, 0.15);
+        border: 1px solid rgba(142, 108, 255, 0.35);
         border-radius: 20px;
-        color: #8E6CFF;
+        color: #A78BFA;
         font-size: 13px;
         font-weight: 600;
         margin-bottom: 16px;
@@ -29,7 +39,7 @@
         text-transform: uppercase;
     }
     .legal-title {
-        font-size: 38px;
+        font-size: 36px;
         font-weight: 800;
         color: #FFF;
         margin-bottom: 12px;
@@ -37,7 +47,7 @@
     }
     .legal-subtitle {
         color: #AEB5CA;
-        font-size: 16px;
+        font-size: 15px;
         max-width: 680px;
         margin: 0 auto 24px;
         line-height: 1.6;
@@ -47,7 +57,6 @@
         justify-content: center;
         gap: 12px;
         flex-wrap: wrap;
-        margin-bottom: 40px;
     }
     .legal-tab {
         padding: 10px 22px;
@@ -67,32 +76,27 @@
         box-shadow: 0 4px 16px rgba(139, 61, 255, 0.35);
     }
     .legal-card {
-        background: #180836;
-        border: 1px solid rgba(255, 255, 255, 0.1);
-        border-radius: 20px;
-        padding: 48px;
-        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
         color: #D1D7E6;
         font-size: 15px;
         line-height: 1.8;
     }
     .legal-card h2 {
-        font-size: 22px;
+        font-size: 20px;
         font-weight: 700;
         color: #FFF;
-        margin: 36px 0 16px;
+        margin: 32px 0 14px;
         display: flex;
         align-items: center;
         gap: 12px;
         border-bottom: 1px solid rgba(255, 255, 255, 0.08);
-        padding-bottom: 12px;
+        padding-bottom: 10px;
     }
     .legal-card h2:first-child {
         margin-top: 0;
     }
     .legal-card h2 i {
         color: #8E6CFF;
-        font-size: 20px;
+        font-size: 18px;
     }
     .legal-card p {
         margin-bottom: 16px;
@@ -134,32 +138,33 @@
         font-style: italic;
     }
     @media (max-width: 768px) {
-        .legal-page { padding: 40px 16px 60px; }
-        .legal-card { padding: 24px; }
-        .legal-title { font-size: 28px; }
+        .legal-page { padding: 110px 16px 60px; }
+        .legal-container-card { padding: 24px 18px; }
+        .legal-title { font-size: 26px; }
     }
 </style>
 {% endblock %}
 
 {% block content %}
 <div class="legal-page">
-    <div class="legal-hero">
-        <span class="legal-badge">Legal Documentation</span>
-        <h1 class="legal-title">Refund &amp; Guarantee Policy</h1>
-        <p class="legal-subtitle">We are committed to providing reliable, working tool access. Review our full replacement, guarantee, and refund guidelines below.</p>
-        
-        <div class="legal-nav-tabs">
-            <a href="{% url 'privacy_policy' %}" class="legal-tab"><i class="fas fa-user-shield"></i> Privacy Policy</a>
-            <a href="{% url 'terms_of_service' %}" class="legal-tab"><i class="fas fa-file-contract"></i> Terms of Service</a>
-            <a href="{% url 'refund_policy' %}" class="legal-tab active"><i class="fas fa-undo-alt"></i> Refund Policy</a>
+    <div class="legal-container-card">
+        <div class="legal-hero">
+            <span class="legal-badge">Legal Documentation</span>
+            <h1 class="legal-title">Refund &amp; Guarantee Policy</h1>
+            <p class="legal-subtitle">We are committed to providing reliable, working tool access. Review our full replacement, guarantee, and refund guidelines below.</p>
+            
+            <div class="legal-nav-tabs">
+                <a href="{% url 'privacy_policy' %}" class="legal-tab"><i class="fas fa-user-shield"></i> Privacy Policy</a>
+                <a href="{% url 'terms_of_service' %}" class="legal-tab"><i class="fas fa-file-contract"></i> Terms of Service</a>
+                <a href="{% url 'refund_policy' %}" class="legal-tab active"><i class="fas fa-undo-alt"></i> Refund Policy</a>
+            </div>
         </div>
-    </div>
 
-    <div class="legal-card">
-        {% if custom_content %}
-            {{ custom_content|safe }}
-        {% else %}
-        <h2><i class="fas fa-shield-heart"></i> 1. Our Customer Commitment</h2>
+        <div class="legal-card">
+            {% if custom_content %}
+                {{ custom_content|safe }}
+            {% else %}
+            <h2><i class="fas fa-shield-heart"></i> 1. Our Customer Commitment</h2>
         <p>At <strong>OneSol AI Hub</strong>, customer satisfaction is at the core of everything we do. Because we sell digital tool subscriptions and access credentials, we maintain a transparent, fair, and user-friendly refund and replacement policy to protect your purchase.</p>
 
         <div class="legal-highlight-box">
@@ -209,5 +214,6 @@
         <div class="updated-date">Last Updated: July 2026 | OneSol AI Hub Legal Team</div>
         {% endif %}
     </div>
+</div>
 </div>
 {% endblock %}

@@ -162,6 +162,33 @@ DEFAULT_REFUND_POLICY_HTML = """<h2><i class="fas fa-shield-heart"></i> 1. Our C
 <div class="updated-date">Last Updated: July 2026 | OneSol AI Hub Legal Team</div>"""
 
 
+DEFAULT_REFERRAL_PAGE_HTML = """<h2><i class="fas fa-gift"></i> 1. Overview & Commission Structure</h2>
+<p>Welcome to the <strong>OneSol AI Hub Refer & Earn Program</strong>! Share your unique referral link with friends, creators, colleagues, or social media followers and earn generous cash commissions for every successful order placed.</p>
+
+<div class="legal-highlight-box">
+    <strong>Generous Payouts:</strong> Earn cash rewards credited directly to your OneSol Wallet balance. Withdraw anytime straight to your bank account or crypto wallet once you reach the minimum threshold.
+</div>
+
+<h2><i class="fas fa-route"></i> 2. How It Works (Step-by-Step)</h2>
+<ul>
+    <li><strong>Get Your Link:</strong> Sign in to your OneSol AI Hub account and copy your unique referral link from your User Dashboard or this page.</li>
+    <li><strong>Share & Promote:</strong> Share your link via WhatsApp, Telegram, Twitter, YouTube, blog posts, or direct messages.</li>
+    <li><strong>Earn Cash:</strong> When someone clicks your link and purchases any AI tool subscription, your earnings wallet is automatically credited!</li>
+</ul>
+
+<h2><i class="fas fa-wallet"></i> 3. Withdrawal Rules & Guidelines</h2>
+<p>Withdrawals are fast, transparent, and hassle-free:</p>
+<ul>
+    <li><strong>Minimum Withdrawal:</strong> You can request a payout as soon as your balance reaches <strong>NGN 5,000</strong> (or crypto equivalent).</li>
+    <li><strong>Supported Payout Methods:</strong> Local Bank Account Transfer or Crypto (USDT TRC20/BEP20).</li>
+    <li><strong>Anti-Fraud Policy:</strong> Self-referrals, spamming, or creating fake accounts to manipulate referral links are strictly monitored and forbidden.</li>
+</ul>
+
+<h2><i class="fas fa-headset"></i> 4. Need Help or Have Questions?</h2>
+<p>If you have questions about custom affiliate partnerships, bulk reseller rates, or referral tracking, contact our team at <strong>info@onesolai.com</strong>.</p>
+<div class="updated-date">Last Updated: July 2026 | OneSol AI Hub Referral Team</div>"""
+
+
 class CurrencyRate(models.Model):
     currency_code = models.CharField(max_length=10, unique=True)
     rate_to_ngn = models.DecimalField(max_digits=10, decimal_places=4)
@@ -224,13 +251,15 @@ class SiteSettings(models.Model):
     transaction_fee_percent = models.DecimalField(max_digits=5, decimal_places=2, default=1.50,
         help_text='% fee added to each transaction (e.g. 1.50 = 1.5%)')
 
-    # Legal Pages Content (Admin Editable)
+    # Legal & Public Pages Content (Admin Editable)
     privacy_policy_content = models.TextField(blank=True, default=DEFAULT_PRIVACY_POLICY_HTML,
         help_text='Custom HTML or text for Privacy Policy page. Edit or replace this text anytime.')
     terms_of_service_content = models.TextField(blank=True, default=DEFAULT_TERMS_OF_SERVICE_HTML,
         help_text='Custom HTML or text for Terms of Service page. Edit or replace this text anytime.')
     refund_policy_content = models.TextField(blank=True, default=DEFAULT_REFUND_POLICY_HTML,
         help_text='Custom HTML or text for Refund Policy page. Edit or replace this text anytime.')
+    referral_page_content = models.TextField(blank=True, default=DEFAULT_REFERRAL_PAGE_HTML,
+        help_text='Custom HTML or text for Refer & Earn page. Edit or replace this text anytime.')
 
     # Referral
     referral_commission_type = models.CharField(max_length=20, default='fixed', choices=[
@@ -259,9 +288,12 @@ class SiteSettings(models.Model):
     trust_bar_right_text = models.CharField(max_length=255, default='from <strong>500+</strong> reviews',
         help_text='Right text in trust bar (HTML allowed, e.g. <strong>500+</strong>)')
 
-    # About Us Page Image
+    # About Us Page Image & Contact Hero Image
     about_us_image = models.ImageField(upload_to='site/', blank=True, null=True,
         help_text='Image to display on the right side of the About Us section on the homepage.')
+    contact_hero_image = models.ImageField(upload_to='site/', blank=True, null=True,
+        verbose_name="Contact Us Hero Image",
+        help_text='Custom hero image for the Contact Us page. If left empty, default image is used.')
 
     # Site name / branding
     site_name = models.CharField(max_length=100, default='OneSol AI Hub')

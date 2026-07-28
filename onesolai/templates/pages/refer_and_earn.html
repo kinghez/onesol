@@ -1,0 +1,324 @@
+{% extends 'base_public.html' %}
+{% load static %}
+
+{% block title %}Refer & Earn – OneSol AI Hub{% endblock %}
+{% block meta_description %}Earn real cash commissions by referring friends and colleagues to OneSol AI Hub. Withdraw your earnings straight to your bank account or crypto wallet.{% endblock %}
+
+{% block extra_css %}
+<style>
+    .referral-page {
+        padding: 140px 24px 100px;
+        max-width: 1050px;
+        margin: 0 auto;
+    }
+    .referral-container-card {
+        background: rgba(15, 21, 53, 0.95);
+        border: 1px solid rgba(255, 255, 255, 0.12);
+        border-radius: 24px;
+        padding: 48px 40px;
+        backdrop-filter: blur(20px);
+        box-shadow: 0 20px 50px rgba(0,0,0,0.6);
+    }
+    .referral-hero {
+        text-align: center;
+        margin-bottom: 36px;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        padding-bottom: 32px;
+    }
+    .referral-badge {
+        display: inline-block;
+        padding: 6px 16px;
+        background: rgba(142, 108, 255, 0.15);
+        border: 1px solid rgba(142, 108, 255, 0.35);
+        border-radius: 20px;
+        color: #A78BFA;
+        font-size: 13px;
+        font-weight: 600;
+        margin-bottom: 16px;
+        letter-spacing: 0.5px;
+        text-transform: uppercase;
+    }
+    .referral-title {
+        font-size: 36px;
+        font-weight: 800;
+        color: #FFF;
+        margin-bottom: 12px;
+        line-height: 1.25;
+    }
+    .referral-subtitle {
+        color: #AEB5CA;
+        font-size: 15px;
+        max-width: 720px;
+        margin: 0 auto 28px;
+        line-height: 1.6;
+    }
+    .ref-link-card {
+        background: linear-gradient(135deg, rgba(30, 20, 60, 0.8), rgba(15, 21, 53, 0.9));
+        border: 1px dashed rgba(142, 108, 255, 0.4);
+        border-radius: 16px;
+        padding: 24px;
+        max-width: 680px;
+        margin: 0 auto 32px;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+    }
+    .ref-link-card h4 {
+        color: #FFF;
+        font-size: 15px;
+        font-weight: 700;
+        margin: 0 0 12px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+    }
+    .ref-input-group {
+        display: flex;
+        gap: 10px;
+    }
+    .ref-input {
+        flex: 1;
+        background: rgba(255, 255, 255, 0.06);
+        border: 1px solid rgba(255, 255, 255, 0.15);
+        border-radius: 10px;
+        padding: 12px 16px;
+        color: #8E6CFF;
+        font-weight: 700;
+        font-size: 14px;
+        outline: none;
+    }
+    .btn-copy-ref {
+        background: linear-gradient(135deg, #5B63F6 0%, #8B3DFF 100%);
+        color: #FFF;
+        border: none;
+        padding: 12px 24px;
+        border-radius: 10px;
+        font-weight: 700;
+        font-size: 14px;
+        cursor: pointer;
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        box-shadow: 0 4px 16px rgba(139, 61, 255, 0.35);
+        transition: transform 0.2s;
+    }
+    .btn-copy-ref:hover { transform: translateY(-2px); }
+
+    .referral-highlights {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 16px;
+        margin-bottom: 36px;
+    }
+    .highlight-card {
+        background: rgba(255, 255, 255, 0.03);
+        border: 1px solid rgba(255, 255, 255, 0.08);
+        border-radius: 14px;
+        padding: 20px;
+        text-align: center;
+    }
+    .highlight-icon {
+        width: 44px;
+        height: 44px;
+        border-radius: 12px;
+        background: rgba(142, 108, 255, 0.15);
+        color: #A78BFA;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 20px;
+        margin: 0 auto 12px;
+    }
+    .highlight-card h4 {
+        font-size: 15px;
+        font-weight: 700;
+        color: #FFF;
+        margin: 0 0 4px;
+    }
+    .highlight-card p {
+        font-size: 12px;
+        color: #AEB5CA;
+        margin: 0;
+        line-height: 1.4;
+    }
+
+    .legal-card {
+        color: #D1D7E6;
+        font-size: 15px;
+        line-height: 1.8;
+    }
+    .legal-card h2 {
+        font-size: 20px;
+        font-weight: 700;
+        color: #FFF;
+        margin: 32px 0 14px;
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+        padding-bottom: 10px;
+    }
+    .legal-card h2:first-child {
+        margin-top: 0;
+    }
+    .legal-card h2 i {
+        color: #8E6CFF;
+        font-size: 18px;
+    }
+    .legal-card p {
+        margin-bottom: 16px;
+    }
+    .legal-card ul {
+        margin: 0 0 24px 20px;
+        list-style-type: none;
+    }
+    .legal-card ul li {
+        position: relative;
+        padding-left: 24px;
+        margin-bottom: 10px;
+    }
+    .legal-card ul li::before {
+        content: "✦";
+        position: absolute;
+        left: 0;
+        color: #8E6CFF;
+        font-size: 12px;
+    }
+    .legal-highlight-box {
+        background: rgba(142, 108, 255, 0.08);
+        border-left: 4px solid #8E6CFF;
+        border-radius: 8px;
+        padding: 20px 24px;
+        margin: 24px 0;
+        color: #E2D9FF;
+    }
+    .legal-highlight-box strong {
+        color: #FFF;
+    }
+    .updated-date {
+        font-size: 13px;
+        color: #AEB5CA;
+        margin-top: 30px;
+        padding-top: 20px;
+        border-top: 1px solid rgba(255, 255, 255, 0.08);
+        text-align: right;
+        font-style: italic;
+    }
+
+    @media (max-width: 768px) {
+        .referral-page { padding: 110px 16px 60px; }
+        .referral-container-card { padding: 24px 18px; }
+        .referral-title { font-size: 26px; }
+        .referral-highlights { grid-template-columns: 1fr; }
+        .ref-input-group { flex-direction: column; }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="referral-page fade-in">
+    <div class="referral-container-card">
+        
+        <div class="referral-hero">
+            <span class="referral-badge">REFERRAL &amp; AFFILIATE PROGRAM</span>
+            <h1 class="referral-title">Invite Friends &amp; <span style="background: linear-gradient(135deg, #7C83FA, #A78BFA); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">Earn Real Cash!</span></h1>
+            <p class="referral-subtitle">Share OneSol AI Hub with your network. Earn generous cash rewards credited directly to your earnings wallet whenever your referrals purchase AI subscriptions.</p>
+
+            <!-- Referral Link Card -->
+            <div class="ref-link-card">
+                {% if user.is_authenticated %}
+                    <h4><i class="fa-solid fa-link" style="color:#A78BFA;"></i> Your Personal Referral Link</h4>
+                    <div class="ref-input-group">
+                        <input type="text" id="refPageLink" class="ref-input" readonly value="{{ site_settings.site_url|default:'https://onesolai.com' }}/?ref={{ user.profile.referral_code }}">
+                        <button type="button" class="btn-copy-ref" onclick="copyRefPageLink()">
+                            <i class="fa-regular fa-copy"></i> <span id="copyBtnTxt">Copy Link</span>
+                        </button>
+                    </div>
+                {% else %}
+                    <h4><i class="fa-solid fa-user-lock" style="color:#A78BFA;"></i> Start Earning Today</h4>
+                    <p style="color:#AEB5CA; font-size:13px; margin-bottom:16px;">Sign in or create an account to get your unique referral link and start earning cash payouts.</p>
+                    <a href="{% url 'accounts:login' %}?next={% url 'refer_and_earn' %}" class="btn-copy-ref" style="text-decoration:none;">
+                        <i class="fa-solid fa-right-to-bracket"></i> Sign In to Get Your Referral Link
+                    </a>
+                {% endif %}
+            </div>
+
+            <!-- Highlights -->
+            <div class="referral-highlights">
+                <div class="highlight-card">
+                    <div class="highlight-icon"><i class="fa-solid fa-coins"></i></div>
+                    <h4>High Commissions</h4>
+                    <p>Earn 
+                    {% if site_settings.referral_commission_type == 'percentage' %}
+                        <strong>{{ site_settings.referral_commission_percentage|default:'10' }}%</strong> on sales
+                    {% else %}
+                        <strong>NGN {{ site_settings.referral_commission_ngn|default:'2,000' }}</strong> per referral
+                    {% endif %}
+                    </p>
+                </div>
+                <div class="highlight-card">
+                    <div class="highlight-icon" style="background:rgba(34,197,94,0.15); color:#4ade80;"><i class="fa-solid fa-bolt"></i></div>
+                    <h4>Instant Credit</h4>
+                    <p>Wallet updated automatically as soon as your referral pays.</p>
+                </div>
+                <div class="highlight-card">
+                    <div class="highlight-icon" style="background:rgba(14,165,233,0.15); color:#38bdf8;"><i class="fa-solid fa-building-columns"></i></div>
+                    <h4>Fast Payouts</h4>
+                    <p>Withdraw to local Bank Transfer or USDT Crypto wallet.</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="legal-card">
+            {% if custom_content %}
+                {{ custom_content|safe }}
+            {% else %}
+                <h2><i class="fas fa-gift"></i> 1. Overview &amp; Commission Structure</h2>
+                <p>Welcome to the <strong>OneSol AI Hub Refer &amp; Earn Program</strong>! Share your unique referral link with friends, creators, colleagues, or social media followers and earn generous cash commissions for every successful order placed.</p>
+
+                <div class="legal-highlight-box">
+                    <strong>Generous Payouts:</strong> Earn cash rewards credited directly to your OneSol Wallet balance. Withdraw anytime straight to your bank account or crypto wallet once you reach the minimum threshold.
+                </div>
+
+                <h2><i class="fas fa-route"></i> 2. How It Works (Step-by-Step)</h2>
+                <ul>
+                    <li><strong>Get Your Link:</strong> Sign in to your OneSol AI Hub account and copy your unique referral link from your User Dashboard or this page.</li>
+                    <li><strong>Share &amp; Promote:</strong> Share your link via WhatsApp, Telegram, Twitter, YouTube, blog posts, or direct messages.</li>
+                    <li><strong>Earn Cash:</strong> When someone clicks your link and purchases any AI tool subscription, your earnings wallet is automatically credited!</li>
+                </ul>
+
+                <h2><i class="fas fa-wallet"></i> 3. Withdrawal Rules &amp; Guidelines</h2>
+                <p>Withdrawals are fast, transparent, and hassle-free:</p>
+                <ul>
+                    <li><strong>Minimum Withdrawal:</strong> You can request a payout as soon as your balance reaches <strong>NGN {{ site_settings.min_withdrawal_ngn|default:'5,000' }}</strong> (or crypto equivalent).</li>
+                    <li><strong>Supported Payout Methods:</strong> Local Bank Account Transfer or Crypto (USDT TRC20/BEP20).</li>
+                    <li><strong>Anti-Fraud Policy:</strong> Self-referrals, spamming, or creating fake accounts to manipulate referral links are strictly monitored and forbidden.</li>
+                </ul>
+
+                <h2><i class="fas fa-headset"></i> 4. Need Help or Have Questions?</h2>
+                <p>If you have questions about custom affiliate partnerships, bulk reseller rates, or referral tracking, contact our team at <strong><a href="mailto:info@onesolai.com" style="color:#8E6CFF;">info@onesolai.com</a></strong>.</p>
+                <div class="updated-date">Last Updated: July 2026 | OneSol AI Hub Referral Team</div>
+            {% endif %}
+        </div>
+
+    </div>
+</div>
+
+<script>
+function copyRefPageLink() {
+    var copyText = document.getElementById("refPageLink");
+    if (!copyText) return;
+    copyText.select();
+    copyText.setSelectionRange(0, 99999);
+    navigator.clipboard.writeText(copyText.value).then(function() {
+        var btnTxt = document.getElementById("copyBtnTxt");
+        if (btnTxt) {
+            btnTxt.textContent = "Copied!";
+            setTimeout(function() { btnTxt.textContent = "Copy Link"; }, 2000);
+        }
+        if (typeof window.showToast === 'function') {
+            window.showToast("Referral link copied to clipboard!", "success");
+        }
+    });
+}
+</script>
+{% endblock %}

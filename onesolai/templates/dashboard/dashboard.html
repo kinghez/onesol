@@ -11,45 +11,23 @@
 
 {% block content %}
 
-    <!-- Stats Grid -->
-    <div class="dashboard-grid">
+    <!-- Stats Grid (2 Cards: Referral Earnings & Wallet Balance) -->
+    <div class="dashboard-grid" style="grid-template-columns: repeat(2, 1fr);">
         <div class="card stat-card">
             <div class="stat-title">
-                <div class="stat-icon" style="width: 20px; height: 20px; margin: 0;">
-                    <i class="fa-solid fa-lock" style="font-size: 10px;"></i>
-                </div>
-                Active Subscriptions
-            </div>
-            <div class="stat-number mb-2">{{ active_subscriptions_count|default:"0" }}</div>
-            <a href="{% url 'dashboard:subscriptions' %}" class="card-link">View all &rarr;</a>
-        </div>
-
-        <div class="card stat-card">
-            <div class="stat-title">
-                <div class="stat-icon" style="width: 20px; height: 20px; margin: 0;">
-                    <i class="fa-solid fa-box-open" style="font-size: 10px;"></i>
-                </div>
-                Total Orders
-            </div>
-            <div class="stat-number mb-2">{{ total_orders_count|default:"0" }}</div>
-            <a href="{% url 'dashboard:order_history' %}" class="card-link">View all &rarr;</a>
-        </div>
-
-        <div class="card stat-card">
-            <div class="stat-title">
-                <div class="stat-icon" style="width: 20px; height: 20px; margin: 0; background-color: rgba(16, 185, 129, 0.1); color: #10B981;">
-                    <i class="fa-solid fa-coins" style="font-size: 10px;"></i>
+                <div class="stat-icon" style="width: 24px; height: 24px; margin: 0; background-color: rgba(16, 185, 129, 0.1); color: #10B981;">
+                    <i class="fa-solid fa-coins" style="font-size: 12px;"></i>
                 </div>
                 Referral Earnings
             </div>
-            <div class="stat-number mb-2">NGN {{ referral_earnings|default:"0" }}</div>
-            <a href="{% url 'dashboard:referrals' %}" class="card-link">View all &rarr;</a>
+            <div class="stat-number mb-2">NGN {{ referral_earnings|default:"0.00" }}</div>
+            <a href="{% url 'dashboard:referrals' %}" class="card-link">View referrals &rarr;</a>
         </div>
 
         <div class="card stat-card">
             <div class="stat-title">
-                <div class="stat-icon" style="width: 20px; height: 20px; margin: 0; background-color: rgba(16, 185, 129, 0.1); color: #10B981;">
-                    <i class="fa-solid fa-wallet" style="font-size: 10px;"></i>
+                <div class="stat-icon" style="width: 24px; height: 24px; margin: 0; background-color: rgba(139, 92, 246, 0.1); color: #A78BFA;">
+                    <i class="fa-solid fa-wallet" style="font-size: 12px;"></i>
                 </div>
                 Wallet Balance
             </div>
@@ -58,73 +36,90 @@
         </div>
     </div>
 
-    <!-- Middle Content Grid -->
+    <!-- Middle Content Grid: Popular Tools & Recommended For You -->
     <div class="dashboard-bottom-grid">
 
-        <!-- Active Subscriptions -->
+        <!-- 🔥 Popular Tools (Top 5 Added & Cheapest Tools) -->
         <div class="card">
             <div class="card-header">
-                <h3 class="card-title">Active Subscriptions</h3>
-                <a href="{% url 'dashboard:subscriptions' %}" class="card-link">View all</a>
+                <h3 class="card-title" style="display:flex; align-items:center; gap:8px;">
+                    <i class="fa-solid fa-fire" style="color: #FBBF24;"></i> Popular Tools
+                </h3>
+                <a href="{% url 'tools:tools_list' %}?sort=popular" class="card-link">View all</a>
             </div>
             <div class="list-container">
-                {% for order_item in recent_subscriptions %}
-                <div class="list-item">
+                {% for tool in popular_tools %}
+                <a href="{% url 'tools:tool_detail' tool.slug %}" class="list-item" style="text-decoration:none; color:inherit;">
                     <div class="list-item-left">
                         <div class="list-item-logo">
-                            {% if order_item.tool.image_url %}
-                                <img src="{{ order_item.tool.image_url }}" alt="{{ order_item.tool.name }}">
+                            {% if tool.image_url %}
+                                <img src="{{ tool.image_url }}" alt="{{ tool.name }}">
                             {% else %}
-                                <i class="fa-solid fa-robot"></i>
+                                <i class="fa-solid fa-bolt" style="color:#FBBF24;"></i>
                             {% endif %}
                         </div>
                         <div>
-                            <div class="list-item-title">{{ order_item.tool.name }}</div>
-                            <div class="list-item-subtitle">{{ order_item.plan.name }}</div>
+                            <div class="list-item-title">{{ tool.name }}</div>
+                            <div class="list-item-subtitle">{{ tool.category.name|default:"AI Tool" }}</div>
                         </div>
                     </div>
                     <div class="list-item-right">
-                        <span class="badge badge-success">Active</span>
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="text-secondary" style="width:16px"><polyline points="9 18 15 12 9 6"></polyline></svg>
+                        <div style="text-align:right;">
+                            <div class="list-item-value" style="color:#4ade80;">NGN {{ tool.price_ngn_display|floatformat:0 }}</div>
+                            <div class="text-secondary text-small" style="font-size:11px; color:#AEB5CA;">${{ tool.price_usd_display|floatformat:2 }} USD</div>
+                        </div>
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="text-secondary" style="width:16px; margin-left:10px;"><polyline points="9 18 15 12 9 6"></polyline></svg>
                     </div>
-                </div>
+                </a>
                 {% empty %}
                 <div class="empty-state" style="padding: 30px 20px; text-align: center; color: #AEB5CA;">
-                    <i class="fa-solid fa-box-open" style="font-size: 32px; color: rgba(255,255,255,0.15); margin-bottom: 12px; display: block;"></i>
-                    <p style="margin: 0; font-size: 14px; font-weight: 500;">No active subscriptions yet</p>
+                    <i class="fa-solid fa-bolt" style="font-size: 32px; color: rgba(255,255,255,0.15); margin-bottom: 12px; display: block;"></i>
+                    <p style="margin: 0; font-size: 14px; font-weight: 500;">No popular tools available</p>
                     <a href="{% url 'tools:tools_list' %}" style="display: inline-block; margin-top: 10px; font-size: 13px; color: var(--btn-top); text-decoration: none; font-weight: 600;">Browse Tools →</a>
                 </div>
                 {% endfor %}
             </div>
         </div>
 
-        <!-- Recent Orders -->
+        <!-- ✨ Recommended For You (Top 5 Recommended Products) -->
         <div class="card">
             <div class="card-header">
-                <h3 class="card-title">Recent Orders</h3>
-                <a href="{% url 'dashboard:order_history' %}" class="card-link">View all</a>
+                <h3 class="card-title" style="display:flex; align-items:center; gap:8px;">
+                    <i class="fa-solid fa-wand-magic-sparkles" style="color: #A78BFA;"></i> Recommended For You
+                </h3>
+                <a href="{% url 'tools:tools_list' %}" class="card-link">Explore all</a>
             </div>
             <div class="list-container">
-                {% for order in recent_orders %}
-                <div class="list-item">
+                {% for tool in recommended_tools %}
+                <a href="{% url 'tools:tool_detail' tool.slug %}" class="list-item" style="text-decoration:none; color:inherit;">
                     <div class="list-item-left">
                         <div class="list-item-logo">
-                            <i class="fa-solid fa-box"></i>
+                            {% if tool.image_url %}
+                                <img src="{{ tool.image_url }}" alt="{{ tool.name }}">
+                            {% else %}
+                                <i class="fa-solid fa-robot" style="color:#A78BFA;"></i>
+                            {% endif %}
                         </div>
                         <div>
-                            <div class="list-item-title">Order #{{ order.id }}</div>
-                            <div class="list-item-subtitle">{{ order.created_at|date:"M d, Y" }}</div>
+                            <div class="list-item-title">{{ tool.name }}</div>
+                            <div class="list-item-subtitle" style="display:flex; align-items:center; gap:6px;">
+                                <span>{{ tool.category.name|default:"AI Tool" }}</span>
+                                <span style="color:#FFD98A;"><i class="fa-solid fa-star" style="font-size:10px;"></i> {{ tool.rating }}</span>
+                            </div>
                         </div>
                     </div>
                     <div class="list-item-right">
-                        <div class="text-secondary text-small hide-on-mobile" style="margin-right: 16px;">{{ order.created_at|date:"M d, Y" }}</div>
-                        <div class="list-item-value">NGN {{ order.total_amount_ngn }}</div>
+                        <div style="text-align:right;">
+                            <div class="list-item-value" style="color:#A78BFA;">NGN {{ tool.price_ngn_display|floatformat:0 }}</div>
+                            <div class="text-secondary text-small" style="font-size:11px; color:#AEB5CA;">${{ tool.price_usd_display|floatformat:2 }} USD</div>
+                        </div>
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="text-secondary" style="width:16px; margin-left:10px;"><polyline points="9 18 15 12 9 6"></polyline></svg>
                     </div>
-                </div>
+                </a>
                 {% empty %}
                 <div class="empty-state" style="padding: 30px 20px; text-align: center; color: #AEB5CA;">
-                    <i class="fa-solid fa-receipt" style="font-size: 32px; color: rgba(255,255,255,0.15); margin-bottom: 12px; display: block;"></i>
-                    <p style="margin: 0; font-size: 14px; font-weight: 500;">No order history yet</p>
+                    <i class="fa-solid fa-robot" style="font-size: 32px; color: rgba(255,255,255,0.15); margin-bottom: 12px; display: block;"></i>
+                    <p style="margin: 0; font-size: 14px; font-weight: 500;">No recommendations yet</p>
                     <a href="{% url 'tools:tools_list' %}" style="display: inline-block; margin-top: 10px; font-size: 13px; color: var(--btn-top); text-decoration: none; font-weight: 600;">Explore Tools →</a>
                 </div>
                 {% endfor %}

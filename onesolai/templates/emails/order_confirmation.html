@@ -50,7 +50,7 @@
     </div>
     <div class="check-icon">✅</div>
     <div class="email-title">Your access is ready!</div>
-    <p class="email-sub">Payment confirmed for Order #{{ order.id }}</p>
+    <p class="email-sub">Payment confirmed for Order #{{ order.order_number }}</p>
   </div>
 
   <div class="body">
@@ -76,7 +76,7 @@
     <div class="order-card">
       <div class="order-row">
         <span class="row-label">Order ID</span>
-        <span class="row-val">#{{ order.id }}</span>
+        <span class="row-val">#{{ order.order_number }}</span>
       </div>
       <div class="order-row">
         <span class="row-label">Payment Status</span>

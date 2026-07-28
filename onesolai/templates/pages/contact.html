@@ -1,0 +1,798 @@
+{% extends 'base_public.html' %}
+{% load static %}
+
+{% block title %}Contact Us – OneSol AI Hub{% endblock %}
+{% block meta_description %}Have a question, need support, or want to partner with us? Reach out to the OneSol AI Hub support team available 24/7.{% endblock %}
+
+{% block nav_contact %}active{% endblock %}
+
+{% block extra_css %}
+<style>
+/* ═════════════════════════════════════════════════════════════
+   CONTACT PAGE MASTER STYLES (Matching Mockup Palette & UX)
+   ═════════════════════════════════════════════════════════════ */
+.contact-page {
+    padding: 130px 24px 80px;
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+.pill-badge {
+    display: inline-block;
+    padding: 6px 16px;
+    background: rgba(142, 108, 255, 0.15);
+    border: 1px solid rgba(142, 108, 255, 0.35);
+    border-radius: 20px;
+    color: #A78BFA;
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 0.8px;
+    text-transform: uppercase;
+    margin-bottom: 16px;
+}
+
+/* ── Hero Section ── */
+.contact-hero {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 40px;
+    align-items: center;
+    margin-bottom: 60px;
+}
+.hero-left h1 {
+    font-size: 44px;
+    font-weight: 800;
+    color: #FFF;
+    line-height: 1.2;
+    margin-bottom: 16px;
+}
+.hero-left p.sub {
+    color: #AEB5CA;
+    font-size: 16px;
+    line-height: 1.6;
+    margin-bottom: 32px;
+}
+.hero-badges {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 16px;
+}
+.hero-badge-card {
+    background: rgba(18, 22, 52, 0.8);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 16px;
+    padding: 18px;
+    backdrop-filter: blur(12px);
+    transition: transform 0.2s ease, border-color 0.2s ease;
+}
+.hero-badge-card:hover {
+    transform: translateY(-3px);
+    border-color: rgba(142, 108, 255, 0.4);
+}
+.hero-badge-icon {
+    width: 40px;
+    height: 40px;
+    border-radius: 12px;
+    background: rgba(142, 108, 255, 0.18);
+    color: #A78BFA;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 18px;
+    margin-bottom: 12px;
+}
+.hero-badge-card h4 {
+    font-size: 14px;
+    font-weight: 700;
+    color: #FFF;
+    margin-bottom: 4px;
+}
+.hero-badge-card p {
+    font-size: 12px;
+    color: #AEB5CA;
+    margin: 0;
+    line-height: 1.4;
+}
+
+/* Hero Right Image */
+.hero-right-wrap {
+    position: relative;
+    text-align: center;
+}
+.hero-img {
+    width: 100%;
+    max-width: 540px;
+    height: auto;
+    border-radius: 24px;
+    filter: drop-shadow(0 20px 40px rgba(0,0,0,0.6));
+    border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+/* ── Main Section: Contact Info + Form Grid ── */
+.main-contact-grid {
+    display: grid;
+    grid-template-columns: 1fr 1.4fr;
+    gap: 32px;
+    margin-bottom: 60px;
+}
+.glass-panel {
+    background: rgba(15, 21, 53, 0.92);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 20px;
+    padding: 36px;
+    backdrop-filter: blur(20px);
+}
+.panel-title {
+    font-size: 24px;
+    font-weight: 800;
+    color: #FFF;
+    margin-bottom: 24px;
+}
+
+/* Info Cards */
+.info-cards-list {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+.info-card {
+    display: flex;
+    align-items: flex-start;
+    gap: 16px;
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 14px;
+    padding: 18px;
+    transition: transform 0.2s, border-color 0.2s;
+}
+.info-card:hover {
+    transform: translateY(-2px);
+    border-color: rgba(142, 108, 255, 0.35);
+}
+.info-icon {
+    width: 44px;
+    height: 44px;
+    border-radius: 12px;
+    background: rgba(91, 99, 246, 0.15);
+    color: #7C83FA;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 18px;
+    flex-shrink: 0;
+}
+.info-card-red .info-icon   { background: rgba(239, 68, 68, 0.15); color: #f87171; }
+.info-card-teal .info-icon  { background: rgba(14, 165, 233, 0.15); color: #38bdf8; }
+.info-card-amber .info-icon { background: rgba(245, 158, 11, 0.15); color: #fbbf24; }
+
+.info-content h4 {
+    font-size: 15px;
+    font-weight: 700;
+    color: #FFF;
+    margin: 0 0 4px;
+}
+.info-content p {
+    font-size: 13px;
+    color: #AEB5CA;
+    margin: 0 0 6px;
+    line-height: 1.4;
+}
+.info-link {
+    font-size: 13px;
+    font-weight: 600;
+    color: #38bdf8;
+    text-decoration: none;
+}
+.info-link:hover { text-decoration: underline; }
+
+/* Contact Form */
+.form-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+    margin-bottom: 16px;
+}
+.form-group {
+    margin-bottom: 16px;
+}
+.form-group label {
+    display: block;
+    font-size: 13px;
+    font-weight: 600;
+    color: #CBD5E1;
+    margin-bottom: 6px;
+}
+.form-control-custom {
+    width: 100%;
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    border-radius: 10px;
+    padding: 12px 14px;
+    color: #FFF;
+    font-size: 14px;
+    outline: none;
+    transition: border-color 0.2s;
+}
+.form-control-custom:focus {
+    border-color: #8E6CFF;
+    box-shadow: 0 0 0 3px rgba(142, 108, 255, 0.2);
+}
+.btn-submit-gradient {
+    width: 100%;
+    padding: 14px;
+    border-radius: 12px;
+    background: linear-gradient(135deg, #5B63F6 0%, #8B3DFF 100%);
+    color: #FFF;
+    font-size: 15px;
+    font-weight: 700;
+    border: none;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    box-shadow: 0 6px 20px rgba(139, 61, 255, 0.35);
+    transition: transform 0.2s, box-shadow 0.2s;
+}
+.btn-submit-gradient:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 10px 28px rgba(139, 61, 255, 0.5);
+}
+.form-secure-note {
+    text-align: center;
+    font-size: 12px;
+    color: #636A8A;
+    margin-top: 12px;
+}
+
+/* ── Other Ways To Reach Us Section ── */
+.other-ways-section {
+    background: rgba(15, 21, 53, 0.92);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 20px;
+    padding: 36px;
+    margin-bottom: 60px;
+    backdrop-filter: blur(20px);
+}
+.ways-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 20px;
+    margin-top: 20px;
+}
+.way-card {
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 16px;
+    padding: 24px;
+    display: flex;
+    flex-direction: column;
+    transition: transform 0.2s, border-color 0.2s;
+}
+.way-card:hover {
+    transform: translateY(-4px);
+    border-color: rgba(142, 108, 255, 0.35);
+}
+.way-icon {
+    width: 44px;
+    height: 44px;
+    border-radius: 12px;
+    background: rgba(142, 108, 255, 0.15);
+    color: #A78BFA;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 20px;
+    margin-bottom: 16px;
+}
+.way-card h4 {
+    font-size: 16px;
+    font-weight: 700;
+    color: #FFF;
+    margin: 0 0 6px;
+}
+.way-card p {
+    font-size: 13px;
+    color: #AEB5CA;
+    margin: 0 0 18px;
+    line-height: 1.5;
+    flex: 1;
+}
+.way-btn {
+    font-size: 13px;
+    font-weight: 700;
+    color: #FFF;
+    background: rgba(142, 108, 255, 0.2);
+    border: 1px solid rgba(142, 108, 255, 0.4);
+    padding: 10px 16px;
+    border-radius: 10px;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    transition: all 0.25s ease;
+}
+.way-btn:hover {
+    background: linear-gradient(135deg, #5B63F6, #8B3DFF);
+    border-color: transparent;
+    color: #FFF;
+    transform: translateY(-2px);
+}
+.way-btn-green {
+    background: rgba(34, 197, 94, 0.18);
+    border-color: rgba(34, 197, 94, 0.4);
+    color: #4ade80;
+}
+.way-btn-green:hover {
+    background: #22c55e;
+    color: #FFF;
+}
+
+/* ── FAQ & Serving Customers Section ── */
+.faq-serving-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 32px;
+    margin-bottom: 40px;
+}
+
+/* Accordion */
+.faq-accordion {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    margin-top: 16px;
+}
+.faq-item {
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 12px;
+    overflow: hidden;
+}
+.faq-btn {
+    width: 100%;
+    padding: 16px 20px;
+    background: transparent;
+    border: none;
+    color: #FFF;
+    font-size: 14px;
+    font-weight: 600;
+    text-align: left;
+    cursor: pointer;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+.faq-btn i {
+    color: #8E6CFF;
+    transition: transform 0.3s;
+}
+.faq-item.active .faq-btn i {
+    transform: rotate(180deg);
+}
+.faq-answer {
+    padding: 0 20px 16px;
+    font-size: 13px;
+    color: #AEB5CA;
+    line-height: 1.6;
+    display: none;
+}
+.faq-item.active .faq-answer {
+    display: block;
+}
+
+/* Serving Customers Worldwide Box (Pro Redesign) */
+.serving-box-pro {
+    background: linear-gradient(135deg, rgba(20, 16, 50, 0.95), rgba(15, 21, 53, 0.98));
+    border: 1px solid rgba(142, 108, 255, 0.3);
+    border-radius: 20px;
+    padding: 36px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    position: relative;
+    overflow: hidden;
+    box-shadow: 0 16px 40px rgba(0, 0, 0, 0.4);
+}
+.serving-box-pro::before {
+    content: '';
+    position: absolute;
+    top: -50px;
+    right: -50px;
+    width: 220px;
+    height: 220px;
+    background: radial-gradient(circle, rgba(142, 108, 255, 0.25) 0%, transparent 70%);
+    border-radius: 50%;
+    pointer-events: none;
+}
+
+/* Stats Counter Grid */
+.serving-stats-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 16px;
+    margin: 28px 0;
+}
+.stat-box {
+    background: rgba(255, 255, 255, 0.04);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 14px;
+    padding: 16px 12px;
+    text-align: center;
+}
+.stat-num {
+    font-size: 22px;
+    font-weight: 800;
+    color: #A78BFA;
+    display: block;
+    margin-bottom: 2px;
+}
+.stat-lbl {
+    font-size: 11px;
+    color: #AEB5CA;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    font-weight: 600;
+}
+
+/* Serving Feature Cards */
+.serving-features {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+.serv-feat-row {
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid rgba(255, 255, 255, 0.07);
+    border-radius: 12px;
+    padding: 14px 16px;
+    display: flex;
+    align-items: center;
+    gap: 14px;
+}
+.serv-feat-row i {
+    font-size: 20px;
+    color: #38bdf8;
+    flex-shrink: 0;
+}
+.serv-feat-row h5 {
+    font-size: 14px;
+    font-weight: 700;
+    color: #FFF;
+    margin: 0 0 2px;
+}
+.serv-feat-row p {
+    font-size: 12px;
+    color: #AEB5CA;
+    margin: 0;
+}
+
+/* Responsive adjustments */
+@media (max-width: 992px) {
+    .contact-hero, .main-contact-grid, .faq-serving-grid { grid-template-columns: 1fr; }
+    .ways-grid { grid-template-columns: repeat(2, 1fr); }
+}
+@media (max-width: 600px) {
+    .hero-badges { grid-template-columns: 1fr; }
+    .form-grid { grid-template-columns: 1fr; }
+    .ways-grid { grid-template-columns: 1fr; }
+    .contact-page { padding: 110px 16px 60px; }
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="contact-page fade-in">
+
+    <!-- ══════ HERO SECTION ══════ -->
+    <section class="contact-hero">
+        <div class="hero-left">
+            <span class="pill-badge">CONTACT US</span>
+            <h1>We're Here <span style="background: linear-gradient(135deg, #7C83FA, #A78BFA); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">to Help!</span></h1>
+            <p class="sub">Have a question, need support, or want to partner with us? Our team is ready to assist you anytime around the clock.</p>
+
+            <div class="hero-badges">
+                <div class="hero-badge-card">
+                    <div class="hero-badge-icon"><i class="fa-solid fa-headset"></i></div>
+                    <h4>Fast Response</h4>
+                    <p>We reply within minutes</p>
+                </div>
+                <div class="hero-badge-card">
+                    <div class="hero-badge-icon"><i class="fa-solid fa-shield-halved"></i></div>
+                    <h4>Trusted Support</h4>
+                    <p>Real people, ready to help</p>
+                </div>
+                <div class="hero-badge-card">
+                    <div class="hero-badge-icon"><i class="fa-solid fa-wand-magic-sparkles"></i></div>
+                    <h4>Your Success</h4>
+                    <p>We're here for your journey</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="hero-right-wrap">
+            {% if site_settings and site_settings.contact_hero_image %}
+                <img src="{{ site_settings.contact_hero_image.url }}" alt="OneSol Support Team" class="hero-img">
+            {% else %}
+                <img src="{% static 'assets/images/contact_hero.png' %}" alt="OneSol Support Team" class="hero-img">
+            {% endif %}
+        </div>
+    </section>
+
+
+    <!-- ══════ MAIN GRID: CONTACT INFO + MESSAGE FORM ══════ -->
+    <section class="main-contact-grid">
+        
+        <!-- Left: Contact Information -->
+        <div class="glass-panel">
+            <span class="pill-badge">GET IN TOUCH</span>
+            <h3 class="panel-title">Contact Information</h3>
+
+            <div class="info-cards-list">
+                <div class="info-card">
+                    <div class="info-icon"><i class="fa-solid fa-headset"></i></div>
+                    <div class="info-content">
+                        <h4>Customer Support</h4>
+                        <p>For order issues, refunds, account help and general inquiries.</p>
+                        <a href="mailto:support@onesolai.com" class="info-link">support@onesolai.com</a>
+                    </div>
+                </div>
+
+                <div class="info-card info-card-red">
+                    <div class="info-icon"><i class="fa-solid fa-circle-exclamation"></i></div>
+                    <div class="info-content">
+                        <h4>Complaints &amp; Disputes</h4>
+                        <p>For urgent complaints, refund claims, or account disputes.</p>
+                        <a href="mailto:complain@onesolai.com" class="info-link" style="color:#f87171;">complain@onesolai.com</a>
+                    </div>
+                </div>
+
+                <div class="info-card info-card-teal">
+                    <div class="info-icon"><i class="fa-solid fa-circle-info"></i></div>
+                    <div class="info-content">
+                        <h4>General Info &amp; Partnerships</h4>
+                        <p>For general inquiries, collaborations, and partnership info.</p>
+                        <a href="mailto:info@onesolai.com" class="info-link">info@onesolai.com</a>
+                    </div>
+                </div>
+
+                <div class="info-card info-card-amber">
+                    <div class="info-icon"><i class="fa-regular fa-clock"></i></div>
+                    <div class="info-content">
+                        <h4>Business Hours</h4>
+                        <p>We are available 24/7 including weekends and holidays.</p>
+                        <span style="font-size:12px; font-weight:700; color:#fbbf24;">24/7 Online Support</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Right: Message Form -->
+        <div class="glass-panel">
+            <span class="pill-badge">SEND US A MESSAGE</span>
+            <h3 class="panel-title">How can we help you?</h3>
+
+            <form method="POST" action="{% url 'contact_us' %}">
+                {% csrf_token %}
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label>Full Name</label>
+                        <input type="text" name="full_name" class="form-control-custom" placeholder="Enter your full name" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Email Address</label>
+                        <input type="email" name="email" class="form-control-custom" placeholder="Enter your email address" required>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label>Subject</label>
+                    <input type="text" name="subject" class="form-control-custom" placeholder="Enter a subject" required>
+                </div>
+
+                <div class="form-group">
+                    <label>Category</label>
+                    <select name="category" class="form-control-custom" style="background: #0f1535; color: #FFF; cursor: pointer;">
+                        <option value="General Inquiry" style="background: #0f1535; color: #FFF;">General Inquiry</option>
+                        <option value="Order Issue" style="background: #0f1535; color: #FFF;">Order Issue / Access Details</option>
+                        <option value="Complaint or Refund" style="background: #0f1535; color: #FFF;">Complaint / Refund Request</option>
+                        <option value="Technical Support" style="background: #0f1535; color: #FFF;">Technical Support</option>
+                        <option value="Partnerships" style="background: #0f1535; color: #FFF;">Sales &amp; Partnerships</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label>Your Message</label>
+                    <textarea name="message" rows="4" class="form-control-custom" placeholder="Type your message here..." required></textarea>
+                </div>
+
+                <button type="submit" class="btn-submit-gradient">
+                    Send Message <i class="fa-solid fa-paper-plane"></i>
+                </button>
+                <div class="form-secure-note">
+                    <i class="fa-solid fa-lock" style="margin-right:4px;"></i> Your information is secure and will never be shared.
+                </div>
+            </form>
+        </div>
+
+    </section>
+
+
+    <!-- ══════ OTHER WAYS TO REACH US ══════ -->
+    <section class="other-ways-section">
+        <div style="text-align:center;">
+            <span class="pill-badge">OTHER WAYS TO REACH US</span>
+        </div>
+
+        <div class="ways-grid">
+            <div class="way-card">
+                <div class="way-icon"><i class="fa-solid fa-comments"></i></div>
+                <h4>Live Chat</h4>
+                <p>Chat with our support team in real-time for immediate assistance.</p>
+                <a href="https://wa.me/{{ site_settings.whatsapp_number|default:'2349110585508' }}" target="_blank" class="way-btn">Start Chat <i class="fa-solid fa-arrow-right"></i></a>
+            </div>
+
+            <div class="way-card">
+                <div class="way-icon"><i class="fa-solid fa-envelope"></i></div>
+                <h4>Email Support</h4>
+                <p>Send us an email and we'll get back to you within minutes.</p>
+                <a href="mailto:support@onesolai.com" class="way-btn">Send Email <i class="fa-solid fa-arrow-right"></i></a>
+            </div>
+
+            <div class="way-card">
+                <div class="way-icon" style="background:rgba(34,197,94,0.15); color:#4ade80;"><i class="fa-brands fa-whatsapp"></i></div>
+                <h4>WhatsApp</h4>
+                <p>Message us directly on WhatsApp for quick 1-on-1 tool assistance.</p>
+                <a href="https://wa.me/{{ site_settings.whatsapp_number|default:'2349110585508' }}" target="_blank" class="way-btn way-btn-green">Open WhatsApp <i class="fa-solid fa-arrow-right"></i></a>
+            </div>
+
+            <div class="way-card">
+                <div class="way-icon" style="background:rgba(245,158,11,0.15); color:#fbbf24;"><i class="fa-solid fa-book-open"></i></div>
+                <h4>Help Center</h4>
+                <p>Find answers to common questions and tool activation guides.</p>
+                <a href="#quickFaqs" class="way-btn" style="background:rgba(245,158,11,0.18); border-color:rgba(245,158,11,0.4); color:#fbbf24;">Visit Help Center <i class="fa-solid fa-arrow-right"></i></a>
+            </div>
+        </div>
+    </section>
+
+
+    <!-- ══════ FAQS & SERVING CUSTOMERS WORLDWIDE ══════ -->
+    <section class="faq-serving-grid" id="quickFaqs">
+        
+        <!-- Left: Quick Answers FAQs -->
+        <div class="glass-panel">
+            <span class="pill-badge">FREQUENTLY ASKED QUESTIONS</span>
+            <h3 class="panel-title">Quick Answers</h3>
+
+            <div class="faq-accordion">
+                <div class="faq-item active">
+                    <button class="faq-btn" onclick="toggleFaq(this)">
+                        <span>How long does activation take?</span>
+                        <i class="fa-solid fa-chevron-down"></i>
+                    </button>
+                    <div class="faq-answer">
+                        Most tool access credentials and activation links are processed and delivered instantly to your registered email and dashboard upon payment confirmation.
+                    </div>
+                </div>
+
+                <div class="faq-item">
+                    <button class="faq-btn" onclick="toggleFaq(this)">
+                        <span>What payment methods do you accept?</span>
+                        <i class="fa-solid fa-chevron-down"></i>
+                    </button>
+                    <div class="faq-answer">
+                        We accept local debit/credit Cards, Bank Transfers, OneSol Wallet balances, and Crypto (USDT TRC20 / BEP20).
+                    </div>
+                </div>
+
+                <div class="faq-item">
+                    <button class="faq-btn" onclick="toggleFaq(this)">
+                        <span>Can I get a refund?</span>
+                        <i class="fa-solid fa-chevron-down"></i>
+                    </button>
+                    <div class="faq-answer">
+                        Yes! We offer a 100% replacement and working guarantee. If an access code or account fails to function during your subscription period, we guarantee a free replacement or instant wallet refund.
+                    </div>
+                </div>
+
+                <div class="faq-item">
+                    <button class="faq-btn" onclick="toggleFaq(this)">
+                        <span>Is my data secure?</span>
+                        <i class="fa-solid fa-chevron-down"></i>
+                    </button>
+                    <div class="faq-answer">
+                        Absolutely. All transactions and platform interactions are protected with 256-bit SSL encryption and strict data privacy standards.
+                    </div>
+                </div>
+
+                <div class="faq-item">
+                    <button class="faq-btn" onclick="toggleFaq(this)">
+                        <span>How do subscriptions work?</span>
+                        <i class="fa-solid fa-chevron-down"></i>
+                    </button>
+                    <div class="faq-answer">
+                        Subscriptions grant active access to your selected AI tool for 30 days (or advertised plan duration). You can easily renew or change tools at any time from your dashboard.
+                    </div>
+                </div>
+            </div>
+
+            <div style="margin-top:20px;">
+                <a href="{% url 'refund_policy' %}" class="info-link" style="color:#A78BFA; font-weight:700;">
+                    View all FAQs in our Help Center &rarr;
+                </a>
+            </div>
+        </div>
+
+        <!-- Right: Serving Customers Worldwide (Pro Redesign) -->
+        <div class="serving-box-pro">
+            <div>
+                <span class="pill-badge">WE'RE HERE FOR YOU</span>
+                <h3 class="panel-title" style="margin-bottom:12px;">Serving Customers Worldwide</h3>
+                <p style="color:#AEB5CA; font-size:14px; line-height:1.6; margin-bottom:0;">
+                    OneSol AI Hub is trusted by thousands of creators, professionals, and businesses around the world. Our global support team is available 24/7 to assist you.
+                </p>
+            </div>
+
+            <!-- Stats Counters -->
+            <div class="serving-stats-grid">
+                <div class="stat-box">
+                    <span class="stat-num">1k+</span>
+                    <span class="stat-lbl">Active Users</span>
+                </div>
+                <div class="stat-box">
+                    <span class="stat-num" style="color:#4ade80;">99.9%</span>
+                    <span class="stat-lbl">Uptime</span>
+                </div>
+                <div class="stat-box">
+                    <span class="stat-num" style="color:#38bdf8;">24/7</span>
+                    <span class="stat-lbl">Support</span>
+                </div>
+            </div>
+
+            <!-- Feature Rows -->
+            <div class="serving-features">
+                <div class="serv-feat-row">
+                    <i class="fa-solid fa-bolt" style="color:#FBBF24;"></i>
+                    <div>
+                        <h5>Instant Activation</h5>
+                        <p>Credentials delivered immediately after checkout.</p>
+                    </div>
+                </div>
+                <div class="serv-feat-row">
+                    <i class="fa-solid fa-shield-halved" style="color:#4ade80;"></i>
+                    <div>
+                        <h5>Bank-Grade Security</h5>
+                        <p>256-bit SSL encrypted checkout &amp; safe payments.</p>
+                    </div>
+                </div>
+                <div class="serv-feat-row">
+                    <i class="fa-solid fa-globe" style="color:#38bdf8;"></i>
+                    <div>
+                        <h5>Global Access</h5>
+                        <p>Serving customers worldwide in local &amp; crypto currencies.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </section>
+
+</div>
+
+<script>
+function toggleFaq(btn) {
+    var item = btn.closest('.faq-item');
+    var isActive = item.classList.contains('active');
+    
+    // Close other accordion items
+    document.querySelectorAll('.faq-item').forEach(function(el) {
+        el.classList.remove('active');
+    });
+    
+    if (!isActive) {
+        item.classList.add('active');
+    }
+}
+</script>
+{% endblock %}

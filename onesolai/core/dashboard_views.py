@@ -5,21 +5,9 @@ from orders.models import Order, OrderItem
 
 @login_required(login_url='/auth/login/')
 def dashboard_home(request):
-    """Main dashboard view with real DB data."""
+    """Main dashboard view with Popular Tools & Recommended Tools for the user."""
     user = request.user
-
-    # Fetch real data
-    orders = Order.objects.filter(user=user).select_related('payment')
-    paid_orders = orders.filter(status='paid')
-    recent_orders = paid_orders[:5]
-
-    # Active subscriptions = items from paid orders
-    recent_subscriptions = (
-        OrderItem.objects
-        .filter(order__user=user, order__status='paid')
-        .select_related('tool')
-        .order_by('-order__created_at')[:4]
-    )
+    from products.models import Tool
 
     # Wallet & earnings from profile
     wallet_balance = '0.00'
@@ -31,13 +19,55 @@ def dashboard_home(request):
     except Exception:
         pass
 
+    # Fetch active tools for calculations
+    all_tools = list(
+        Tool.objects.filter(is_active=True)
+        .select_related('category', 'vendor_product')
+    )
+
+    for t in all_tools:
+        try:
+            t.price_ngn_display = t.get_ngn_price()
+            t.price_usd_display = t.get_usd_price()
+        except Exception:
+            t.price_ngn_display = 0.0
+            t.price_usd_display = 0.0
+
+    # 1. Popular Tools: sorted by popular flag, featured flag, and cheapest USD price
+    popular_tools = sorted(
+        all_tools,
+        key=lambda t: (not t.is_popular, not t.is_featured, t.price_usd_display)
+    )[:5]
+
+    # 2. Recommended For You: based on user's initial purchases or top featured tools
+    purchased_category_ids = list(
+        OrderItem.objects
+        .filter(order__user=user, order__status='paid', tool__isnull=False)
+        .values_list('tool__category_id', flat=True)
+        .distinct()
+    )
+
+    bought_tool_ids = set(
+        OrderItem.objects
+        .filter(order__user=user, order__status='paid', tool__isnull=False)
+        .values_list('tool_id', flat=True)
+    )
+
+    if purchased_category_ids:
+        cat_recs = [t for t in all_tools if t.category_id in purchased_category_ids and t.id not in bought_tool_ids]
+        other_recs = [t for t in all_tools if t.id not in bought_tool_ids and t not in cat_recs]
+        recommended_tools = (cat_recs + sorted(other_recs, key=lambda t: (not t.is_featured, -t.id)))[:5]
+    else:
+        recommended_tools = sorted(
+            all_tools,
+            key=lambda t: (not t.is_featured, -t.rating, t.price_usd_display)
+        )[:5]
+
     context = {
-        'active_subscriptions_count': recent_subscriptions.count(),
-        'total_orders_count': paid_orders.count(),
         'referral_earnings': referral_earnings,
         'wallet_balance': wallet_balance,
-        'recent_subscriptions': recent_subscriptions,
-        'recent_orders': recent_orders,
+        'popular_tools': popular_tools,
+        'recommended_tools': recommended_tools,
     }
     return render(request, 'dashboard/dashboard.html', context)
 

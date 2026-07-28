@@ -31,11 +31,12 @@ class PaymentTransactionInline(admin.StackedInline):
 @admin.register(Order)
 class OrderAdmin(admin.ModelAdmin):
     list_display = (
-        'id', 'user_email', 'status_badge', 'total_amount_ngn',
+        'order_tracking_id', 'user_email', 'status_badge', 'total_amount_ngn',
         'local_currency', 'delivery_status', 'created_at'
     )
+    list_display_links = ('user_email',)
     list_filter = ('status', 'delivery_status', 'local_currency', 'created_at')
-    search_fields = ('user__email', 'delivery_email', 'id')
+    search_fields = ('user__email', 'delivery_email', 'id', 'paystack_reference')
     ordering = ('-created_at',)
     readonly_fields = ('created_at', 'updated_at', 'user', 'total_amount_ngn',
                        'local_amount', 'exchange_rate', 'local_currency')
@@ -47,7 +48,7 @@ class OrderAdmin(admin.ModelAdmin):
             'fields': ('user', 'status', 'total_amount_ngn', 'local_currency', 'local_amount', 'exchange_rate')
         }),
         ('Delivery', {
-            'fields': ('delivery_email', 'delivery_status', 'delivery_notes')
+            'fields': ('delivery_email', 'delivery_status', 'delivery_notes', 'access_details')
         }),
         ('Referral', {
             'fields': ('referred_by',),
@@ -58,6 +59,10 @@ class OrderAdmin(admin.ModelAdmin):
             'classes': ('collapse',)
         }),
     )
+
+    @admin.display(description='Order ID', ordering='id')
+    def order_tracking_id(self, obj):
+        return f"#{obj.order_number}"
 
     @admin.display(description='User')
     def user_email(self, obj):

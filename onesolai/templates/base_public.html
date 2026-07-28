@@ -127,6 +127,7 @@
                 <li><a href="{% url 'tools:tools_list' %}" class="nav-a {% block nav_tools %}{% endblock %}">Tools</a></li>
                 <li><a href="{% url 'features' %}" class="nav-a {% block nav_features %}{% endblock %}">Features</a></li>
                 <li><a href="{% url 'home' %}#aboutUs" class="nav-a">About Us</a></li>
+                <li><a href="{% url 'contact_us' %}" class="nav-a {% block nav_contact %}{% endblock %}">Contact Us</a></li>
                 {% if user.is_authenticated %}
                 <li class="nav-mobile-only"><a href="{% url 'accounts:logout' %}" class="nav-a">Logout</a></li>
                 {% else %}
@@ -268,8 +269,8 @@
                 <h4 class="footer-title">Company</h4>
                 <a href="{% url 'home' %}#aboutUs" class="footer-link">About Us</a>
                 <a href="{% url 'home' %}#trustFeatures" class="footer-link">How It Works</a>
-                <a href="mailto:{{ site_settings.support_email|default:'support@onesolai.com' }}" class="footer-link">Support</a>
-                <a href="mailto:{{ site_settings.support_email|default:'support@onesolai.com' }}" class="footer-link">Contact Us</a>
+                <a href="{% url 'refer_and_earn' %}" class="footer-link">Refer &amp; Earn</a>
+                <a href="{% url 'contact_us' %}" class="footer-link">Contact Us</a>
             </div>
 
             <!-- Col 4: Legal -->
@@ -306,6 +307,9 @@
         </div>
 
         <div class="footer-bottom">
+            <div class="footer-disclaimer" style="max-width: 960px; margin: 0 auto 16px; font-size: 12px; color: #636A8A; line-height: 1.6; text-align: center; border-bottom: 1px solid rgba(255,255,255,0.06); padding-bottom: 14px;">
+                <strong>Disclaimer:</strong> OneSol AI Hub is an independent platform that provides access to digital subscriptions through authorized vendors and service partners. OneSol is not owned by, operated by, or officially affiliated with OpenAI, Anthropic, Google, Canva, Netflix, Coursera, or other third-party brands unless explicitly stated.
+            </div>
             <p>&copy; 2026 OneSol AI Hub. All rights reserved.</p>
         </div>
     </footer>
