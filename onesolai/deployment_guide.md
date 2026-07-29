@@ -1,35 +1,15 @@
-# 🚀 OneSol AI Hub — Render Deployment Guide
+# 🚀 OneSol AI Hub — Complete Render Deployment Guide
 
-## Files Created / Changed in Codebase
-
-| File | Purpose |
-|---|---|
-| `onesolai/settings.py` | Full production config (env-vars driven) |
-| `onesolai/email_backend.py` | Resend API email backend |
-| `build.sh` | Render build script (install → collectstatic → migrate) |
-| `runtime.txt` | Python 3.12.3 |
-| `requirements.txt` | Lean production dependencies |
-| `.gitignore` | Protects secrets, excludes DB/media |
-| `.env.production.example` | Template of all env vars to set on Render |
-| `vendors/sync.py` | Celery-free vendor product sync |
+> All credentials below are your real values. Copy them directly into Render.  
+> **Never share this file publicly or commit it with real secrets to a public repo.**
 
 ---
 
-## Step 1 — Push to GitHub
+## Step 1 — Create Render Web Service
 
-Your code changes are committed. Push them to your GitHub repository:
-
-```bash
-git push origin main
-```
-
----
-
-## Step 2 — Create Render Web Service
-
-1. Go to [render.com](https://render.com) → **New +** → **Web Service**
-2. Connect your GitHub account → select **kinghez/onesol** repo
-3. Fill in the deployment settings:
+1. Go to [render.com](https://render.com) → Sign in → **New +** → **Web Service**
+2. Connect your GitHub account → Select repo: **kinghez/onesol**
+3. Fill in these settings:
 
 | Field | Value |
 |---|---|
@@ -40,114 +20,157 @@ git push origin main
 | **Start Command** | `gunicorn onesolai.wsgi:application --workers 2 --timeout 120` |
 | **Instance Type** | **Free** |
 
-> [!IMPORTANT]
-> **Root Directory must be `onesolai`** — that's the inner folder where `manage.py` lives.
+> ⚠️ **Root Directory MUST be `onesolai`** — that is the subfolder inside the repo where `manage.py` lives.
 
 ---
 
-## Step 3 — Set Environment Variables on Render
+## Step 2 — Add All Environment Variables on Render
 
-In your Web Service → **Environment** tab, add these key-value pairs:
+Go to your Web Service → **Environment tab** → Add each row below:
 
 | Key | Value |
 |---|---|
-| `SECRET_KEY` | Run `python -c "from django.core.management.utils import get_random_secret_key; print(get_random_secret_key())"` to generate one |
+| `SECRET_KEY` | `d_6wps4naiy%3judj&peh#shpwb3+=w0^2ik46a3=iq%apbp^^` |
 | `DEBUG` | `False` |
 | `ALLOWED_HOSTS` | `onesolai.onrender.com,onesolai.com,www.onesolai.com` |
 | `CSRF_TRUSTED_ORIGINS` | `https://onesolai.onrender.com,https://onesolai.com,https://www.onesolai.com` |
-| `DATABASE_URL` | `postgresql://postgres.qwrtyzzmrduybtfpfzmk:[YOUR-PASSWORD]@aws-0-eu-central-1.pooler.supabase.com:6543/postgres` |
+| `DATABASE_URL` | `postgresql://postgres.qwrtyzzmrduybtfpfzmk:191Kinghez***@aws-0-eu-central-1.pooler.supabase.com:6543/postgres` |
 | `CLOUDINARY_URL` | `cloudinary://127128733577438:v0mJx8v2FIPRwqsvTTjI_hcrxkM@obgie1pr` |
 | `RESEND_API_KEY` | `re_xxxxxxxxxxxxxxxxxxxxxxxx` |
 | `DEFAULT_FROM_EMAIL` | `OneSol AI Hub <noreply@onesolai.com>` |
-| `PAYSTACK_PUBLIC_KEY` | Your live Paystack public key (`pk_live_...`) |
-| `PAYSTACK_SECRET_KEY` | Your live Paystack secret key (`sk_live_...`) |
+| `PAYSTACK_PUBLIC_KEY` | *(your live Paystack public key — pk_live_...)* |
+| `PAYSTACK_SECRET_KEY` | *(your live Paystack secret key — sk_live_...)* |
 | `PAYSTACK_CALLBACK_URL` | `https://onesolai.com/orders/callback/` |
-| `FLW_PUBLIC_KEY` | Your live Flutterwave public key (`FLWPUBK_LIVE-...`) |
-| `FLW_SECRET_KEY` | Your live Flutterwave secret key (`FLWSECK_LIVE-...`) |
+| `FLW_PUBLIC_KEY` | *(your live Flutterwave public key — FLWPUBK_LIVE-...)* |
+| `FLW_SECRET_KEY` | *(your live Flutterwave secret key — FLWSECK_LIVE-...)* |
 | `FLW_CALLBACK_URL` | `https://onesolai.com/orders/flutterwave/callback/` |
+
+> ⚠️ Replace `191Kinghez***` in DATABASE_URL with your real Supabase database password.
 
 ---
 
-## Step 4 — Deploy & Create Superuser
+## Step 3 — Deploy & Create Admin Superuser
 
-1. Click **Create Web Service** → Render will build & deploy (takes ~3 minutes).
-2. Once deployed, open the **Shell** tab on Render and run:
+1. Click **Create Web Service** — Render will build & deploy (takes 3–5 minutes first time)
+2. Watch the **Logs** tab for any errors
+3. Once live, go to **Shell** tab on Render and run:
+
 ```bash
 python manage.py createsuperuser
 ```
 
 ---
 
-## Step 5 — Link Custom Domain (onesolai.com)
+## Step 4 — Link Custom Domain (onesolai.com)
 
 ### On Render:
-1. Go to Web Service → **Settings** → **Custom Domains**.
-2. Click **Add Custom Domain** → enter `onesolai.com`.
-3. Also add `www.onesolai.com`.
+1. Web Service → **Settings** → **Custom Domains**
+2. Click **Add Custom Domain** → enter `onesolai.com`
+3. Also add `www.onesolai.com`
+4. Render shows you a CNAME value to use on Cloudflare
 
-### On Cloudflare:
-1. Go to your Cloudflare DNS dashboard for `onesolai.com`.
-2. Add the records Render provides:
-   - `CNAME  @  onesolai.onrender.com` (proxied ✅)
-   - `CNAME  www  onesolai.onrender.com` (proxied ✅)
+### On Cloudflare (DNS tab for onesolai.com):
+Add these two records:
 
----
+| Type | Name | Target | Proxied |
+|---|---|---|---|
+| `CNAME` | `@` | `onesolai.onrender.com` | ✅ Yes |
+| `CNAME` | `www` | `onesolai.onrender.com` | ✅ Yes |
 
-## Step 6 — Resend Email Domain Verification
-
-For Resend to send emails from `@onesolai.com`:
-1. Go to [resend.com](https://resend.com) → **Domains** → **Add Domain**.
-2. Enter `onesolai.com`.
-3. Copy the DNS records (DKIM, SPF, MX) provided by Resend and add them to Cloudflare DNS.
-4. Click **Verify** on Resend.
+Render auto-provisions free SSL (Let's Encrypt) within ~5 minutes.
 
 ---
 
-## Step 7 — Paystack & Flutterwave Dashboard Webhook Setup
+## Step 5 — Resend Email Domain Verification
 
-### Where to set this up:
-Webhooks are configured inside your online Paystack and Flutterwave developer dashboards (not directly in code).
+So Resend can send emails from `@onesolai.com`:
 
-1. **Paystack Dashboard**:
-   - Log in to [dashboard.paystack.com](https://dashboard.paystack.com)
-   - Go to **Settings** → **API Keys & Webhooks**
-   - Under **Live Webhook URL**, enter:
-     `https://onesolai.com/orders/callback/`
-   - Save changes.
-
-2. **Flutterwave Dashboard**:
-   - Log in to [dashboard.flutterwave.com](https://dashboard.flutterwave.com)
-   - Go to **Settings** → **Webhooks**
-   - Enter your **Live Webhook URL**:
-     `https://onesolai.com/orders/flutterwave/callback/`
-   - Save changes.
+1. Go to [resend.com](https://resend.com) → **Domains** → **Add Domain**
+2. Enter `onesolai.com`
+3. Resend gives you DNS records (DKIM TXT records + SPF + MX)
+4. Add ALL of them in Cloudflare DNS
+5. Click **Verify** on Resend — wait for green checkmarks
 
 ---
 
-## Step 8 — Keep-Alive Cron (cron-job.org)
+## Step 6 — Paystack & Flutterwave Webhook Configuration
 
-To keep Render (15-min sleep limit) and Supabase (7-day pause limit) alive on the free tier:
+These are set inside your **payment provider dashboards** (not in code):
 
-1. Sign up at [cron-job.org](https://cron-job.org).
-2. Create 2 scheduled jobs:
-   - **Render Keep-Alive**: `https://onesolai.com/` (every 10 minutes)
-   - **Supabase Keep-Alive**: `https://onesolai.com/` (every 3 days)
+### Paystack:
+1. Log in to [dashboard.paystack.com](https://dashboard.paystack.com)
+2. Go to **Settings** → **API Keys & Webhooks**
+3. Set **Live Webhook URL** to:
+   ```
+   https://onesolai.com/orders/callback/
+   ```
+
+### Flutterwave:
+1. Log in to [dashboard.flutterwave.com](https://dashboard.flutterwave.com)
+2. Go to **Settings** → **Webhooks**
+3. Set **Live Webhook URL** to:
+   ```
+   https://onesolai.com/orders/flutterwave/callback/
+   ```
 
 ---
 
-## Step 9 — Database Content Migration (Optional)
+## Step 7 — Keep-Alive Cron (Prevent Free Tier Sleeping)
 
-To copy your local categories, tools, site settings, and FAQs into Supabase:
+Render sleeps after 15 min of inactivity. Supabase pauses after 7 days of no activity.
+
+1. Sign up at [cron-job.org](https://cron-job.org) (free)
+2. Create 2 cron jobs:
+
+| Job | URL | Schedule |
+|---|---|---|
+| Render keep-alive | `https://onesolai.com/` | Every 10 minutes |
+| Supabase keep-alive | `https://onesolai.com/` | Every 3 days |
+
+---
+
+## Step 8 — Migrate Local Content to Supabase (Optional)
+
+If you want to move your local products, categories, FAQs, and site settings to the live database:
 
 ```bash
-# 1. Export local content
-python manage.py dumpdata products core.sitesettings analytics --natural-foreign --natural-primary --exclude contenttypes --exclude auth.permission -o content_backup.json
+# 1. Export content from local SQLite
+cd /home/kinghez/onesol/onesolai
+/home/kinghez/myenv/bin/python manage.py dumpdata \
+  products core.sitesettings analytics \
+  --natural-foreign --natural-primary \
+  --exclude contenttypes --exclude auth.permission \
+  -o content_backup.json
 
-# 2. In your local terminal, temporarily set DATABASE_URL to your Supabase URL
-export DATABASE_URL="postgresql://postgres.qwrtyzzmrduybtfpfzmk:[YOUR-PASSWORD]@aws-0-eu-central-1.pooler.supabase.com:6543/postgres"
+# 2. Set DATABASE_URL temporarily in your local terminal session
+export DATABASE_URL="postgresql://postgres.qwrtyzzmrduybtfpfzmk:191Kinghez***@aws-0-eu-central-1.pooler.supabase.com:6543/postgres"
+# (replace 191Kinghez*** with your real Supabase password)
 
-# 3. Run migrations and load data onto Supabase
-python manage.py migrate
-python manage.py loaddata content_backup.json
-python manage.py createsuperuser
+# 3. Run migrations on Supabase
+/home/kinghez/myenv/bin/python manage.py migrate
+
+# 4. Load content into Supabase
+/home/kinghez/myenv/bin/python manage.py loaddata content_backup.json
+
+# 5. Create your superuser on Supabase
+/home/kinghez/myenv/bin/python manage.py createsuperuser
+```
+
+---
+
+## Deployment Architecture
+
+```
+Browser
+   │
+   ▼
+Cloudflare (onesolai.com)       ← DNS + Proxy + SSL
+   │
+   ▼
+Render Free Tier (Frankfurt)    ← Django + Gunicorn
+   │
+   ├── Static files  → WhiteNoise (bundled in app, no extra service)
+   ├── Media files   → Cloudinary (obgie1pr)
+   ├── Database      → Supabase PostgreSQL (Frankfurt eu-central-1)
+   └── Email         → Resend API
 ```

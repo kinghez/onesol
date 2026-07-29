@@ -28,6 +28,8 @@ CSRF_TRUSTED_ORIGINS = [o.strip() for o in CSRF_TRUSTED_ORIGINS_ENV.split(',')]
 # Application definition
 # ─────────────────────────────────────────────────────────────────────────────
 INSTALLED_APPS = [
+    "cloudinary_storage",
+    "cloudinary",
     "jazzmin",
     "django.contrib.admin",
     "django.contrib.auth",
@@ -107,17 +109,12 @@ else:
 
 
 # ─────────────────────────────────────────────────────────────────────────────
-# Static Files — WhiteNoise (bundled CSS/JS/fonts, no external service needed)
+# Static & Media Storage — Cloudinary for Media, WhiteNoise for Static
 # ─────────────────────────────────────────────────────────────────────────────
 STATIC_URL = "/static/"
 STATICFILES_DIRS = [BASE_DIR / 'static']
 STATIC_ROOT = BASE_DIR / 'staticfiles'
-STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 
-
-# ─────────────────────────────────────────────────────────────────────────────
-# Media Files — Cloudinary (uploaded images, logos, product images etc.)
-# ─────────────────────────────────────────────────────────────────────────────
 CLOUDINARY_URL = os.environ.get('CLOUDINARY_URL', '')
 
 if CLOUDINARY_URL:
@@ -129,12 +126,24 @@ if CLOUDINARY_URL:
         cloudinary_url=CLOUDINARY_URL
     )
 
-    DEFAULT_FILE_STORAGE = 'cloudinary_storage.storage.MediaCloudinaryStorage'
+    STORAGES = {
+        "default": {
+            "BACKEND": "cloudinary_storage.storage.MediaCloudinaryStorage",
+        },
+        "staticfiles": {
+            "BACKEND": "whitenoise.storage.CompressedManifestStaticFilesStorage",
+        },
+    }
     MEDIA_URL = f'https://res.cloudinary.com/{cloudinary.config().cloud_name}/image/upload/'
-
-    INSTALLED_APPS += ['cloudinary_storage', 'cloudinary']
 else:
-    # Local development: local media folder
+    STORAGES = {
+        "default": {
+            "BACKEND": "django.core.files.storage.FileSystemStorage",
+        },
+        "staticfiles": {
+            "BACKEND": "whitenoise.storage.CompressedManifestStaticFilesStorage",
+        },
+    }
     MEDIA_URL = '/media/'
     MEDIA_ROOT = BASE_DIR / 'media'
 

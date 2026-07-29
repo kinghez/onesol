@@ -16,6 +16,8 @@ myenv/
 db.sqlite3
 media/
 staticfiles/
+fixtures/
+test_uploads/
 
 # Environment variables — NEVER commit these
 .env
