@@ -115,7 +115,8 @@ STATIC_URL = "/static/"
 STATICFILES_DIRS = [BASE_DIR / 'static']
 STATIC_ROOT = BASE_DIR / 'staticfiles'
 
-CLOUDINARY_URL = os.environ.get('CLOUDINARY_URL', '')
+DEFAULT_CLOUDINARY = 'cloudinary://127128733577438:v0mJx8v2FIPRwqsvTTjI_hcrxkM@obgie1pr'
+CLOUDINARY_URL = os.environ.get('CLOUDINARY_URL', '').strip() or DEFAULT_CLOUDINARY
 
 if CLOUDINARY_URL:
     import cloudinary
