@@ -227,6 +227,30 @@ def reload_vendor_balances(request):
 
 
 @staff_member_required
+def pull_vendor_products(request):
+    """
+    Manual trigger endpoint: Pull all products from all active vendor APIs.
+    Updates VendorProduct table and syncs price/stock to any linked Tools.
+    Called by the "Pull Products from Vendors" button on the Admin Analytics Dashboard.
+    """
+    if request.method == 'POST':
+        from vendors.sync import sync_all_vendor_products
+        try:
+            result = sync_all_vendor_products(triggered_by=f"Admin Dashboard ({request.user})")
+            return JsonResponse({
+                'success': True,
+                'total_created': result['total_created'],
+                'total_updated': result['total_updated'],
+                'total_tools_synced': result.get('total_tools_synced', 0),
+                'details': result['details'],
+                'errors': result.get('errors', []),
+            })
+        except Exception as e:
+            return JsonResponse({'success': False, 'error': str(e)}, status=500)
+    return JsonResponse({'success': False, 'error': 'Invalid method'}, status=400)
+
+
+@staff_member_required
 def platform_wallet_view(request):
     """
     Platform Wallet for tracking inflow, outflow, and complex profit calculations.

@@ -111,6 +111,30 @@
 
 </div>
 
+<!-- ══════ VENDOR PRODUCT POOL ACTION CARD ══════ -->
+<div class="admin-card" style="margin-bottom: 24px; border: 1px solid rgba(139,92,246,0.3);">
+    <div class="admin-card-header" style="display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:12px;">
+        <span><i class="fa-solid fa-arrows-rotate" style="color: var(--admin-accent-purple);"></i> Vendor Product Pool</span>
+        <span style="font-size:12px; color: var(--admin-text-muted); font-weight:400;">Manually pull latest products & prices from all active vendor APIs</span>
+    </div>
+    <div style="display:flex; align-items:center; gap:16px; flex-wrap:wrap; padding-top: 4px;">
+        <button id="pullProductsBtn" onclick="pullVendorProducts()" style="
+            background: linear-gradient(135deg, #6D28D9, #8B5CF6);
+            color: #fff; border: none; padding: 11px 24px;
+            border-radius: 10px; font-weight: 700; font-size: 14px;
+            cursor: pointer; display: inline-flex; align-items: center; gap: 8px;
+            box-shadow: 0 4px 16px rgba(139,92,246,0.35);
+            transition: transform 0.2s, box-shadow 0.2s;">
+            <i class="fa-solid fa-cloud-arrow-down"></i> Pull Products from Vendors
+        </button>
+        <span id="pullProductsStatus" style="font-size:13px; color: var(--admin-text-muted);"></span>
+    </div>
+    <div id="pullProductsResult" style="display:none; margin-top:16px; padding:14px 18px;
+        background: rgba(16,185,129,0.08); border:1px solid rgba(16,185,129,0.3);
+        border-radius: 10px; font-size: 13px; color: #6EE7B7;">
+    </div>
+</div>
+
 <div class="admin-grid" style="grid-template-columns: repeat(2, 1fr);">
     <!-- Top Selling Tools -->
     <div class="admin-card full-width-mobile">
@@ -472,5 +496,61 @@
             }
         });
     });
+</script>
+
+<script>
+function pullVendorProducts() {
+    const btn = document.getElementById('pullProductsBtn');
+    const statusEl = document.getElementById('pullProductsStatus');
+    const resultEl = document.getElementById('pullProductsResult');
+
+    btn.disabled = true;
+    btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Pulling from vendors…';
+    statusEl.textContent = 'This may take 10–30 seconds depending on vendor API response time…';
+    resultEl.style.display = 'none';
+
+    fetch("{% url 'analytics:pull_vendor_products' %}", {
+        method: 'POST',
+        headers: {
+            'X-CSRFToken': '{{ csrf_token }}',
+            'Content-Type': 'application/json',
+        }
+    })
+    .then(res => res.json())
+    .then(data => {
+        btn.disabled = false;
+        btn.innerHTML = '<i class="fa-solid fa-cloud-arrow-down"></i> Pull Products from Vendors';
+
+        if (data.success) {
+            statusEl.style.color = '#6EE7B7';
+            statusEl.textContent = `✅ Done! ${data.total_created} new, ${data.total_updated} updated, ${data.total_tools_synced} tools synced.`;
+            let detailHTML = `
+                <strong>✅ Sync Complete</strong><br>
+                🆕 New products added: <strong>${data.total_created}</strong><br>
+                🔄 Existing products updated: <strong>${data.total_updated}</strong><br>
+                🔗 Linked Tools price/stock synced: <strong>${data.total_tools_synced}</strong><br>
+            `;
+            if (data.details && data.details.length > 0) {
+                detailHTML += `<br><em>${data.details.join(' &bull; ')}</em>`;
+            }
+            if (data.errors && data.errors.length > 0) {
+                detailHTML += `<br><span style="color:#FCA5A5;">⚠️ Errors: ${data.errors.join('; ')}</span>`;
+                resultEl.style.background = 'rgba(239,68,68,0.08)';
+                resultEl.style.borderColor = 'rgba(239,68,68,0.3)';
+            }
+            resultEl.innerHTML = detailHTML;
+            resultEl.style.display = 'block';
+        } else {
+            statusEl.style.color = '#FCA5A5';
+            statusEl.textContent = `❌ Failed: ${data.error || 'Unknown error'}`;
+        }
+    })
+    .catch(err => {
+        btn.disabled = false;
+        btn.innerHTML = '<i class="fa-solid fa-cloud-arrow-down"></i> Pull Products from Vendors';
+        statusEl.style.color = '#FCA5A5';
+        statusEl.textContent = `❌ Network error: ${err}`;
+    });
+}
 </script>
 {% endblock %}

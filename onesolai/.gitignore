@@ -1,0 +1,66 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.pyc
+*.pyo
+
+# Virtual environments
+venv/
+env/
+myenv/
+.venv/
+
+# Django
+*.sqlite3
+db.sqlite3
+media/
+staticfiles/
+
+# Environment variables — NEVER commit these
+.env
+.env.local
+.env.production
+.env.*.local
+*.env
+
+# Secrets
+*.pem
+*.key
+
+# Windows metadata streams
+*Zone.Identifier*
+*:Zone.Identifier*
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+logs/
+
+# Scratch / debug scripts
+scratch/
+check_*.py
+test_*.py
+fix_*.py
+update_*.py
+seed_*.py
+resync_*.py
+create_superuser.py
+ensure_profiles.py
+
+# Build artifacts
+*.egg-info/
+dist/
+build/
+.eggs/
+
+# Coverage
+.coverage
+htmlcov/

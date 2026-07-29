@@ -9,5 +9,6 @@ urlpatterns = [
     path('platform-wallet/', views.platform_wallet_view, name='platform_wallet'),
     path('activity-logs/', views.activity_logs_view, name='activity_logs'),
     path('reload-balances/', views.reload_vendor_balances, name='reload_balances'),
+    path('pull-vendor-products/', views.pull_vendor_products, name='pull_vendor_products'),
 ]
 
