@@ -122,11 +122,24 @@ def wallet_crypto_topup_view(request, reference):
         messages.error(request, "Transaction not found.")
         return redirect('dashboard:wallet')
 
+    from core.services import get_live_usd_rates
+    rates = get_live_usd_rates() or {}
+    usd_rate = rates.get('USD') or (1 / float(cfg.usd_to_ngn_rate)) if cfg.usd_to_ngn_rate else 0.00067
+
+    amount_ngn = tx.amount_ngn
+    usd_amount = round(float(amount_ngn) * float(usd_rate), 2) if usd_rate else round(float(amount_ngn) / 1500.0, 2)
+
     context = {
         'tx': tx,
         'cfg': cfg,
+        'reference': reference,
+        'amount_ngn': amount_ngn,
+        'usd_amount': usd_amount,
+        'instructions': cfg.crypto_instructions,
+        'usdt_network': cfg.crypto_usdt_network,
+        'usdt_address': cfg.crypto_usdt_address,
     }
-    return render(request, 'dashboard/wallet_crypto_topup.html', context)
+    return render(request, 'dashboard/wallet_crypto.html', context)
 
 
 @login_required(login_url='/auth/login/')

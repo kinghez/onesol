@@ -227,12 +227,21 @@ def checkout_view(request):
                 amount_paid=price_ngn,
                 currency_paid='NGN',
             )
+
+            from analytics.models import ActivityLog
+            ActivityLog.log(
+                action_type='wallet_purchase',
+                title=f"Purchased {tool.name} via Wallet",
+                details=f"Order #{order.id} | Amount: NGN {price_ngn:,.2f}",
+                user=request.user,
+                severity='success'
+            )
             
             trigger_delivery(order)
             credit_referral_commission(order)
             try:
                 from vendors.tasks import fulfill_order_via_vendors
-                fulfill_order_via_vendors.delay(order.id)
+                fulfill_order_via_vendors(order.id)
             except Exception:
                 pass
             
@@ -292,12 +301,21 @@ def payment_callback_view(request):
                 gateway_response=txn_data,
             )
 
+            from analytics.models import ActivityLog
+            ActivityLog.log(
+                action_type='payment_success',
+                title=f"Paystack Payment Verified: Order #{order.id}",
+                details=f"Amount: NGN {amount_paid_ngn:,.2f} | Reference: {reference}",
+                user=order.user,
+                severity='success'
+            )
+
             trigger_delivery(order)
             credit_referral_commission(order)
             
             try:
                 from vendors.tasks import fulfill_order_via_vendors
-                fulfill_order_via_vendors.delay(order.id)
+                fulfill_order_via_vendors(order.id)
             except Exception:
                 pass
 
@@ -364,12 +382,21 @@ def flutterwave_callback_view(request):
             pt.currency_paid = currency_paid
             pt.save()
 
+            from analytics.models import ActivityLog
+            ActivityLog.log(
+                action_type='payment_success',
+                title=f"Flutterwave Payment Verified: Order #{order.id}",
+                details=f"Amount: {currency_paid} {amount_paid:,.2f} | Reference: {tx_ref or transaction_id}",
+                user=order.user,
+                severity='success'
+            )
+
             trigger_delivery(order)
             credit_referral_commission(order)
 
             try:
                 from vendors.tasks import fulfill_order_via_vendors
-                fulfill_order_via_vendors.delay(order.id)
+                fulfill_order_via_vendors(order.id)
             except Exception:
                 pass
 

@@ -137,7 +137,7 @@ class WalletTransaction(models.Model):
         return f"{self.user.email} - {self.transaction_type} - {self.amount_ngn}"
 
 
-from django.db.models.signals import post_save
+from django.db.models.signals import post_save, post_delete
 from django.contrib.auth.signals import user_logged_in, user_login_failed
 from django.dispatch import receiver
 
@@ -176,4 +176,13 @@ def log_user_login_failed(sender, credentials, request, **kwargs):
         ActivityLog.log('user_login', f"Failed login attempt for: {email}", severity='warning', ip_address=ip)
     except Exception:
         pass
+
+@receiver(post_delete, sender=User)
+def log_user_deletion(sender, instance, **kwargs):
+    try:
+        from analytics.models import ActivityLog
+        ActivityLog.log('user_deleted', f"User account deleted: {instance.email}", severity='warning')
+    except Exception:
+        pass
+
 

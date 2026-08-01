@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Welcome to {{ site_name }}</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { background-color: #070919; font-family: 'Segoe UI', -apple-system, BlinkMacSystemFont, Roboto, Helvetica, Arial, sans-serif; color: #E2E8F0; line-height: 1.6; }
+  .wrapper { max-width: 620px; margin: 0 auto; padding: 24px 16px; }
+  .card { background: #0F142D; border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 20px; overflow: hidden; box-shadow: 0 20px 50px rgba(0, 0, 0, 0.6); }
+  
+  /* Header */
+  .header { background: linear-gradient(135deg, #131A3E 0%, #0F142D 100%); padding: 40px 32px 32px; text-align: center; border-bottom: 1px solid rgba(91, 99, 246, 0.25); position: relative; }
+  .logo-container { margin-bottom: 24px; display: inline-block; }
+  .logo-img { max-height: 54px; width: auto; object-fit: contain; }
+  .logo-badge { display: inline-flex; align-items: center; gap: 10px; background: rgba(91, 99, 246, 0.15); border: 1px solid rgba(91, 99, 246, 0.3); padding: 8px 18px; border-radius: 30px; }
+  .logo-dot { width: 12px; height: 12px; background: #4ADE80; border-radius: 50%; box-shadow: 0 0 10px #4ADE80; }
+  .logo-title { font-size: 22px; font-weight: 800; color: #FFFFFF; letter-spacing: -0.5px; }
+  
+  .welcome-badge { display: inline-block; background: linear-gradient(135deg, rgba(91,99,246,0.2), rgba(142,108,255,0.2)); border: 1px solid rgba(142,108,255,0.4); color: #C4B5FD; font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: 1.5px; padding: 6px 14px; border-radius: 20px; margin-bottom: 16px; }
+  .header-title { font-size: 26px; font-weight: 800; color: #FFFFFF; line-height: 1.3; margin-bottom: 10px; }
+  .header-subtitle { color: #94A3B8; font-size: 15px; max-width: 480px; margin: 0 auto; }
+
+  /* Content */
+  .content { padding: 36px 32px; background: #0F142D; }
+  .greeting { font-size: 18px; font-weight: 700; color: #F8FAFC; margin-bottom: 14px; }
+  .lead-text { color: #CBD5E1; font-size: 15px; margin-bottom: 28px; }
+
+  /* Info Banner Box */
+  .info-box { background: rgba(91, 99, 246, 0.08); border: 1px solid rgba(91, 99, 246, 0.25); border-radius: 14px; padding: 22px; margin-bottom: 32px; }
+  .info-title { font-size: 15px; font-weight: 700; color: #A78BFA; margin-bottom: 8px; display: flex; align-items: center; gap: 8px; }
+  .info-desc { font-size: 14px; color: #94A3B8; margin: 0; }
+
+  /* Step Cards Grid */
+  .section-heading { font-size: 12px; font-weight: 800; text-transform: uppercase; letter-spacing: 1.8px; color: #64748B; margin-bottom: 16px; }
+  
+  .step-card { background: rgba(255, 255, 255, 0.03); border: 1px solid rgba(255, 255, 255, 0.07); border-radius: 14px; padding: 20px; margin-bottom: 14px; display: flex; gap: 16px; align-items: flex-start; }
+  .step-number { width: 36px; height: 36px; border-radius: 10px; background: linear-gradient(135deg, #5B63F6, #8E6CFF); color: #FFF; font-weight: 800; font-size: 15px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; box-shadow: 0 4px 14px rgba(91, 99, 246, 0.4); }
+  .step-content { flex: 1; }
+  .step-title { font-size: 15px; font-weight: 700; color: #F1F5F9; margin-bottom: 4px; }
+  .step-text { font-size: 13px; color: #94A3B8; line-height: 1.5; margin: 0; }
+
+  /* Primary CTA */
+  .cta-wrapper { text-align: center; margin: 36px 0 32px; }
+  .cta-btn { display: inline-block; background: linear-gradient(135deg, #5B63F6 0%, #8E6CFF 100%); color: #FFFFFF !important; text-decoration: none; font-size: 16px; font-weight: 700; padding: 16px 36px; border-radius: 14px; box-shadow: 0 10px 30px rgba(91, 99, 246, 0.4); transition: all 0.2s ease; }
+  
+  /* Quick Links Table Grid */
+  .quick-links-title { font-size: 13px; font-weight: 700; color: #CBD5E1; margin-bottom: 14px; text-align: center; }
+  .links-grid { display: table; width: 100%; margin-bottom: 28px; border-collapse: separate; border-spacing: 8px; }
+  .link-cell { display: table-cell; width: 50%; background: rgba(255, 255, 255, 0.03); border: 1px solid rgba(255, 255, 255, 0.08); border-radius: 12px; padding: 14px; text-decoration: none; vertical-align: top; }
+  .link-cell-title { font-size: 13px; font-weight: 700; color: #8E6CFF; margin-bottom: 3px; }
+  .link-cell-desc { font-size: 11px; color: #64748B; margin: 0; }
+
+  /* Divider */
+  .divider { height: 1px; background: rgba(255, 255, 255, 0.08); margin: 32px 0; }
+
+  /* Footer */
+  .footer { background: #070919; padding: 32px; text-align: center; border-top: 1px solid rgba(255, 255, 255, 0.06); }
+  .footer-text { font-size: 12px; color: #64748B; line-height: 1.8; margin-bottom: 12px; }
+  .footer-links { font-size: 12px; margin-bottom: 16px; }
+  .footer-links a { color: #8E6CFF; text-decoration: none; margin: 0 8px; }
+  .guarantee-tag { display: inline-flex; align-items: center; gap: 6px; font-size: 11px; color: #4ADE80; background: rgba(74, 222, 128, 0.1); border: 1px solid rgba(74, 222, 128, 0.2); padding: 4px 12px; border-radius: 20px; margin-bottom: 16px; }
+</style>
+</head>
+<body>
+<div class="wrapper">
+  <div class="card">
+    
+    <!-- Header -->
+    <div class="header">
+      <div class="logo-container">
+        {% if logo_url %}
+          <img src="{{ logo_url }}" alt="{{ site_name }}" class="logo-img">
+        {% else %}
+          <div class="logo-badge">
+            <div class="logo-dot"></div>
+            <span class="logo-title">{{ site_name }}</span>
+          </div>
+        {% endif %}
+      </div>
+      <br>
+      <div class="welcome-badge">🚀 Welcome Aboard</div>
+      <h1 class="header-title">Welcome to OneSol AI Hub!</h1>
+      <p class="header-subtitle">Africa's #1 Marketplace for 100+ Premium AI & SaaS Tools</p>
+    </div>
+
+    <!-- Content -->
+    <div class="content">
+      <div class="greeting">Hello {{ user_name }}, 👋</div>
+      <p class="lead-text">
+        Thank you for joining <strong>{{ site_name }}</strong>! We are thrilled to have you as part of our growing community of creators, developers, entrepreneurs, and professionals across Africa.
+      </p>
+
+      <!-- Info Box -->
+      <div class="info-box">
+        <div class="info-title">💡 What is {{ site_name }}?</div>
+        <p class="info-desc">
+          We provide affordable, localized access to over 100 premium AI and SaaS software tools (including ChatGPT, Midjourney, Claude, Canva Pro, ElevenLabs, and more) with seamless payments in your local African currency via <strong>Paystack</strong>, <strong>Flutterwave</strong>, or <strong>Crypto (USDT)</strong>.
+        </p>
+      </div>
+
+      <!-- How it Works Steps -->
+      <div class="section-heading">How It Works in 3 Easy Steps</div>
+
+      <div class="step-card">
+        <div class="step-number">1</div>
+        <div class="step-content">
+          <div class="step-title">Browse & Choose Your Tool</div>
+          <p class="step-text">Explore our catalog of 100+ AI tools and select the subscription plan that fits your creative or business needs.</p>
+        </div>
+      </div>
+
+      <div class="step-card">
+        <div class="step-number">2</div>
+        <div class="step-content">
+          <div class="step-title">Pay in Local Currency or Crypto</div>
+          <p class="step-text">Pay securely using your local bank account, debit card (NGN, GHS, KES, ZAR, etc.), or USDT crypto wallet with dynamic exchange rates.</p>
+        </div>
+      </div>
+
+      <div class="step-card">
+        <div class="step-number">3</div>
+        <div class="step-content">
+          <div class="step-title">Instant Access & Credentials Delivery</div>
+          <p class="step-text">Access details and activation instructions are delivered straight to your email inbox and user dashboard immediately after payment.</p>
+        </div>
+      </div>
+
+      <!-- Primary CTA -->
+      <div class="cta-wrapper">
+        <a href="{{ site_url }}/tools/" class="cta-btn">Explore Premium AI Tools Now →</a>
+      </div>
+
+      <div class="divider"></div>
+
+      <!-- Quick Links -->
+      <div class="quick-links-title">⚡ Helpful Quick Links</div>
+      
+      <table style="width: 100%; border-collapse: collapse; margin-bottom: 24px;">
+        <tr>
+          <td style="width: 50%; padding-right: 6px; vertical-align: top;">
+            <a href="{{ site_url }}/auth/login/" style="display: block; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); border-radius: 12px; padding: 14px; text-decoration: none;">
+              <div style="font-size: 13px; font-weight: 700; color: #8E6CFF; margin-bottom: 4px;">🔑 User Dashboard</div>
+              <div style="font-size: 11px; color: #64748B;">Manage your subscriptions & orders</div>
+            </a>
+          </td>
+          <td style="width: 50%; padding-left: 6px; vertical-align: top;">
+            <a href="{{ site_url }}/refer-and-earn/" style="display: block; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); border-radius: 12px; padding: 14px; text-decoration: none;">
+              <div style="font-size: 13px; font-weight: 700; color: #4ADE80; margin-bottom: 4px;">🎁 Refer & Earn</div>
+              <div style="font-size: 11px; color: #64748B;">Earn cash on every referral purchase</div>
+            </a>
+          </td>
+        </tr>
+        <tr><td style="height: 12px;" colspan="2"></td></tr>
+        <tr>
+          <td style="width: 50%; padding-right: 6px; vertical-align: top;">
+            <a href="{{ site_url }}/refund-policy/" style="display: block; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); border-radius: 12px; padding: 14px; text-decoration: none;">
+              <div style="font-size: 13px; font-weight: 700; color: #38BDF8; margin-bottom: 4px;">🛡️ 100% Refund Policy</div>
+              <div style="font-size: 11px; color: #64748B;">Working guarantee & protection</div>
+            </a>
+          </td>
+          <td style="width: 50%; padding-left: 6px; vertical-align: top;">
+            <a href="{{ site_url }}/contact/" style="display: block; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); border-radius: 12px; padding: 14px; text-decoration: none;">
+              <div style="font-size: 13px; font-weight: 700; color: #F43F5E; margin-bottom: 4px;">💬 Support Desk</div>
+              <div style="font-size: 11px; color: #64748B;">We are here to help you 24/7</div>
+            </a>
+          </td>
+        </tr>
+      </table>
+
+    </div>
+
+    <!-- Footer -->
+    <div class="footer">
+      <div class="guarantee-tag">✓ 256-Bit SSL Encrypted & Secured Payments</div>
+      
+      <div class="footer-links">
+        <a href="{{ site_url }}/terms-of-service/">Terms of Service</a> •
+        <a href="{{ site_url }}/privacy-policy/">Privacy Policy</a> •
+        <a href="{{ site_url }}/refund-policy/">Refund Policy</a>
+      </div>
+
+      <p class="footer-text">
+        © {% now "Y" %} {{ site_name }}. All rights reserved.<br>
+        If you have any questions, feel free to reply directly to this email or reach us at 
+        <a href="mailto:{{ support_email }}" style="color: #8E6CFF;">{{ support_email }}</a>.
+      </p>
+    </div>
+
+  </div>
+</div>
+</body>
+</html>

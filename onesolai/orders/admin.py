@@ -158,3 +158,38 @@ class RefundRequestAdmin(admin.ModelAdmin):
             processed_at=timezone.now()
         )
         self.message_user(request, f"{count} refund(s) rejected.")
+
+
+# ─────────────────────────────────────────────
+#  OrderAPIRequest Admin (Vendor API Logs)
+# ─────────────────────────────────────────────
+from .models import OrderAPIRequest
+
+@admin.register(OrderAPIRequest)
+class OrderAPIRequestAdmin(admin.ModelAdmin):
+    list_display = ('order_link', 'vendor', 'vendor_product', 'status_badge', 'vendor_order_id', 'created_at')
+    list_filter = ('vendor', 'status', 'created_at')
+    search_fields = ('order__id', 'vendor__name', 'vendor_order_id', 'error_message')
+    readonly_fields = ('order', 'vendor', 'vendor_product', 'status', 'vendor_order_id', 'request_data', 'response_data', 'error_message', 'created_at')
+    ordering = ('-created_at',)
+
+    @admin.display(description='Order')
+    def order_link(self, obj):
+        url = f"/admin/orders/order/{obj.order.id}/change/"
+        return format_html('<a href="{}">Order #{}</a>', url, obj.order.id)
+
+    @admin.display(description='Status')
+    def status_badge(self, obj):
+        colors = {
+            'completed': '#10B981',
+            'success': '#10B981',
+            'pending_manual': '#F59E0B',
+            'pending': '#3B82F6',
+            'failed': '#EF4444',
+        }
+        color = colors.get(obj.status, '#6B7280')
+        return format_html(
+            '<span style="background:{};color:#fff;padding:2px 8px;border-radius:4px;font-size:11px;font-weight:bold;">{}</span>',
+            color, obj.status.upper()
+        )
+

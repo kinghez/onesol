@@ -209,3 +209,26 @@ class Wishlist(models.Model):
 
     def __str__(self):
         return f"{self.user.username} - {self.tool.name}"
+
+
+from django.db.models.signals import post_save, post_delete
+from django.dispatch import receiver
+
+@receiver(post_save, sender=Tool)
+def log_tool_save(sender, instance, created, **kwargs):
+    try:
+        from analytics.models import ActivityLog
+        action = 'product_created' if created else 'product_updated'
+        title = f"Product Created: {instance.name}" if created else f"Product Updated: {instance.name}"
+        ActivityLog.log(action_type=action, title=title, details=f"Category: {instance.category.name} | Price: ${instance.get_usd_price()} USD", severity='info')
+    except Exception:
+        pass
+
+@receiver(post_delete, sender=Tool)
+def log_tool_delete(sender, instance, **kwargs):
+    try:
+        from analytics.models import ActivityLog
+        ActivityLog.log(action_type='product_deleted', title=f"Product Deleted: {instance.name}", severity='warning')
+    except Exception:
+        pass
+

@@ -105,3 +105,26 @@ class RefundRequest(models.Model):
 
     def __str__(self):
         return f"Refund for Order #{self.order.id} [{self.status.upper()}]"
+
+
+class OrderAPIRequest(models.Model):
+    """Logs third-party vendor API purchase requests and responses."""
+    order = models.ForeignKey(Order, related_name='api_requests', on_delete=models.CASCADE)
+    vendor = models.ForeignKey('vendors.Vendor', on_delete=models.SET_NULL, null=True, blank=True)
+    vendor_product = models.ForeignKey('vendors.VendorProduct', on_delete=models.SET_NULL, null=True, blank=True)
+    status = models.CharField(max_length=50, default='pending')  # pending, completed, pending_manual, failed
+    vendor_order_id = models.CharField(max_length=200, blank=True, default='')
+    request_data = models.JSONField(null=True, blank=True)
+    response_data = models.JSONField(null=True, blank=True)
+    error_message = models.TextField(blank=True, default='')
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ['-created_at']
+        verbose_name = 'Vendor API Request'
+        verbose_name_plural = 'Vendor API Requests'
+
+    def __str__(self):
+        v_name = self.vendor.name if self.vendor else "Unknown Vendor"
+        return f"Order #{self.order.id} API Request → {v_name} [{self.status}]"
+

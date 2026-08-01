@@ -196,3 +196,36 @@ class WithdrawalRequestAdmin(admin.ModelAdmin):
         self.message_user(request, f'Selected withdrawal(s) rejected.')
 
 
+# ─────────────────────────────────────────────
+#  Wallet Transaction Admin
+# ─────────────────────────────────────────────
+from .models import WalletTransaction
+
+@admin.register(WalletTransaction)
+class WalletTransactionAdmin(admin.ModelAdmin):
+    list_display = ('user', 'type_badge', 'amount_ngn_display', 'reference', 'description', 'created_at')
+    list_filter = ('transaction_type', 'created_at')
+    search_fields = ('user__email', 'reference', 'description')
+    readonly_fields = ('created_at',)
+    ordering = ('-created_at',)
+
+    @admin.display(description='Type')
+    def type_badge(self, obj):
+        colors = {
+            'deposit': '#10B981',
+            'purchase': '#3B82F6',
+            'withdrawal': '#EF4444',
+            'referral_credit': '#8B5CF6',
+        }
+        color = colors.get(obj.transaction_type, '#6B7280')
+        return format_html(
+            '<span style="background:{};color:#fff;padding:2px 8px;border-radius:4px;font-size:11px;font-weight:bold;">{}</span>',
+            color, obj.get_transaction_type_display().upper()
+        )
+
+    @admin.display(description='Amount (NGN)')
+    def amount_ngn_display(self, obj):
+        return f"NGN {obj.amount_ngn:,.2f}"
+
+
+

@@ -119,14 +119,9 @@ def signup_view(request):
                     status='pending',
                 )
 
-            # Send Welcome Email and In-App Notification
-            from core.email_utils import send_alert
-            send_alert(
-                user=user,
-                title="Welcome to OneSol AI Hub!",
-                message="Thank you for joining OneSol AI Hub. Explore our premium AI and SaaS tools at unbeatable prices today!",
-                notification_type='system'
-            )
+            # Send Professional HTML Welcome Email
+            from core.email_utils import send_welcome_email
+            send_welcome_email(user)
 
             login(request, user)
             messages.success(request, f'Welcome to OneSol AI Hub, {first_name}!')
@@ -296,6 +291,8 @@ def google_callback_view(request):
                 user=user,
                 severity='success'
             )
+            from core.email_utils import send_welcome_email
+            send_welcome_email(user)
         else:
             ActivityLog.log(
                 action_type='user_login',
