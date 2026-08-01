@@ -39,12 +39,20 @@ def dashboard_home(request):
         key=lambda t: (not t.is_popular, not t.is_featured, t.price_usd_display)
     )[:5]
 
-    # 2. Recommended For You: based on user's initial purchases or top featured tools
-    purchased_category_ids = list(
+    # 2. Recommended For You: based on user wishlist categories, purchased categories, or top featured tools
+    from products.models import Wishlist
+
+    wishlist_tool_ids = set(
+        Wishlist.objects.filter(user=user).values_list('tool_id', flat=True)
+    )
+    wishlist_category_ids = set(
+        Wishlist.objects.filter(user=user, tool__category__isnull=False).values_list('tool__category_id', flat=True)
+    )
+
+    purchased_category_ids = set(
         OrderItem.objects
         .filter(order__user=user, order__status='paid', tool__isnull=False)
         .values_list('tool__category_id', flat=True)
-        .distinct()
     )
 
     bought_tool_ids = set(
@@ -53,15 +61,48 @@ def dashboard_home(request):
         .values_list('tool_id', flat=True)
     )
 
+    recommended_list = []
+    seen_ids = set()
+
+    # Priority A: Top cheapest products in same categories as tools in user's wishlist
+    if wishlist_category_ids:
+        wishlist_cat_tools = [
+            t for t in all_tools 
+            if t.category_id in wishlist_category_ids 
+            and t.id not in bought_tool_ids 
+            and t.id not in wishlist_tool_ids
+        ]
+        wishlist_cat_tools.sort(key=lambda t: t.price_usd_display)
+        for t in wishlist_cat_tools:
+            if t.id not in seen_ids:
+                recommended_list.append(t)
+                seen_ids.add(t.id)
+
+    # Priority B: Products from categories user previously purchased
     if purchased_category_ids:
-        cat_recs = [t for t in all_tools if t.category_id in purchased_category_ids and t.id not in bought_tool_ids]
-        other_recs = [t for t in all_tools if t.id not in bought_tool_ids and t not in cat_recs]
-        recommended_tools = (cat_recs + sorted(other_recs, key=lambda t: (not t.is_featured, -t.id)))[:5]
-    else:
-        recommended_tools = sorted(
-            all_tools,
-            key=lambda t: (not t.is_featured, -t.rating, t.price_usd_display)
-        )[:5]
+        purchased_cat_tools = [
+            t for t in all_tools 
+            if t.category_id in purchased_category_ids 
+            and t.id not in bought_tool_ids 
+            and t.id not in seen_ids
+        ]
+        purchased_cat_tools.sort(key=lambda t: (not t.is_featured, t.price_usd_display))
+        for t in purchased_cat_tools:
+            if t.id not in seen_ids:
+                recommended_list.append(t)
+                seen_ids.add(t.id)
+
+    # Priority C: Fill remaining slots with top featured / rated / popular tools
+    fallback_tools = sorted(
+        [t for t in all_tools if t.id not in bought_tool_ids and t.id not in seen_ids],
+        key=lambda t: (not t.is_featured, -t.rating, t.price_usd_display)
+    )
+    for t in fallback_tools:
+        if t.id not in seen_ids:
+            recommended_list.append(t)
+            seen_ids.add(t.id)
+
+    recommended_tools = recommended_list[:5]
 
     context = {
         'referral_earnings': referral_earnings,

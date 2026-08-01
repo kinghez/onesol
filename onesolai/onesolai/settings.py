@@ -118,42 +118,48 @@ STATIC_ROOT = BASE_DIR / 'staticfiles'
 DEFAULT_CLOUDINARY = 'cloudinary://127128733577438:v0mJx8v2FIPRwqsvTTjI_hcrxkM@obgie1pr'
 CLOUDINARY_URL = os.environ.get('CLOUDINARY_URL', '').strip() or DEFAULT_CLOUDINARY
 
-if CLOUDINARY_URL:
-    import cloudinary
-    import cloudinary.uploader
-    import cloudinary.api
+import urllib.parse
+try:
+    parsed_url = urllib.parse.urlparse(CLOUDINARY_URL)
+    cloud_name = parsed_url.hostname or 'obgie1pr'
+    api_key = parsed_url.username or '127128733577438'
+    api_secret = parsed_url.password or 'v0mJx8v2FIPRwqsvTTjI_hcrxkM'
+except Exception:
+    cloud_name = 'obgie1pr'
+    api_key = '127128733577438'
+    api_secret = 'v0mJx8v2FIPRwqsvTTjI_hcrxkM'
 
-    cloudinary.config(
-        cloudinary_url=CLOUDINARY_URL
-    )
+CLOUDINARY_STORAGE = {
+    'CLOUD_NAME': cloud_name,
+    'API_KEY': api_key,
+    'API_SECRET': api_secret,
+    'SECURE': True,
+}
 
-    DEFAULT_FILE_STORAGE = "cloudinary_storage.storage.MediaCloudinaryStorage"
-    STATICFILES_STORAGE = "whitenoise.storage.CompressedStaticFilesStorage"
-    WHITENOISE_MANIFEST_STRICT = False
+import cloudinary
+import cloudinary.uploader
+import cloudinary.api
 
-    STORAGES = {
-        "default": {
-            "BACKEND": "cloudinary_storage.storage.MediaCloudinaryStorage",
-        },
-        "staticfiles": {
-            "BACKEND": "whitenoise.storage.CompressedStaticFilesStorage",
-        },
-    }
-    MEDIA_URL = f'https://res.cloudinary.com/{cloudinary.config().cloud_name}/image/upload/'
-else:
-    DEFAULT_FILE_STORAGE = "django.core.files.storage.FileSystemStorage"
-    STATICFILES_STORAGE = "whitenoise.storage.CompressedStaticFilesStorage"
+cloudinary.config(
+    cloud_name=cloud_name,
+    api_key=api_key,
+    api_secret=api_secret,
+    secure=True
+)
 
-    STORAGES = {
-        "default": {
-            "BACKEND": "django.core.files.storage.FileSystemStorage",
-        },
-        "staticfiles": {
-            "BACKEND": "whitenoise.storage.CompressedStaticFilesStorage",
-        },
-    }
-    MEDIA_URL = '/media/'
-    MEDIA_ROOT = BASE_DIR / 'media'
+DEFAULT_FILE_STORAGE = "cloudinary_storage.storage.MediaCloudinaryStorage"
+STATICFILES_STORAGE = "whitenoise.storage.CompressedStaticFilesStorage"
+WHITENOISE_MANIFEST_STRICT = False
+
+STORAGES = {
+    "default": {
+        "BACKEND": "cloudinary_storage.storage.MediaCloudinaryStorage",
+    },
+    "staticfiles": {
+        "BACKEND": "whitenoise.storage.CompressedStaticFilesStorage",
+    },
+}
+MEDIA_URL = f'https://res.cloudinary.com/{cloud_name}/image/upload/'
 
 
 # ─────────────────────────────────────────────────────────────────────────────

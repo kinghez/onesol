@@ -44,6 +44,13 @@ def profile_settings_view(request):
             profile.avatar = request.FILES['avatar']
             
         profile.save()
+
+        if 'avatar' in request.FILES and profile.avatar:
+            try:
+                profile.avatar_url = profile.avatar.url
+                profile.save(update_fields=['avatar_url'])
+            except Exception:
+                pass
         messages.success(request, "Your profile and payout settings have been updated successfully.")
         return redirect('dashboard:profile')
 
