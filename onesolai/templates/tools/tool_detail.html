@@ -56,24 +56,11 @@
                     {% csrf_token %}
                     <input type="hidden" name="tool_slug" value="{{ tool.slug }}">
                     
-                    {% if user.is_authenticated and user.profile.wallet_balance > 0 %}
-                    <div class="th-wallet-pay" style="margin-bottom:12px;">
-                        <label class="wallet-checkbox flex items-center" style="display:flex; align-items:center; gap:8px; cursor:pointer;">
-                            <input type="checkbox" name="pay_with_wallet" value="true" style="accent-color:#FBBF24; width:16px; height:16px; cursor:pointer;">
-                            <span style="font-size:14px; font-weight:700; display:inline-flex; align-items:center; gap:6px;">
-                                <i class="fa-solid fa-wallet" style="color:#FBBF24;"></i>
-                                <span style="color:#FBBF24;">Pay with Wallet</span>
-                                <span style="color:#FFFFFF; font-weight:500;">(Bal: ₦{{ user.profile.wallet_balance|floatformat:2 }})</span>
-                            </span>
-                        </label>
-                    </div>
-                    {% endif %}
-
                     <div style="margin-bottom: 14px;">
                         <label style="font-size:12px; color:#AEB5CA; display:block; margin-bottom:4px; font-weight:600;">Payment Gateway</label>
                         <select name="payment_method" style="background:#0f1535; border:1px solid rgba(255,255,255,0.2); color:#fff; font-size:13px; padding:10px 12px; border-radius:8px; width:100%; cursor:pointer;">
                             {% if user.is_authenticated and user.profile.wallet_balance > 0 %}
-                            <option value="wallet" style="background:#0f1535; color:#FBBF24; font-weight:bold;">👛 Pay with Wallet (Bal: ₦{{ user.profile.wallet_balance|floatformat:2 }})</option>
+                            <option value="wallet" style="background:#0f1535; color:#ffffff; font-weight:bold;">👛 Pay with Wallet (Bal: ₦{{ user.profile.wallet_balance|floatformat:2 }})</option>
                             {% endif %}
                             <option value="card" style="background:#0f1535; color:#ffffff;">💳 Card / Bank Transfer (Paystack / Flutterwave)</option>
                             <option value="crypto" style="background:#0f1535; color:#ffffff;">🪙 Crypto (USDT TRC20 / BEP20)</option>

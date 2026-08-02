@@ -146,8 +146,8 @@ def checkout_view(request):
     tool = get_object_or_404(Tool, slug=tool_slug, is_active=True)
 
     # Determine price
-    price_ngn = tool.get_ngn_price()
-    usd_price = tool.get_usd_price()
+    price_ngn = Decimal(str(round(tool.get_ngn_price(), 2)))
+    usd_price = Decimal(str(round(tool.get_usd_price(), 2)))
 
     user_currency = request.session.get('detected_currency')
     if not user_currency and hasattr(request.user, 'profile') and request.user.profile.currency_preference:
