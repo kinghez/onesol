@@ -582,3 +582,119 @@ def refund_user_wallet_api(request):
 
     return JsonResponse({'success': False, 'error': 'Invalid request method.'}, status=405)
 
+
+@staff_member_required
+def buy_tool_for_user_api(request):
+    """
+    AJAX / Form endpoint for Admin to purchase a tool on behalf of a user.
+    Can use the user's wallet balance or mark as Complimentary Admin Gift.
+    Automatically executes vendor API purchase, updates access_details, and sends email/in-app notification.
+    """
+    if request.method == 'POST':
+        import json
+        import logging
+        from decimal import Decimal
+        from django.contrib.auth import get_user_model
+        from products.models import Tool
+        from orders.models import Order, OrderItem, PaymentTransaction
+        from accounts.models import WalletTransaction
+        from vendors.tasks import _fulfill_order_logic
+        from orders.delivery import trigger_delivery
+        from notifications.models import Notification
+        from .models import ActivityLog
+
+        logger = logging.getLogger(__name__)
+        User = get_user_model()
+        data = request.POST if request.POST else (json.loads(request.body) if request.body else {})
+
+        email = data.get('user_email', '').strip()
+        tool_id = data.get('tool_id')
+        payment_method = data.get('payment_method', 'wallet').strip()
+
+        if not email:
+            return JsonResponse({'success': False, 'error': 'User email is required.'}, status=400)
+        if not tool_id:
+            return JsonResponse({'success': False, 'error': 'Tool selection is required.'}, status=400)
+
+        user = User.objects.filter(email__iexact=email).first()
+        if not user:
+            return JsonResponse({'success': False, 'error': f'No user account found with email "{email}".'}, status=404)
+
+        tool = Tool.objects.filter(id=tool_id, is_active=True).first()
+        if not tool:
+            return JsonResponse({'success': False, 'error': 'Selected tool is invalid or inactive.'}, status=404)
+
+        price_ngn = Decimal(str(round(tool.get_ngn_price(), 2)))
+
+        profile = user.profile
+        if payment_method == 'wallet':
+            if profile.wallet_balance < price_ngn:
+                return JsonResponse({
+                    'success': False,
+                    'error': f"User has insufficient wallet balance (Bal: NGN {profile.wallet_balance:,.2f}, Tool Price: NGN {price_ngn:,.2f}). Please fund user's wallet first or select Complimentary Admin Gift."
+                }, status=400)
+
+            profile.wallet_balance -= price_ngn
+            profile.save(update_fields=['wallet_balance'])
+
+            WalletTransaction.objects.create(
+                user=user,
+                transaction_type='purchase',
+                amount_ngn=price_ngn,
+                status='success',
+                reference=f"ADMIN_BUY_{tool.id}",
+                description=f"Purchased {tool.name} (Admin Purchase)"
+            )
+
+        order = Order.objects.create(
+            user=user,
+            total_amount_ngn=price_ngn,
+            local_currency='NGN',
+            local_amount=price_ngn,
+            exchange_rate=Decimal('1500.00'),
+            delivery_email=user.email,
+            status='paid',
+        )
+
+        OrderItem.objects.create(
+            order=order,
+            tool=tool,
+            price_ngn=price_ngn,
+        )
+
+        PaymentTransaction.objects.create(
+            order=order,
+            gateway='wallet' if payment_method == 'wallet' else 'manual',
+            transaction_id=f"ADMIN_PAY_{order.id}",
+            reference=f"ADMIN_PAY_{order.id}",
+            status='success',
+            amount_paid=price_ngn,
+            currency_paid='NGN',
+        )
+
+        ActivityLog.log(
+            action_type='wallet_purchase',
+            title=f"Admin Purchased {tool.name} for {user.email}",
+            details=f"Order #{order.order_number} | Amount: NGN {price_ngn:,.2f} | Payment: {payment_method.title()} | Admin: {request.user.email}",
+            user=user,
+            performed_by=request.user,
+            severity='success'
+        )
+
+        try:
+            _fulfill_order_logic(order.id)
+            order.refresh_from_db()
+        except Exception as ve:
+            logger.error(f"Admin purchase vendor fulfillment error for Order #{order.id}: {ve}")
+
+        trigger_delivery(order)
+
+        return JsonResponse({
+            'success': True,
+            'order_id': order.id,
+            'order_number': order.order_number,
+            'message': f"Successfully purchased {tool.name} for {user.email}! Order #{order.order_number} processed and delivered."
+        })
+
+    return JsonResponse({'success': False, 'error': 'Invalid request method.'}, status=405)
+

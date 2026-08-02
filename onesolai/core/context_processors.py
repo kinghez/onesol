@@ -4,13 +4,23 @@ def unread_notifications(request):
         from products.models import Wishlist
         notif_count = Notification.objects.filter(user=request.user, is_read=False).count()
         wl_count = Wishlist.objects.filter(user=request.user).count()
+        admin_tools = []
+        if request.user.is_staff:
+            from products.models import Tool
+            admin_tools = list(Tool.objects.filter(is_active=True).values('id', 'name'))
+            for t in Tool.objects.filter(is_active=True):
+                for at in admin_tools:
+                    if at['id'] == t.id:
+                        at['price_ngn'] = float(t.get_ngn_price())
         return {
             'unread_notifications_count': notif_count,
             'wishlist_count': wl_count,
+            'admin_active_tools': admin_tools,
         }
     return {
         'unread_notifications_count': 0,
         'wishlist_count': 0,
+        'admin_active_tools': [],
     }
 
 def site_settings(request):

@@ -12,5 +12,6 @@ urlpatterns = [
     path('pull-vendor-products/', views.pull_vendor_products, name='pull_vendor_products'),
     path('fund-user-wallet/', views.fund_user_wallet_api, name='fund_user_wallet'),
     path('refund-user-wallet/', views.refund_user_wallet_api, name='refund_user_wallet'),
+    path('buy-tool-for-user/', views.buy_tool_for_user_api, name='buy_tool_for_user'),
 ]
 
