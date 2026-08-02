@@ -6,6 +6,19 @@
 
 {% block content %}
 
+<!-- ══════ ADMIN ACTION TOOLBAR ══════ -->
+<div style="display: flex; flex-wrap: wrap; gap: 12px; margin-bottom: 24px; align-items: center; justify-content: flex-start;">
+    <button onclick="openFundWalletModal()" style="background: linear-gradient(135deg, #10B981, #059669); color: white; border: none; padding: 10px 18px; border-radius: 10px; font-size: 14px; font-weight: 600; cursor: pointer; display: inline-flex; align-items: center; gap: 8px; box-shadow: 0 4px 12px rgba(16, 185, 129, 0.25);">
+        <i class="fa-solid fa-wallet"></i> 💵 Fund User Wallet
+    </button>
+    <button onclick="openRefundWalletModal()" style="background: linear-gradient(135deg, #6366F1, #4F46E5); color: white; border: none; padding: 10px 18px; border-radius: 10px; font-size: 14px; font-weight: 600; cursor: pointer; display: inline-flex; align-items: center; gap: 8px; box-shadow: 0 4px 12px rgba(99, 102, 241, 0.25);">
+        <i class="fa-solid fa-rotate-left"></i> ↩️ Refund User Wallet
+    </button>
+    <button onclick="openBuyToolModal()" style="background: linear-gradient(135deg, #F59E0B, #D97706); color: white; border: none; padding: 10px 18px; border-radius: 10px; font-size: 14px; font-weight: 600; cursor: pointer; display: inline-flex; align-items: center; gap: 8px; box-shadow: 0 4px 12px rgba(245, 158, 11, 0.25);">
+        <i class="fa-solid fa-cart-shopping"></i> 🛒 Buy Tool for User
+    </button>
+</div>
+
 <!-- ══════ FILTERS ══════ -->
 <div class="admin-card" style="margin-bottom: 24px;">
     <div class="admin-card-header">

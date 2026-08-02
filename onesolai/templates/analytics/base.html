@@ -75,15 +75,6 @@
             </div>
             <div class="admin-topbar-right">
                 {% block topbar_actions %}{% endblock %}
-                <button onclick="openFundWalletModal()" style="background: linear-gradient(135deg, #10B981, #059669); color: white; border: none; padding: 8px 14px; border-radius: 8px; font-size: 13px; font-weight: 600; cursor: pointer; display: inline-flex; align-items: center; gap: 6px; margin-left: 8px;">
-                    <i class="fa-solid fa-wallet"></i> Fund Wallet
-                </button>
-                <button onclick="openRefundWalletModal()" style="background: linear-gradient(135deg, #6366F1, #4F46E5); color: white; border: none; padding: 8px 14px; border-radius: 8px; font-size: 13px; font-weight: 600; cursor: pointer; display: inline-flex; align-items: center; gap: 6px; margin-left: 8px;">
-                    <i class="fa-solid fa-rotate-left"></i> Refund Wallet
-                </button>
-                <button onclick="openBuyToolModal()" style="background: linear-gradient(135deg, #F59E0B, #D97706); color: white; border: none; padding: 8px 14px; border-radius: 8px; font-size: 13px; font-weight: 600; cursor: pointer; display: inline-flex; align-items: center; gap: 6px; margin-left: 8px;">
-                    <i class="fa-solid fa-cart-shopping"></i> Buy Tool for User
-                </button>
                 <span style="font-size: 14px; font-weight: 600; margin-left: 16px;">{{ request.user.get_full_name|default:request.user.username }}</span>
                 <div style="width: 32px; height: 32px; background: var(--admin-accent-purple); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: bold; margin-left: 10px;">
                     {{ request.user.username|make_list|first|upper }}
