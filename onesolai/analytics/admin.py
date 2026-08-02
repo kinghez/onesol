@@ -5,10 +5,10 @@ from .models import ActivityLog, VendorBalanceSnapshot
 
 @admin.register(ActivityLog)
 class ActivityLogAdmin(admin.ModelAdmin):
-    list_display = ('title', 'action_badge', 'user_link', 'severity_badge', 'ip_address', 'timestamp')
+    list_display = ('title', 'action_badge', 'user_link', 'performed_by_link', 'severity_badge', 'ip_address', 'timestamp')
     list_filter = ('severity', 'action_type', 'timestamp')
-    search_fields = ('title', 'details', 'user__email', 'user__username', 'ip_address')
-    readonly_fields = ('user', 'action_type', 'severity', 'title', 'details', 'ip_address', 'timestamp')
+    search_fields = ('title', 'details', 'user__email', 'user__username', 'performed_by__email', 'ip_address')
+    readonly_fields = ('user', 'performed_by', 'action_type', 'severity', 'title', 'details', 'ip_address', 'timestamp')
     date_hierarchy = 'timestamp'
 
     def has_add_permission(self, request):
@@ -18,7 +18,7 @@ class ActivityLogAdmin(admin.ModelAdmin):
         # Keep logs immutable for audit safety
         return request.user.is_superuser
 
-    @admin.display(description='User')
+    @admin.display(description='Target User')
     def user_link(self, obj):
         if obj.user:
             return format_html('<a href="/admin/accounts/user/{}/change/" style="font-weight:600; color:#8E6CFF;">{}</a>', obj.user.id, obj.user.email)
@@ -27,6 +27,12 @@ class ActivityLogAdmin(admin.ModelAdmin):
         if emails:
             return format_html('<span style="color:#60A5FA; font-weight:500;">{}</span>', emails[0])
         return format_html('<span style="color:#888;">System / Guest</span>')
+
+    @admin.display(description='Performed By')
+    def performed_by_link(self, obj):
+        if obj.performed_by:
+            return format_html('<a href="/admin/accounts/user/{}/change/" style="font-weight:600; color:#10B981;">{}</a>', obj.performed_by.id, obj.performed_by.email)
+        return format_html('<span style="color:#6B7280; font-size:11px;">System</span>')
 
     @admin.display(description='Action')
     def action_badge(self, obj):

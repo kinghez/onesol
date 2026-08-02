@@ -284,10 +284,25 @@ def google_callback_view(request):
         if created:
             user.set_unusable_password()
             user.save()
+
+            # Automatically capture detected country & currency for Google signup
+            from accounts.utils import get_client_ip, get_location_data_from_ip
+            ip = get_client_ip(request)
+            loc = get_location_data_from_ip(ip)
+
+            country = request.session.get('detected_country') or loc.get('country') or 'Nigeria'
+            currency = request.session.get('detected_currency') or loc.get('currency') or 'NGN'
+
+            profile = getattr(user, 'profile', None)
+            if profile:
+                profile.country_preference = country
+                profile.currency_preference = currency
+                profile.save()
+
             ActivityLog.log(
                 action_type='user_signup',
                 title='New User Registered via Google',
-                details=f'User {user.email} signed up using Google OAuth 2.0',
+                details=f'User {user.email} signed up using Google OAuth 2.0 (Location: {country})',
                 user=user,
                 severity='success'
             )

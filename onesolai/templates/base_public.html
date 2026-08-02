@@ -595,6 +595,64 @@
         <span class="floating-whatsapp-label">WhatsApp</span>
     </div>
 
+    {% if show_location_switch_modal %}
+    <div id="locationSwitchModal" class="location-switch-overlay" style="position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(7,9,25,0.85); backdrop-filter:blur(12px); z-index:99999; display:flex; align-items:center; justify-content:center; padding:20px;">
+        <div class="location-switch-card" style="background:#0F142D; border:1px solid rgba(142,108,255,0.3); border-radius:24px; padding:36px 30px; max-width:480px; width:100%; text-align:center; box-shadow:0 25px 50px rgba(0,0,0,0.6);">
+            <div style="width:64px; height:64px; background:rgba(142,108,255,0.15); border:1px solid rgba(142,108,255,0.3); border-radius:50%; display:inline-flex; align-items:center; justify-content:center; font-size:28px; margin-bottom:18px;">
+                📍
+            </div>
+            <h2 style="color:#FFFFFF; font-size:22px; font-weight:800; margin-bottom:10px; line-height:1.3;">Location Change Detected</h2>
+            <p style="color:#CBD5E1; font-size:14px; line-height:1.6; margin-bottom:16px;">
+                We noticed you are currently visiting from <strong style="color:#FBBF24;">{{ detected_country }} ({{ detected_currency }})</strong>.<br>
+                Your profile setting is currently <strong style="color:#8E6CFF;">{{ profile_country }} ({{ profile_currency }})</strong>.
+            </p>
+            <p style="color:#94A3B8; font-size:13px; margin-bottom:28px;">
+                Would you like to update your country & currency preference to <strong>{{ detected_country }}</strong>?
+            </p>
+            <div style="display:flex; flex-direction:column; gap:12px;">
+                <button id="btnAcceptLocationSwitch" class="btn" style="background:linear-gradient(135deg, #5B63F6, #8E6CFF); color:#FFFFFF; border:none; padding:14px 20px; border-radius:12px; font-weight:700; font-size:14px; cursor:pointer; width:100%;">
+                    Yes, Update to {{ detected_country }} ({{ detected_currency }})
+                </button>
+                <button id="btnDeclineLocationSwitch" class="btn" style="background:rgba(255,255,255,0.06); color:#CBD5E1; border:1px solid rgba(255,255,255,0.12); padding:12px 20px; border-radius:12px; font-weight:600; font-size:13px; cursor:pointer; width:100%;">
+                    No, Keep {{ profile_country }} ({{ profile_currency }})
+                </button>
+            </div>
+        </div>
+    </div>
+    <script>
+        document.addEventListener("DOMContentLoaded", function() {
+            var modal = document.getElementById('locationSwitchModal');
+            var btnAccept = document.getElementById('btnAcceptLocationSwitch');
+            var btnDecline = document.getElementById('btnDeclineLocationSwitch');
+
+            function sendLocationPreference(action) {
+                var formData = new FormData();
+                formData.append('action', action);
+                formData.append('country', "{{ detected_country }}");
+                formData.append('currency', "{{ detected_currency }}");
+                formData.append('csrfmiddlewaretoken', "{{ csrf_token }}");
+
+                fetch("{% url 'dashboard:update_location_preference' %}", {
+                    method: 'POST',
+                    body: formData,
+                    headers: { 'X-Requested-With': 'XMLHttpRequest' }
+                }).then(function(res) { return res.json(); })
+                .then(function(data) {
+                    if (modal) modal.style.display = 'none';
+                    if (action === 'accept') {
+                        window.location.reload();
+                    }
+                }).catch(function() {
+                    if (modal) modal.style.display = 'none';
+                });
+            }
+
+            if (btnAccept) btnAccept.addEventListener('click', function() { sendLocationPreference('accept'); });
+            if (btnDecline) btnDecline.addEventListener('click', function() { sendLocationPreference('decline'); });
+        });
+    </script>
+    {% endif %}
+
     {% block extra_js %}{% endblock %}
 </body>
 

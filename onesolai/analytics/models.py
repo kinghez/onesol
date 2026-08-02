@@ -51,7 +51,8 @@ class ActivityLog(models.Model):
         ('error', 'Error'),
     ]
 
-    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True, blank=True, related_name='activity_logs')
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True, blank=True, related_name='activity_logs', help_text="Target user affected by this action")
+    performed_by = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True, blank=True, related_name='actions_performed', help_text="Admin or user who triggered this action")
     action_type = models.CharField(max_length=30, choices=ACTION_TYPES, default='system', db_index=True)
     severity = models.CharField(max_length=15, choices=SEVERITY_LEVELS, default='info', db_index=True)
     title = models.CharField(max_length=255)
@@ -68,10 +69,10 @@ class ActivityLog(models.Model):
         return f"[{self.get_severity_display()}] {self.title} ({self.timestamp.strftime('%Y-%m-%d %H:%M')})"
 
     @classmethod
-    def log(cls, action_type, title, details='', user=None, severity='info', ip_address=None):
+    def log(cls, action_type, title, details='', user=None, performed_by=None, severity='info', ip_address=None):
         """
         Helper method to record an activity log entry anywhere across the application.
-        Auto-resolves user by email from title/details if user is not explicitly passed.
+        Auto-resolves target user by email from title/details if user is not explicitly passed.
         """
         try:
             if user is None and (title or details):
@@ -89,6 +90,7 @@ class ActivityLog(models.Model):
 
             return cls.objects.create(
                 user=user,
+                performed_by=performed_by,
                 action_type=action_type,
                 severity=severity,
                 title=title,

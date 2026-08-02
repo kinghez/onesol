@@ -22,4 +22,5 @@ urlpatterns = [
     path('referrals/', referrals_view, name='referrals'),
     path('referrals/withdraw/', withdrawal_request_view, name='withdraw'),
     path('wishlist/', dashboard_views.wishlist_view, name='wishlist'),
+    path('api/update-location-preference/', profile_views.update_location_preference_view, name='update_location_preference'),
 ]

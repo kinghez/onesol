@@ -118,3 +118,34 @@ def support_view(request):
         messages.success(request, "Support ticket created. We will get back to you shortly.")
         return redirect('dashboard:support')
     return render(request, 'dashboard/support.html')
+
+
+from django.http import JsonResponse
+from accounts.utils import COUNTRY_TO_CURRENCY
+
+@login_required(login_url='/auth/login/')
+def update_location_preference_view(request):
+    """AJAX endpoint for Location Mismatch Modal Popup."""
+    if request.method == 'POST':
+        action = request.POST.get('action')
+        new_country = request.POST.get('country', '').strip()
+        new_currency = request.POST.get('currency', '').strip()
+
+        if action == 'accept' and new_country:
+            profile = request.user.profile
+            profile.country_preference = new_country
+            if new_currency:
+                profile.currency_preference = new_currency.upper()
+            else:
+                profile.currency_preference = COUNTRY_TO_CURRENCY.get(new_country, 'USD')
+            profile.save()
+            request.session['location_switch_dismissed'] = True
+            return JsonResponse({
+                'status': 'success',
+                'country': profile.country_preference,
+                'currency': profile.currency_preference
+            })
+        else:
+            request.session['location_switch_dismissed'] = True
+            return JsonResponse({'status': 'dismissed'})
+    return JsonResponse({'status': 'invalid'}, status=400)

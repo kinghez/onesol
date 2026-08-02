@@ -4,12 +4,22 @@ import logging
 logger = logging.getLogger(__name__)
 
 CURRENCY_TO_FLAG = {
-    'USD': 'us', 'NGN': 'ng', 'GBP': 'gb', 'EUR': 'eu',
+    'NGN': 'ng', 'USD': 'us', 'GBP': 'gb', 'EUR': 'eu',
     'GHS': 'gh', 'KES': 'ke', 'ZAR': 'za', 'UGX': 'ug',
     'TZS': 'tz', 'RWF': 'rw', 'XOF': 'sn', 'XAF': 'cm',
     'ZMW': 'zm', 'MWK': 'mw', 'MUR': 'mu', 'EGP': 'eg',
     'ETB': 'et', 'CAD': 'ca', 'AUD': 'au', 'INR': 'in',
-    'BRL': 'br', 'JPY': 'jp', 'CNY': 'cn',
+    'BRL': 'br', 'JPY': 'jp', 'CNY': 'cn', 'MAD': 'ma',
+}
+
+COUNTRY_TO_CURRENCY = {
+    'Nigeria': 'NGN', 'United States': 'USD', 'United Kingdom': 'GBP',
+    'Ghana': 'GHS', 'Kenya': 'KES', 'South Africa': 'ZAR',
+    'Canada': 'CAD', 'Australia': 'AUD', 'India': 'INR',
+    'France': 'EUR', 'Germany': 'EUR', 'Spain': 'EUR',
+    'Italy': 'EUR', 'Netherlands': 'EUR', 'Uganda': 'UGX',
+    'Tanzania': 'TZS', 'Rwanda': 'RWF', 'Zambia': 'ZMW',
+    'Egypt': 'EGP', 'Morocco': 'MAD', 'China': 'CNY', 'Japan': 'JPY',
 }
 
 
