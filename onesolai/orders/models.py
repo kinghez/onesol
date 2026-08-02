@@ -37,6 +37,9 @@ class Order(models.Model):
         help_text='Credentials/access info delivered to user after payment')
     paystack_reference = models.CharField(max_length=200, blank=True,
         help_text='Paystack payment reference for this order')
+    vendor_order_id = models.CharField(max_length=255, blank=True, null=True,
+        verbose_name="Vendor Order ID",
+        help_text="Third-party vendor API order reference for admin reconciliation")
     # Timestamps
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)

@@ -61,13 +61,18 @@ def _fulfill_order_logic(order_id):
                     error_message=res.get('error', '') or ''
                 )
 
+                v_order_id = str(res.get('order_id', '')).strip()
+                if v_order_id:
+                    order.vendor_order_id = v_order_id
+                    order.save(update_fields=['vendor_order_id'])
+
                 if res.get('status') in ['completed', 'success'] and res.get('codes'):
                     codes = res['codes']
                     delivered_codes.extend(codes)
                     ActivityLog.log(
                         action_type='order_fulfilled',
                         title=f"Vendor Order Fulfilled: Order #{order.id}",
-                        details=f"Tool: {tool.name} | Vendor: {vendor.name} | Codes: {', '.join(codes)}",
+                        details=f"Tool: {tool.name} | Vendor: {vendor.name} | Vendor Order ID: {v_order_id} | Codes: {', '.join(codes)}",
                         user=order.user,
                         severity='success'
                     )

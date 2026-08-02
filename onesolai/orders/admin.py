@@ -34,11 +34,11 @@ from core.admin_utils import export_as_csv
 class OrderAdmin(admin.ModelAdmin):
     list_display = (
         'order_tracking_id', 'user_email', 'status_badge', 'total_amount_ngn',
-        'local_currency', 'delivery_status', 'created_at'
+        'local_currency', 'delivery_status', 'vendor_order_id', 'created_at'
     )
     list_display_links = ('user_email',)
     list_filter = ('status', 'delivery_status', 'local_currency', 'created_at')
-    search_fields = ('user__email', 'delivery_email', 'id', 'paystack_reference')
+    search_fields = ('user__email', 'delivery_email', 'id', 'paystack_reference', 'vendor_order_id')
     ordering = ('-created_at',)
     readonly_fields = ('created_at', 'updated_at', 'user', 'total_amount_ngn',
                        'local_amount', 'exchange_rate', 'local_currency')
@@ -47,7 +47,7 @@ class OrderAdmin(admin.ModelAdmin):
 
     fieldsets = (
         ('Order Info', {
-            'fields': ('user', 'status', 'total_amount_ngn', 'local_currency', 'local_amount', 'exchange_rate')
+            'fields': ('user', 'status', 'total_amount_ngn', 'local_currency', 'local_amount', 'exchange_rate', 'vendor_order_id')
         }),
         ('Delivery', {
             'fields': ('delivery_email', 'delivery_status', 'delivery_notes', 'access_details')

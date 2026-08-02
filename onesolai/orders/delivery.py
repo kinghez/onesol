@@ -51,12 +51,16 @@ def trigger_delivery(order):
         )
         order.delivery_status = 'sent'
         
-        # In-App Notification
+        # In-App Notification with Full Activation Details
         from notifications.models import Notification
+        notif_msg = f"Your order #{order.order_number} for {tool_name} is ready!"
+        if order.access_details:
+            notif_msg += f"\n\nActivation Details:\n{order.access_details}"
+
         Notification.objects.create(
             user=order.user,
-            title="Order Delivered",
-            message=f"Your order #{order.id} for {tool_name} has been processed successfully.",
+            title=f"🎉 {tool_name} Access Delivered!",
+            message=notif_msg,
             notification_type='order',
             action_url=f"/dashboard/orders/"
         )
