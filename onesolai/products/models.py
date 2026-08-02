@@ -95,6 +95,7 @@ class Tool(models.Model):
     def get_usd_price(self):
         from core.models import SiteSettings
         settings = SiteSettings.objects.first()
+        markup_type = getattr(settings, 'markup_type', 'percent') if settings else 'percent'
         global_markup_percent = float(settings.global_markup_percent) if settings else 20.00
         global_markup_fixed = float(settings.global_markup_fixed_usd) if settings else 0.00
         
@@ -106,7 +107,7 @@ class Tool(models.Model):
                 profit = float(self.markup_fixed_usd)
             elif float(self.markup_percent) > 0:
                 profit = vendor_price * (float(self.markup_percent) / 100)
-            elif global_markup_fixed > 0:
+            elif markup_type == 'fixed' and global_markup_fixed > 0:
                 profit = global_markup_fixed
             else:
                 profit = vendor_price * (global_markup_percent / 100)

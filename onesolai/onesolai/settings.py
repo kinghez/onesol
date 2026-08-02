@@ -159,7 +159,8 @@ STORAGES = {
         "BACKEND": "whitenoise.storage.CompressedStaticFilesStorage",
     },
 }
-MEDIA_URL = f'https://res.cloudinary.com/{cloud_name}/image/upload/'
+MEDIA_URL = '/media/'
+MEDIA_ROOT = BASE_DIR / 'media'
 
 
 # ─────────────────────────────────────────────────────────────────────────────

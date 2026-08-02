@@ -47,7 +47,14 @@ def profile_settings_view(request):
 
         if 'avatar' in request.FILES and profile.avatar:
             try:
-                profile.avatar_url = profile.avatar.url
+                raw_url = profile.avatar.url
+                import re
+                matches = re.findall(r'https://res\.cloudinary\.com/[^/]+/image/upload/', raw_url)
+                if len(matches) > 1:
+                    raw_url = matches[0] + raw_url.replace(matches[0], '')
+                elif raw_url.startswith('/media/https://'):
+                    raw_url = raw_url.replace('/media/', '')
+                profile.avatar_url = raw_url
                 profile.save(update_fields=['avatar_url'])
             except Exception:
                 pass

@@ -148,8 +148,8 @@ class SiteSettingsAdmin(admin.ModelAdmin):
             ),
         }),
         ('💱 Dynamic Pricing', {
-            'fields': ('global_markup_percent', 'global_markup_fixed_usd', 'usd_to_ngn_rate'),
-            'description': 'Configure profit margins and currency conversion for dynamic Vendor products.',
+            'fields': ('markup_type', 'global_markup_percent', 'global_markup_fixed_usd', 'usd_to_ngn_rate'),
+            'description': 'Select active markup strategy (Percentage vs Fixed USD Amount), configure profit margins, and set currency exchange rates for dynamic vendor products.',
         }),
         ('🌟 Homepage Trust Bar', {
             'fields': ('trust_bar_left_text', 'trust_bar_rating_score', 'trust_bar_right_text'),

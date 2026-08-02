@@ -251,11 +251,8 @@
                     </button>
                     <a href="{% url 'dashboard:profile' %}" class="user-profile" style="text-decoration:none;cursor:pointer;" title="Go to Profile Settings">
                         <div class="avatar flex items-center justify-center bg-transparent">
-                            {% if user.profile.avatar %}
-                                <img src="{{ user.profile.avatar.url }}" alt="Avatar" style="width: 36px; height: 36px; border-radius: 50%; object-fit: cover;" onerror="this.onerror=null; this.style.display='none'; this.nextElementSibling.style.display='inline-block';">
-                                <i class="fa-solid fa-circle-user" style="font-size: 36px; color: var(--text-secondary); display: none;"></i>
-                            {% elif user.profile.avatar_url %}
-                                <img src="{{ user.profile.avatar_url }}" alt="Avatar" style="width: 36px; height: 36px; border-radius: 50%; object-fit: cover;" onerror="this.onerror=null; this.style.display='none'; this.nextElementSibling.style.display='inline-block';">
+                            {% if user.profile.get_avatar_url %}
+                                <img src="{{ user.profile.get_avatar_url }}" alt="Avatar" style="width: 36px; height: 36px; border-radius: 50%; object-fit: cover;" onerror="this.onerror=null; this.style.display='none'; this.nextElementSibling.style.display='inline-block';">
                                 <i class="fa-solid fa-circle-user" style="font-size: 36px; color: var(--text-secondary); display: none;"></i>
                             {% else %}
                                 <i class="fa-solid fa-circle-user" style="font-size: 36px; color: var(--text-secondary);"></i>

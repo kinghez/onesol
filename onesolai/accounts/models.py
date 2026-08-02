@@ -52,6 +52,29 @@ class Profile(models.Model):
     def __str__(self):
         return f"{self.user.email}'s Profile"
 
+    @property
+    def get_avatar_url(self):
+        """Returns clean avatar URL, stripping any duplicate Cloudinary prefixes."""
+        url = None
+        if self.avatar:
+            try:
+                url = self.avatar.url
+            except Exception:
+                pass
+        if not url and self.avatar_url:
+            url = self.avatar_url
+
+        if url:
+            import re
+            matches = re.findall(r'https://res\.cloudinary\.com/[^/]+/image/upload/', url)
+            if len(matches) > 1:
+                first_prefix = matches[0]
+                url = first_prefix + url.replace(first_prefix, '')
+            elif url.startswith("/media/https://") or url.startswith("/media/http://"):
+                url = url.replace("/media/", "")
+            return url
+        return None
+
     def save(self, *args, **kwargs):
         if not self.referral_code:
             self.referral_code = str(uuid.uuid4()).replace('-', '').upper()[:12]

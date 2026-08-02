@@ -20,10 +20,8 @@
         <!-- Avatar Section -->
         <div class="avatar-section">
           <div class="avatar-preview">
-            {% if user.profile.avatar %}
-              <img src="{{ user.profile.avatar.url }}" alt="Avatar" class="avatar-img" id="avatarImg" onerror="this.onerror=null; this.src='https://res.cloudinary.com/obgie1pr/image/upload/site_logos/One_Sol_Icon_Blue.png';">
-            {% elif user.profile.avatar_url %}
-              <img src="{{ user.profile.avatar_url }}" alt="Avatar" class="avatar-img" id="avatarImg" onerror="this.onerror=null; this.src='https://res.cloudinary.com/obgie1pr/image/upload/site_logos/One_Sol_Icon_Blue.png';">
+            {% if user.profile.get_avatar_url %}
+              <img src="{{ user.profile.get_avatar_url }}" alt="Avatar" class="avatar-img" id="avatarImg" onerror="this.onerror=null; this.src='https://res.cloudinary.com/obgie1pr/image/upload/site_logos/One_Sol_Icon_Blue.png';">
             {% else %}
               <div class="avatar-placeholder" id="avatarImg">
                 {{ user.get_full_name|default:user.username|first|upper }}

@@ -305,10 +305,19 @@ class SiteSettings(models.Model):
         help_text='Upload the site favicon (ideally 32x32 or 64x64). If not provided, site logo is used.')
 
     # Global Pricing Settings
+    MARKUP_TYPES = [
+        ('percent', 'Global Percentage Markup (%)'),
+        ('fixed', 'Global Fixed USD Amount ($)'),
+    ]
+    markup_type = models.CharField(
+        max_length=20, choices=MARKUP_TYPES, default='percent',
+        verbose_name="Active Markup Strategy",
+        help_text="Select whether to calculate product profit markup using a Percentage (%) or a Fixed USD ($) amount."
+    )
     global_markup_percent = models.DecimalField(max_digits=5, decimal_places=2, default=20.00,
-        help_text='% to add to vendor USD price for profit (e.g. 20.00 = 20%)')
+        help_text='% to add to vendor USD price for profit when Percentage Markup is selected above (e.g. 20.00 = 20%)')
     global_markup_fixed_usd = models.DecimalField(max_digits=10, decimal_places=2, default=0.00,
-        help_text='Fixed USD profit to add instead of percentage. If greater than 0, overrides percentage.')
+        help_text='Fixed USD profit to add to vendor USD price when Fixed USD Amount is selected above (e.g. 5.00 = $5 profit).')
     usd_to_ngn_rate = models.DecimalField(max_digits=10, decimal_places=2, default=1500.00,
         help_text='Exchange rate to convert USD to local currency (NGN) on the frontend')
 
