@@ -179,8 +179,8 @@ def checkout_view(request):
         price_ngn=price_ngn,
     )
 
-    pay_with_wallet = request.POST.get('pay_with_wallet') == 'true'
     payment_method = request.POST.get('payment_method', '').strip().lower()
+    pay_with_wallet = (request.POST.get('pay_with_wallet') == 'true') or (payment_method == 'wallet')
 
     if payment_method == 'crypto':
         from core.models import SiteSettings
@@ -258,10 +258,11 @@ def checkout_view(request):
     try:
         redirect_url = initiate_gateway_payment(order, tool, price_ngn, local_amount, user_currency, request)
         return redirect(redirect_url)
-    except ValueError as e:
+    except Exception as e:
         order.status = 'failed'
         order.save(update_fields=['status'])
-        messages.error(request, f'Payment initialization failed: {e}')
+        logger.error(f"Order #{order.id} payment initialization failed: {e}")
+        messages.error(request, f"Payment gateway initialization failed: {e}")
         return redirect(reverse('tools:tool_detail', kwargs={'slug': tool_slug}))
 
 
