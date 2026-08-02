@@ -59,8 +59,10 @@
                     {% if user.is_authenticated and user.profile.wallet_balance > 0 %}
                     <div class="th-wallet-pay" style="margin-bottom:12px;">
                         <label class="wallet-checkbox flex items-center" style="display:flex; align-items:center; gap:8px; cursor:pointer;">
-                            <input type="checkbox" name="pay_with_wallet" value="true" style="accent-color:#5B63F6;">
-                            <span style="font-size:13px; color:#AEB5CA;">Pay with Wallet (Bal: ₦{{ user.profile.wallet_balance|floatformat:0 }})</span>
+                            <input type="checkbox" name="pay_with_wallet" value="true" style="accent-color:#FBBF24; width:16px; height:16px; cursor:pointer;">
+                            <span style="font-size:14px; color:#FBBF24; font-weight:700; display:inline-flex; align-items:center; gap:6px;">
+                                <i class="fa-solid fa-wallet" style="color:#FBBF24;"></i> Pay with Wallet (Bal: ₦{{ user.profile.wallet_balance|floatformat:2 }})
+                            </span>
                         </label>
                     </div>
                     {% endif %}

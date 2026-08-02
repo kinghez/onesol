@@ -65,6 +65,8 @@ class VendorAdmin(admin.ModelAdmin):
                 messages.error(request, f"Failed to get balance for {vendor.name}: {e}")
 
 
+from core.admin_utils import export_as_csv
+
 @admin.register(VendorProduct)
 class VendorProductAdmin(admin.ModelAdmin):
     list_display = (
@@ -77,7 +79,7 @@ class VendorProductAdmin(admin.ModelAdmin):
         'vendor', 'vendor_product_id', 'name', 'description',
         'price', 'stock', 'is_manual', 'raw_data', 'last_synced_at'
     )
-    actions = ['create_tools_from_products', 'pull_price_stock_updates']
+    actions = ['create_tools_from_products', 'pull_price_stock_updates', export_as_csv]
 
     def has_add_permission(self, request):
         return False

@@ -48,6 +48,8 @@ class CategoryAdmin(admin.ModelAdmin):
         return obj.tools.count()
 
 
+from core.admin_utils import export_as_csv
+
 # ─────────────────────────────────────────────
 #  Tool Admin
 # ─────────────────────────────────────────────
@@ -70,7 +72,7 @@ class ToolAdmin(admin.ModelAdmin):
         ToolFAQInline,
         ToolReviewInline
     ]
-    actions = ['refine_tools_with_ai']
+    actions = ['refine_tools_with_ai', export_as_csv]
 
     @admin.display(description='AI Refined', ordering='is_ai_refined')
     def ai_refinement_status(self, obj):

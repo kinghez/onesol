@@ -269,6 +269,12 @@ if not DEBUG:
     SESSION_COOKIE_SECURE = True
     CSRF_COOKIE_SECURE = True
 
+# ─────────────────────────────────────────────────────────────────────────────
+# Session Security & Inactivity Timeout (3 Hours)
+# ─────────────────────────────────────────────────────────────────────────────
+SESSION_COOKIE_AGE = 3 * 60 * 60  # 3 hours of inactivity (10,800 seconds)
+SESSION_SAVE_EVERY_REQUEST = True  # Resets the 3-hour session timer on active requests
+
 
 # ─────────────────────────────────────────────────────────────────────────────
 # Jazzmin Admin Theme

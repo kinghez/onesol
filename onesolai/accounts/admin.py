@@ -1,7 +1,9 @@
 from django.contrib import admin
 from django.contrib.auth.admin import UserAdmin as BaseUserAdmin
 from django.utils.html import format_html
-from .models import User, Profile, Referral
+from django.utils import timezone
+from .models import User, Profile, Referral, WithdrawalRequest, WalletTransaction
+from core.admin_utils import export_as_csv
 
 
 # ─────────────────────────────────────────────
@@ -24,6 +26,7 @@ class ProfileInline(admin.StackedInline):
 @admin.register(User)
 class UserAdmin(BaseUserAdmin):
     inlines = (ProfileInline,)
+    actions = [export_as_csv]
     list_display = (
         'email', 'full_name', 'username', 'is_active', 'is_staff',
         'wallet_balance', 'referral_earnings', 'referrals_count', 'date_joined'
@@ -32,7 +35,6 @@ class UserAdmin(BaseUserAdmin):
     search_fields = ('email', 'username', 'first_name', 'last_name')
     ordering = ('-date_joined',)
 
-    # Override fieldsets to show email prominently
     fieldsets = (
         (None, {'fields': ('email', 'username', 'password')}),
         ('Personal info', {'fields': ('first_name', 'last_name')}),
@@ -84,6 +86,7 @@ class ProfileAdmin(admin.ModelAdmin):
     search_fields = ('user__email', 'referral_code')
     list_filter = ('currency_preference', 'country_preference')
     readonly_fields = ('referral_code', 'referral_link_display')
+    actions = [export_as_csv]
 
     @admin.display(description='Referrals Made')
     def referrals_count(self, obj):
@@ -105,14 +108,13 @@ class ReferralAdmin(admin.ModelAdmin):
     search_fields = ('referrer__email', 'referred_user__email')
     list_editable = ('status',)
     ordering = ('-date_referred',)
-    actions = ['mark_rewarded']
+    actions = ['mark_rewarded', export_as_csv]
 
     @admin.action(description='Mark selected referrals as Rewarded')
     def mark_rewarded(self, request, queryset):
         for referral in queryset.filter(status='successful'):
             referral.status = 'rewarded'
             referral.save()
-            # Credit the referrer's earnings
             try:
                 profile = referral.referrer.profile
                 profile.earnings += referral.reward_amount_ngn
@@ -125,17 +127,13 @@ class ReferralAdmin(admin.ModelAdmin):
 # ─────────────────────────────────────────────
 #  Withdrawal Request Admin
 # ─────────────────────────────────────────────
-from .models import WithdrawalRequest
-from django.utils import timezone
-
-
 @admin.register(WithdrawalRequest)
 class WithdrawalRequestAdmin(admin.ModelAdmin):
     list_display = ('user', 'amount_ngn', 'method_badge', 'payout_details_display', 'status', 'created_at')
     list_filter = ('withdrawal_method', 'status', 'created_at')
     search_fields = ('user__email', 'account_number', 'account_name', 'bank_name', 'crypto_wallet_address')
     readonly_fields = ('created_at', 'processed_at')
-    actions = ['approve_withdrawals', 'reject_withdrawals']
+    actions = ['approve_withdrawals', 'reject_withdrawals', export_as_csv]
 
     @admin.display(description='Method')
     def method_badge(self, obj):
@@ -155,7 +153,6 @@ class WithdrawalRequestAdmin(admin.ModelAdmin):
 
     @admin.action(description='✅ Approve selected withdrawals (deduct balance)')
     def approve_withdrawals(self, request, queryset):
-        from accounts.models import Profile
         from analytics.models import ActivityLog
         updated = 0
         for wr in queryset.filter(status='pending'):
@@ -199,15 +196,27 @@ class WithdrawalRequestAdmin(admin.ModelAdmin):
 # ─────────────────────────────────────────────
 #  Wallet Transaction Admin
 # ─────────────────────────────────────────────
-from .models import WalletTransaction
-
 @admin.register(WalletTransaction)
 class WalletTransactionAdmin(admin.ModelAdmin):
-    list_display = ('user', 'type_badge', 'amount_ngn_display', 'reference', 'description', 'created_at')
-    list_filter = ('transaction_type', 'created_at')
+    list_display = ('user', 'type_badge', 'amount_ngn_display', 'status_badge', 'reference', 'description', 'created_at')
+    list_filter = ('transaction_type', 'status', 'created_at')
     search_fields = ('user__email', 'reference', 'description')
     readonly_fields = ('created_at',)
+    actions = [export_as_csv]
     ordering = ('-created_at',)
+
+    @admin.display(description='Status')
+    def status_badge(self, obj):
+        colors = {
+            'success': '#10B981',
+            'pending': '#F59E0B',
+            'failed': '#EF4444',
+        }
+        color = colors.get(obj.status, '#6B7280')
+        return format_html(
+            '<span style="background:{};color:#fff;padding:2px 8px;border-radius:4px;font-size:11px;font-weight:bold;">{}</span>',
+            color, obj.get_status_display().upper()
+        )
 
     @admin.display(description='Type')
     def type_badge(self, obj):
@@ -226,6 +235,3 @@ class WalletTransactionAdmin(admin.ModelAdmin):
     @admin.display(description='Amount (NGN)')
     def amount_ngn_display(self, obj):
         return f"NGN {obj.amount_ngn:,.2f}"
-
-
-

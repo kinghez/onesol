@@ -71,8 +71,22 @@ class ActivityLog(models.Model):
     def log(cls, action_type, title, details='', user=None, severity='info', ip_address=None):
         """
         Helper method to record an activity log entry anywhere across the application.
+        Auto-resolves user by email from title/details if user is not explicitly passed.
         """
         try:
+            if user is None and (title or details):
+                import re
+                emails = re.findall(r'[\w\.-]+@[\w\.-]+\.\w+', f"{title} {details}")
+                if emails:
+                    try:
+                        from django.contrib.auth import get_user_model
+                        User = get_user_model()
+                        target_user = User.objects.filter(email__iexact=emails[0]).first()
+                        if target_user:
+                            user = target_user
+                    except Exception:
+                        pass
+
             return cls.objects.create(
                 user=user,
                 action_type=action_type,

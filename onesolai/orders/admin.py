@@ -25,6 +25,8 @@ class PaymentTransactionInline(admin.StackedInline):
     can_delete = False
 
 
+from core.admin_utils import export_as_csv
+
 # ─────────────────────────────────────────────
 #  Order Admin
 # ─────────────────────────────────────────────
@@ -41,7 +43,7 @@ class OrderAdmin(admin.ModelAdmin):
     readonly_fields = ('created_at', 'updated_at', 'user', 'total_amount_ngn',
                        'local_amount', 'exchange_rate', 'local_currency')
     inlines = [OrderItemInline, PaymentTransactionInline]
-    actions = ['mark_delivery_sent', 'mark_delivery_failed']
+    actions = ['mark_delivery_sent', 'mark_delivery_failed', export_as_csv]
 
     fieldsets = (
         ('Order Info', {
@@ -109,6 +111,7 @@ class PaymentTransactionAdmin(admin.ModelAdmin):
     readonly_fields = ('transaction_id', 'reference', 'gateway', 'order',
                        'amount_paid', 'currency_paid', 'gateway_response',
                        'created_at', 'updated_at')
+    actions = [export_as_csv]
     ordering = ('-created_at',)
 
     @admin.display(description='Order')
@@ -128,7 +131,7 @@ class RefundRequestAdmin(admin.ModelAdmin):
     list_filter = ('status', 'created_at')
     search_fields = ('order__id', 'order__user__email', 'reason')
     readonly_fields = ('created_at', 'processed_at')
-    actions = ['approve_refunds', 'reject_refunds']
+    actions = ['approve_refunds', 'reject_refunds', export_as_csv]
 
     @admin.display(description='User')
     def user_email(self, obj):
