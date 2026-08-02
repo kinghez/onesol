@@ -106,6 +106,16 @@ class OrderAdmin(admin.ModelAdmin):
         count = queryset.update(status='failed')
         self.message_user(request, f"{count} order(s) marked as FAILED.")
 
+    @admin.action(description='🔄 Re-trigger Vendor API Purchase Fulfillment')
+    def retry_vendor_fulfillment(self, request, queryset):
+        from vendors.tasks import _fulfill_order_logic
+        count = 0
+        for order in queryset:
+            if order.status == 'paid':
+                _fulfill_order_logic(order.id)
+                count += 1
+        self.message_user(request, f"Re-triggered vendor purchase for {count} paid order(s). Check API Logs / Access Details for updates.")
+
 
 # ─────────────────────────────────────────────
 #  PaymentTransaction Admin
@@ -180,10 +190,11 @@ from .models import OrderAPIRequest
 
 @admin.register(OrderAPIRequest)
 class OrderAPIRequestAdmin(admin.ModelAdmin):
-    list_display = ('order_link', 'vendor', 'vendor_product', 'status_badge', 'vendor_order_id', 'created_at')
+    list_display = ('order_link', 'vendor', 'vendor_product', 'status_badge', 'vendor_order_id', 'error_message', 'created_at')
     list_filter = ('vendor', 'status', 'created_at')
     search_fields = ('order__id', 'vendor__name', 'vendor_order_id', 'error_message')
     readonly_fields = ('order', 'vendor', 'vendor_product', 'status', 'vendor_order_id', 'request_data', 'response_data', 'error_message', 'created_at')
+    actions = ['retry_vendor_fulfillment_from_log', export_as_csv]
     ordering = ('-created_at',)
 
     @admin.display(description='Order')

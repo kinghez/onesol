@@ -170,8 +170,9 @@ def admin_analytics_dashboard(request):
 @staff_member_required
 def vendor_wallets_view(request):
     """
-    Dedicated view for vendor wallets monitoring.
+    Dedicated view for vendor wallets monitoring and API feedback logs.
     """
+    from orders.models import OrderAPIRequest
     active_vendors = Vendor.objects.filter(is_active=True)
     vendor_data = []
     for v in active_vendors:
@@ -187,11 +188,15 @@ def vendor_wallets_view(request):
             'vendor_product_count': vendor_product_count,
         })
         
-    # Failed Transactions
+    # Vendor API Requests Feedback Logs
+    api_logs = OrderAPIRequest.objects.all().select_related('order__user', 'vendor', 'vendor_product').order_by('-created_at')[:50]
+    failed_api_requests = OrderAPIRequest.objects.filter(status='failed').select_related('order__user', 'vendor', 'vendor_product').order_by('-created_at')[:50]
     failed_orders = Order.objects.filter(status='failed').select_related('user').order_by('-created_at')[:50]
         
     return render(request, 'analytics/vendor_wallets.html', {
         'vendor_data': vendor_data,
+        'api_logs': api_logs,
+        'failed_api_requests': failed_api_requests,
         'failed_orders': failed_orders
     })
 

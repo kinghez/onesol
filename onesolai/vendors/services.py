@@ -70,19 +70,31 @@ class AkundingService(BaseVendorService):
         return parsed_products
 
     def purchase(self, vendor_product_id: str, quantity: int, buyer_info: str = "") -> dict:
+        import uuid
         url = f"{self._get_base_url()}/v1/orders"
         payload = {
             "product_id": int(vendor_product_id),
             "quantity": quantity
         }
+        headers = self._headers()
+        headers["X-Idempotency-Key"] = str(uuid.uuid4())
         try:
-            response = requests.post(url, json=payload, headers=self._headers())
+            response = requests.post(url, json=payload, headers=headers)
             response.raise_for_status()
             data = response.json()
-            # Depending on actual API response, this may need adjustment:
-            codes = data.get('codes', [])
-            if not codes and 'items' in data: # sometimes orders return items
-                codes = [item.get('code') for item in data.get('items', []) if item.get('code')]
+            
+            raw_items = data.get('items', [])
+            codes = []
+            if isinstance(raw_items, list):
+                for item in raw_items:
+                    if isinstance(item, str):
+                        codes.append(item)
+                    elif isinstance(item, dict):
+                        c = item.get('code') or item.get('url') or item.get('link')
+                        if c:
+                            codes.append(c)
+            if not codes and data.get('codes'):
+                codes = data.get('codes')
                 
             return {
                 'status': 'completed' if codes else 'pending_manual',

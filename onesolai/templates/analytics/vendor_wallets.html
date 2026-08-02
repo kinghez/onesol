@@ -43,6 +43,62 @@
     {% endfor %}
 </div>
 
+<div class="admin-card full-width-mobile" style="margin-bottom: 24px;">
+    <div class="admin-card-header">
+        <i class="fa-solid fa-satellite-dish" style="color: var(--admin-accent-cyan);"></i> Vendor API Purchase Feedback Logs
+    </div>
+    <div class="admin-card-subtext" style="margin-bottom: 16px;">Real-time API feedback responses, vendor order IDs, and error tracebacks from vendor endpoints.</div>
+    
+    <div class="table-responsive-wrapper" style="max-height: 400px; overflow-y: auto;">
+        <table class="admin-table">
+            <thead>
+                <tr>
+                    <th>Date</th>
+                    <th>Order</th>
+                    <th>User</th>
+                    <th>Vendor</th>
+                    <th>Product</th>
+                    <th>API Status</th>
+                    <th>Vendor Response / Error</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for log in api_logs %}
+                <tr>
+                    <td>{{ log.created_at|date:"M d, H:i" }}</td>
+                    <td><a href="/admin/orders/order/{{ log.order.id }}/change/" style="color:#FBBF24; text-decoration:none; font-weight:bold;">#{{ log.order.order_number }}</a></td>
+                    <td>{{ log.order.user.email }}</td>
+                    <td><span style="font-weight:600; color:#fff;">{{ log.vendor.name }}</span></td>
+                    <td><span style="background: rgba(255,255,255,0.05); padding: 2px 6px; border-radius: 4px; font-size: 11px;">{{ log.vendor_product.name }}</span></td>
+                    <td>
+                        {% if log.status == 'completed' or log.status == 'success' %}
+                            <span style="background:#10B981; color:#fff; padding:2px 8px; border-radius:4px; font-size:11px; font-weight:bold;">COMPLETED</span>
+                        {% elif log.status == 'pending_manual' %}
+                            <span style="background:#F59E0B; color:#fff; padding:2px 8px; border-radius:4px; font-size:11px; font-weight:bold;">MANUAL</span>
+                        {% else %}
+                            <span style="background:#EF4444; color:#fff; padding:2px 8px; border-radius:4px; font-size:11px; font-weight:bold;">FAILED</span>
+                        {% endif %}
+                    </td>
+                    <td style="font-size: 11px; max-width: 320px; word-break: break-all; white-space: normal;">
+                        {% if log.error_message %}
+                            <span style="color:#EF4444;">{{ log.error_message }}</span>
+                        {% elif log.response_data %}
+                            <span style="color:#A7F3D0;">{{ log.response_data }}</span>
+                        {% else %}
+                            <span style="color:#9CA3AF;">N/A</span>
+                        {% endif %}
+                    </td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="7" class="admin-text-muted">No API request logs recorded yet.</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+
 <div class="admin-card full-width-mobile">
     <div class="admin-card-header">
         <i class="fa-solid fa-triangle-exclamation" style="color: #FF3B30;"></i> Failed User Transactions

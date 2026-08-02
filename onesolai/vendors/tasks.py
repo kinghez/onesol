@@ -131,11 +131,7 @@ def _fulfill_order_logic(order_id):
 
 def fulfill_order_via_vendors(order_id):
     """
-    Public function to fulfill vendor order without Celery.
-    Spawns a background thread so HTTP response is not delayed.
+    Public function to fulfill vendor order synchronously so that vendor API responses,
+    credentials, and errors are immediately captured and saved to the order before response.
     """
-    threading.Thread(
-        target=_fulfill_order_logic,
-        args=(order_id,),
-        daemon=True
-    ).start()
+    _fulfill_order_logic(order_id)
