@@ -203,52 +203,56 @@ def checkout_view(request):
     if pay_with_wallet:
         profile = request.user.profile
         if profile.wallet_balance >= price_ngn:
-            profile.wallet_balance -= price_ngn
-            profile.save(update_fields=['wallet_balance'])
-            
-            order.status = 'paid'
-            order.save(update_fields=['status'])
-            
-            from accounts.models import WalletTransaction
-            WalletTransaction.objects.create(
-                user=request.user,
-                transaction_type='purchase',
-                amount_ngn=price_ngn,
-                reference=f"ORDER_{order.id}",
-                description=f"Purchased {tool.name}"
-            )
-            
-            PaymentTransaction.objects.create(
-                order=order,
-                gateway='wallet',
-                transaction_id=f"WALLET_{order.id}",
-                reference=f"WALLET_{order.id}",
-                status='success',
-                amount_paid=price_ngn,
-                currency_paid='NGN',
-            )
+            from django.db import transaction
+            with transaction.atomic():
+                profile.wallet_balance -= price_ngn
+                profile.save(update_fields=['wallet_balance'])
+                
+                order.status = 'paid'
+                order.save(update_fields=['status'])
+                
+                from accounts.models import WalletTransaction
+                WalletTransaction.objects.create(
+                    user=request.user,
+                    transaction_type='purchase',
+                    amount_ngn=price_ngn,
+                    reference=f"ORDER_{order.id}",
+                    status='success',
+                    description=f"Purchased {tool.name}"
+                )
+                
+                PaymentTransaction.objects.create(
+                    order=order,
+                    gateway='wallet',
+                    transaction_id=f"WALLET_{order.id}",
+                    reference=f"WALLET_{order.id}",
+                    status='success',
+                    amount_paid=price_ngn,
+                    currency_paid='NGN',
+                )
 
-            from analytics.models import ActivityLog
-            ActivityLog.log(
-                action_type='wallet_purchase',
-                title=f"Purchased {tool.name} via Wallet",
-                details=f"Order #{order.id} | Amount: NGN {price_ngn:,.2f}",
-                user=request.user,
-                severity='success'
-            )
-            
+                from analytics.models import ActivityLog
+                ActivityLog.log(
+                    action_type='wallet_purchase',
+                    title=f"Purchased {tool.name} via Wallet",
+                    details=f"Order #{order.id} | Amount: NGN {price_ngn:,.2f}",
+                    user=request.user,
+                    severity='success'
+                )
+                
             trigger_delivery(order)
             credit_referral_commission(order)
             try:
                 from vendors.tasks import fulfill_order_via_vendors
                 fulfill_order_via_vendors(order.id)
-            except Exception:
-                pass
+            except Exception as e:
+                logger.error(f"Vendor fulfillment error for Order #{order.id}: {e}")
             
-            messages.success(request, f"Payment successful! You purchased {tool.name} using your wallet.")
+            messages.success(request, f"Payment successful! You purchased {tool.name} using your wallet balance.")
             return redirect(reverse('orders:confirmation', args=[order.id]))
         else:
-            messages.error(request, "Insufficient wallet balance. Redirecting to payment gateway.")
+            messages.error(request, "Insufficient wallet balance for this purchase. Please top up your wallet.")
+            return redirect(reverse('tools:tool_detail', kwargs={'slug': tool_slug}))
 
     # Initiate payment with primary / fallback gateway
     try:

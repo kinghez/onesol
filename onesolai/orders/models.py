@@ -13,6 +13,8 @@ ORDER_STATUS_CHOICES = [
 PAYMENT_GATEWAY_CHOICES = [
     ('paystack', 'Paystack'),
     ('flutterwave', 'Flutterwave'),
+    ('wallet', 'Wallet Balance'),
+    ('crypto', 'Crypto USDT'),
     ('manual', 'Manual'),
 ]
 
