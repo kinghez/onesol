@@ -145,6 +145,7 @@ class WalletTransaction(models.Model):
         ('purchase', 'Tool Purchase'),
         ('withdrawal', 'Withdrawal'),
         ('referral_credit', 'Referral Commission'),
+        ('refund', 'Wallet Refund'),
     ]
 
     STATUS_CHOICES = [

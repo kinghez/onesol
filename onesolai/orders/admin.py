@@ -116,6 +116,51 @@ class OrderAdmin(admin.ModelAdmin):
                 count += 1
         self.message_user(request, f"Re-triggered vendor purchase for {count} paid order(s). Check API Logs / Access Details for updates.")
 
+    @admin.action(description='↩️ Refund Selected Orders to User Wallet')
+    def refund_orders_to_wallet(self, request, queryset):
+        from accounts.models import WalletTransaction
+        from notifications.models import Notification
+        from analytics.models import ActivityLog
+        refunded_count = 0
+        for order in queryset:
+            if order.status in ['paid', 'pending', 'failed']:
+                user = order.user
+                amount = order.total_amount_ngn
+                profile = user.profile
+                profile.wallet_balance += amount
+                profile.save(update_fields=['wallet_balance'])
+
+                order.status = 'refunded'
+                order.save(update_fields=['status'])
+
+                WalletTransaction.objects.create(
+                    user=user,
+                    transaction_type='refund',
+                    amount_ngn=amount,
+                    status='success',
+                    reference=f"REFUND_{order.order_number}",
+                    description=f"Wallet Refund for Order #{order.order_number}"
+                )
+
+                ActivityLog.log(
+                    action_type='order_refunded',
+                    title=f"Order #{order.order_number} Refunded to Wallet",
+                    details=f"Amount: NGN {amount:,.2f} | User: {user.email} | Admin: {request.user.email}",
+                    user=user,
+                    performed_by=request.user,
+                    severity='info'
+                )
+
+                Notification.objects.create(
+                    user=user,
+                    title="↩️ Order Refunded to Wallet",
+                    message=f"Order #{order.order_number} has been refunded. NGN {amount:,.2f} has been added back to your wallet.",
+                    notification_type='order',
+                    action_url="/dashboard/wallet/"
+                )
+                refunded_count += 1
+        self.message_user(request, f"{refunded_count} order(s) refunded to user wallet balance.")
+
 
 # ─────────────────────────────────────────────
 #  PaymentTransaction Admin
@@ -157,9 +202,12 @@ class RefundRequestAdmin(admin.ModelAdmin):
     def user_email(self, obj):
         return obj.order.user.email
 
-    @admin.action(description='✅ Approve selected refunds')
+    @admin.action(description='✅ Approve selected refunds & credit user wallet')
     def approve_refunds(self, request, queryset):
         from django.utils import timezone
+        from accounts.models import WalletTransaction
+        from notifications.models import Notification
+        from analytics.models import ActivityLog
         updated = 0
         for rr in queryset.filter(status='pending'):
             rr.status = 'approved'

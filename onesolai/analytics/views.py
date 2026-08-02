@@ -394,3 +394,191 @@ def activity_logs_view(request):
 
     return render(request, 'analytics/activity_logs.html', context)
 
+
+@staff_member_required
+def fund_user_wallet_api(request):
+    """
+    AJAX / Form endpoint for Admin to manually fund a user's wallet (Cash, POS, Bank Transfer).
+    """
+    if request.method == 'POST':
+        import json
+        import uuid
+        from decimal import Decimal
+        from django.contrib.auth import get_user_model
+        from accounts.models import WalletTransaction
+        from notifications.models import Notification
+        from .models import ActivityLog
+
+        User = get_user_model()
+        data = request.POST if request.POST else (json.loads(request.body) if request.body else {})
+
+        email = data.get('user_email', '').strip()
+        amount_raw = data.get('amount_ngn', 0)
+        source = data.get('payment_source', 'POS / Cash Transfer').strip()
+        notes = data.get('notes', '').strip()
+
+        if not email:
+            return JsonResponse({'success': False, 'error': 'User email is required.'}, status=400)
+
+        user = User.objects.filter(email__iexact=email).first()
+        if not user:
+            return JsonResponse({'success': False, 'error': f'No user account found with email "{email}".'}, status=404)
+
+        try:
+            amount = Decimal(str(amount_raw))
+            if amount <= 0:
+                return JsonResponse({'success': False, 'error': 'Funding amount must be greater than zero.'}, status=400)
+        except Exception:
+            return JsonResponse({'success': False, 'error': 'Invalid funding amount format.'}, status=400)
+
+        profile = user.profile
+        profile.wallet_balance += amount
+        profile.save(update_fields=['wallet_balance'])
+
+        ref = f"ADMIN_DEPOSIT_{uuid.uuid4().hex[:8].upper()}"
+        desc = f"Manual Deposit ({source})"
+        if notes:
+            desc += f": {notes}"
+
+        WalletTransaction.objects.create(
+            user=user,
+            transaction_type='deposit',
+            amount_ngn=amount,
+            status='success',
+            reference=ref,
+            description=desc
+        )
+
+        ActivityLog.log(
+            action_type='wallet_funding',
+            title=f"Admin Funded Wallet for {user.email}",
+            details=f"Amount: NGN {amount:,.2f} | Source: {source} | Admin: {request.user.email}",
+            user=user,
+            performed_by=request.user,
+            severity='success'
+        )
+
+        Notification.objects.create(
+            user=user,
+            title="💰 Wallet Balance Credited",
+            message=f"Your wallet balance has been credited with NGN {amount:,.2f} via {source}.",
+            notification_type='payment',
+            action_url="/dashboard/wallet/"
+        )
+
+        return JsonResponse({
+            'success': True,
+            'message': f"Successfully funded NGN {amount:,.2f} to {user.email}'s wallet. New balance: NGN {profile.wallet_balance:,.2f}",
+            'new_balance': float(profile.wallet_balance)
+        })
+
+    return JsonResponse({'success': False, 'error': 'Invalid request method.'}, status=405)
+
+
+@staff_member_required
+def refund_user_wallet_api(request):
+    """
+    AJAX / Form endpoint for Admin to issue a wallet refund to a user (e.g. for failed orders).
+    """
+    if request.method == 'POST':
+        import json
+        import uuid
+        from decimal import Decimal
+        from django.contrib.auth import get_user_model
+        from orders.models import Order, RefundRequest
+        from accounts.models import WalletTransaction
+        from notifications.models import Notification
+        from .models import ActivityLog
+
+        User = get_user_model()
+        data = request.POST if request.POST else (json.loads(request.body) if request.body else {})
+
+        email = data.get('user_email', '').strip()
+        order_id = data.get('order_id', '').strip()
+        amount_raw = data.get('amount_ngn', 0)
+        reason = data.get('reason', 'Order refund requested by admin').strip()
+
+        order = None
+        user = None
+
+        if order_id:
+            order = Order.objects.filter(id=order_id).first()
+            if not order and str(order_id).startswith('OS-'):
+                try:
+                    num = int(str(order_id).replace('OS-', ''))
+                    order = Order.objects.filter(id=num).first()
+                except ValueError:
+                    pass
+            if order:
+                user = order.user
+                if not amount_raw or float(amount_raw) == 0:
+                    amount_raw = order.total_amount_ngn
+
+        if not user and email:
+            user = User.objects.filter(email__iexact=email).first()
+
+        if not user:
+            return JsonResponse({'success': False, 'error': 'Target user or order not found.'}, status=404)
+
+        try:
+            amount = Decimal(str(amount_raw))
+            if amount <= 0:
+                return JsonResponse({'success': False, 'error': 'Refund amount must be greater than zero.'}, status=400)
+        except Exception:
+            return JsonResponse({'success': False, 'error': 'Invalid refund amount format.'}, status=400)
+
+        profile = user.profile
+        profile.wallet_balance += amount
+        profile.save(update_fields=['wallet_balance'])
+
+        if order:
+            order.status = 'refunded'
+            order.save(update_fields=['status'])
+            rr = RefundRequest.objects.filter(order=order, status='pending').first()
+            if rr:
+                from django.utils import timezone
+                rr.status = 'approved'
+                rr.processed_at = timezone.now()
+                rr.save()
+
+        ref = f"REFUND_{order.order_number if order else uuid.uuid4().hex[:8].upper()}"
+        desc = f"Wallet Refund"
+        if order:
+            desc += f" for Order #{order.order_number}"
+        if reason:
+            desc += f": {reason}"
+
+        WalletTransaction.objects.create(
+            user=user,
+            transaction_type='refund',
+            amount_ngn=amount,
+            status='success',
+            reference=ref,
+            description=desc
+        )
+
+        ActivityLog.log(
+            action_type='order_refunded',
+            title=f"Wallet Refund Issued for {user.email}",
+            details=f"Amount: NGN {amount:,.2f} | Reason: {reason} | Order: #{order.order_number if order else 'N/A'} | Admin: {request.user.email}",
+            user=user,
+            performed_by=request.user,
+            severity='info'
+        )
+
+        Notification.objects.create(
+            user=user,
+            title="↩️ Wallet Refund Credited",
+            message=f"A refund of NGN {amount:,.2f} has been credited back to your wallet balance.",
+            notification_type='order',
+            action_url="/dashboard/wallet/"
+        )
+
+        return JsonResponse({
+            'success': True,
+            'message': f"Successfully refunded NGN {amount:,.2f} to {user.email}'s wallet. New balance: NGN {profile.wallet_balance:,.2f}",
+            'new_balance': float(profile.wallet_balance)
+        })
+
+    return JsonResponse({'success': False, 'error': 'Invalid request method.'}, status=405)
+

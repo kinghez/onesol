@@ -10,5 +10,7 @@ urlpatterns = [
     path('activity-logs/', views.activity_logs_view, name='activity_logs'),
     path('reload-balances/', views.reload_vendor_balances, name='reload_balances'),
     path('pull-vendor-products/', views.pull_vendor_products, name='pull_vendor_products'),
+    path('fund-user-wallet/', views.fund_user_wallet_api, name='fund_user_wallet'),
+    path('refund-user-wallet/', views.refund_user_wallet_api, name='refund_user_wallet'),
 ]
 
