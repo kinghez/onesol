@@ -51,6 +51,7 @@ def wallet_topup_initialize(request):
                 transaction_type='deposit',
                 amount_ngn=amount,
                 reference=reference,
+                status='pending',
                 description="Wallet Top-up via Crypto USDT (Pending TxID Submission)"
             )
             return redirect('dashboard:wallet_crypto_topup', reference=reference)

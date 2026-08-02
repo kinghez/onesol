@@ -202,8 +202,82 @@ class WalletTransactionAdmin(admin.ModelAdmin):
     list_filter = ('transaction_type', 'status', 'created_at')
     search_fields = ('user__email', 'reference', 'description')
     readonly_fields = ('created_at',)
-    actions = [export_as_csv]
+    actions = [export_as_csv, 'approve_crypto_topup', 'reject_crypto_topup']
     ordering = ('-created_at',)
+
+    @admin.action(description='✅ Approve Selected Crypto Top-ups')
+    def approve_crypto_topup(self, request, queryset):
+        approved_count = 0
+        for tx in queryset.filter(status='pending'):
+            profile = tx.user.profile
+            profile.wallet_balance += tx.amount_ngn
+            profile.save(update_fields=['wallet_balance'])
+
+            tx.status = 'success'
+            tx.save(update_fields=['status'])
+
+            try:
+                from notifications.models import Notification
+                Notification.objects.create(
+                    user=tx.user,
+                    title="Crypto Top-up Approved",
+                    message=f"Your crypto deposit of NGN {tx.amount_ngn:,.2f} has been verified and added to your wallet.",
+                    notification_type='system',
+                    action_url='/dashboard/wallet/'
+                )
+            except Exception:
+                pass
+
+            try:
+                from analytics.models import ActivityLog
+                ActivityLog.log(
+                    action_type='wallet_topup',
+                    title=f"Crypto Top-up Approved ({tx.reference})",
+                    details=f"Admin {request.user.email} approved crypto top-up of NGN {tx.amount_ngn} for {tx.user.email}",
+                    user=tx.user,
+                    performed_by=request.user,
+                    severity='success'
+                )
+            except Exception:
+                pass
+
+            approved_count += 1
+        self.message_user(request, f"Successfully approved {approved_count} crypto top-up transaction(s) and credited user wallet(s).")
+
+    @admin.action(description='❌ Reject Selected Crypto Top-ups')
+    def reject_crypto_topup(self, request, queryset):
+        rejected_count = 0
+        for tx in queryset.filter(status='pending'):
+            tx.status = 'failed'
+            tx.save(update_fields=['status'])
+
+            try:
+                from notifications.models import Notification
+                Notification.objects.create(
+                    user=tx.user,
+                    title="Crypto Top-up Rejected",
+                    message=f"Your crypto deposit of NGN {tx.amount_ngn:,.2f} (Ref: {tx.reference}) could not be verified.",
+                    notification_type='system',
+                    action_url='/dashboard/wallet/'
+                )
+            except Exception:
+                pass
+
+            try:
+                from analytics.models import ActivityLog
+                ActivityLog.log(
+                    action_type='payment_failed',
+                    title=f"Crypto Top-up Rejected ({tx.reference})",
+                    details=f"Admin {request.user.email} rejected crypto top-up of NGN {tx.amount_ngn} for {tx.user.email}",
+                    user=tx.user,
+                    performed_by=request.user,
+                    severity='warning'
+                )
+            except Exception:
+                pass
+
+            rejected_count += 1
+        self.message_user(request, f"Rejected {rejected_count} crypto top-up transaction(s).")
 
     @admin.display(description='Status')
     def status_badge(self, obj):

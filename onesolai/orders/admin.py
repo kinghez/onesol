@@ -43,7 +43,7 @@ class OrderAdmin(admin.ModelAdmin):
     readonly_fields = ('created_at', 'updated_at', 'user', 'total_amount_ngn',
                        'local_amount', 'exchange_rate', 'local_currency')
     inlines = [OrderItemInline, PaymentTransactionInline]
-    actions = ['mark_delivery_sent', 'mark_delivery_failed', export_as_csv]
+    actions = ['mark_delivery_sent', 'mark_delivery_failed', 'mark_as_paid', 'mark_as_failed', export_as_csv]
 
     fieldsets = (
         ('Order Info', {
@@ -95,6 +95,16 @@ class OrderAdmin(admin.ModelAdmin):
     def mark_delivery_failed(self, request, queryset):
         queryset.update(delivery_status='failed')
         self.message_user(request, f"{queryset.count()} orders marked delivery failed.")
+
+    @admin.action(description='✅ Mark selected orders as PAID')
+    def mark_as_paid(self, request, queryset):
+        count = queryset.update(status='paid')
+        self.message_user(request, f"{count} order(s) marked as PAID.")
+
+    @admin.action(description='❌ Mark selected orders as FAILED (Abandoned)')
+    def mark_as_failed(self, request, queryset):
+        count = queryset.update(status='failed')
+        self.message_user(request, f"{count} order(s) marked as FAILED.")
 
 
 # ─────────────────────────────────────────────
