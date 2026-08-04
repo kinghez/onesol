@@ -171,6 +171,15 @@ class SiteSettingsAdmin(admin.ModelAdmin):
             'fields': ('site_name', 'site_url', 'support_email', 'site_logo', 'site_favicon', 'about_us_image', 'contact_hero_image'),
             'description': 'Configure site branding, logos, and custom hero images for the About Us and Contact Us pages.',
         }),
+        ('💬 Live Chat Widget', {
+            'fields': ('livechat_enabled', 'livechat_show_on_dashboard', 'livechat_script'),
+            'description': (
+                '🟢 Toggle the widget on/off with "Enable Live Chat Widget". '
+                '📋 Paste your full &lt;script&gt; tag in the "Live Chat Widget Script" field. '
+                '🗑️ Clear the script field entirely to permanently remove the widget. '
+                '📱 Use "Show on Dashboard Pages" to control whether the widget appears inside the user dashboard too.'
+            ),
+        }),
     ]
 
     def has_add_permission(self, request):

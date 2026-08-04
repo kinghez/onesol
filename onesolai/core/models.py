@@ -347,6 +347,37 @@ class SiteSettings(models.Model):
     whatsapp_number = models.CharField(max_length=50, blank=True, default='+2349110585508',
         help_text='WhatsApp support phone number e.g. +2349110585508')
 
+    # ── Live Chat Widget ─────────────────────────────────────────────────
+    livechat_enabled = models.BooleanField(
+        default=True,
+        verbose_name="Enable Live Chat Widget",
+        help_text="Toggle to show or hide the live chat widget across the entire site."
+    )
+    livechat_show_on_dashboard = models.BooleanField(
+        default=True,
+        verbose_name="Show on Dashboard Pages",
+        help_text="If unchecked, the widget will only appear on public pages (not inside the user dashboard)."
+    )
+    livechat_script = models.TextField(
+        blank=True,
+        verbose_name="Live Chat Widget Script",
+        default='''<script
+  src="https://hglobal.store/widget.js"
+  data-widget-id="1"
+  data-agent-id="5"
+  data-title="Onesolai"
+  data-bg-color="%235e0303"
+  data-position="left"
+  data-show-support="true"
+  data-support-email="support@tripowercircle.com.ng"
+></script>''',
+        help_text=(
+            "Paste the full live chat widget &lt;script&gt; tag here. "
+            "Clear this field entirely to remove the widget. "
+            "Use the 'Enable Live Chat Widget' toggle above to temporarily hide/show it without deleting the script."
+        )
+    )
+
     class Meta:
         verbose_name = 'Site Settings'
         verbose_name_plural = 'Site Settings'

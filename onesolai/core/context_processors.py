@@ -23,9 +23,21 @@ def unread_notifications(request):
         'admin_active_tools': [],
     }
 
+
 def site_settings(request):
     from core.models import SiteSettings
-    return {'site_settings': SiteSettings.get()}
+    try:
+        settings_obj = SiteSettings.get()
+    except Exception:
+        settings_obj = None
+
+    return {
+        'site_settings': settings_obj,
+        # Live Chat Widget convenience vars — used directly in base templates
+        'livechat_enabled': getattr(settings_obj, 'livechat_enabled', False),
+        'livechat_show_on_dashboard': getattr(settings_obj, 'livechat_show_on_dashboard', False),
+        'livechat_script': getattr(settings_obj, 'livechat_script', ''),
+    }
 
 
 def currency_settings(request):
@@ -82,10 +94,10 @@ def currency_settings(request):
         # Check for location mismatch: detected IP country vs profile country preference
         location_switch_dismissed = request.session.get('location_switch_dismissed', False)
         if (
-            detected_country 
-            and profile_country 
+            detected_country
+            and profile_country
             and profile_country != '-'
-            and detected_country.lower() != profile_country.lower() 
+            and detected_country.lower() != profile_country.lower()
             and not location_switch_dismissed
         ):
             show_location_switch_modal = True
@@ -111,4 +123,3 @@ def currency_settings(request):
         'profile_country': profile_country,
         'profile_currency': profile_currency,
     }
-

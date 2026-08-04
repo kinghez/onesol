@@ -658,17 +658,10 @@
 
     {% block extra_js %}{% endblock %}
 
-    <!-- Live Chat Widget -->
-    <script
-      src="https://hglobal.store/widget.js"
-      data-widget-id="1"
-      data-agent-id="5"
-      data-title="Onesolai"
-      data-bg-color="%235e0303"
-      data-position="left"
-      data-show-support="true"
-      data-support-email="support@tripowercircle.com.ng"
-    ></script>
+    <!-- Live Chat Widget (controlled from Admin → Site Settings → Live Chat Widget) -->
+    {% if livechat_enabled and livechat_script %}
+      {{ livechat_script|safe }}
+    {% endif %}
 </body>
 
 </html>
