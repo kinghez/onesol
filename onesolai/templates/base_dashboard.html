@@ -120,6 +120,11 @@
                         <span class="sidebar-text">Security</span>
                     </a>
 
+                    <a href="{% url 'dashboard:developer_keys' %}" class="sidebar-item {% block nav_developer %}{% endblock %}">
+                        <i class="fa-solid fa-code fa-fw"></i>
+                        <span class="sidebar-text">Developer API</span>
+                    </a>
+
                     <a href="{% url 'dashboard:support' %}" class="sidebar-item {% block nav_support %}{% endblock %}">
                         <i class="fa-regular fa-circle-question fa-fw"></i>
                         <span class="sidebar-text">Support</span>

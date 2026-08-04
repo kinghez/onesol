@@ -69,6 +69,50 @@ def trigger_delivery(order):
 
     order.save(update_fields=['delivery_status'])
 
+    # Dispatch Developer Webhook if user configured one
+    dispatch_developer_webhook(order)
+
+
+def dispatch_developer_webhook(order):
+    """
+    Sends an HTTP POST webhook to user's registered developer webhook URL when order is fulfilled.
+    """
+    try:
+        import hmac, hashlib, json, time, requests
+        from accounts.models import DeveloperWebhook
+        dev_webhook = DeveloperWebhook.objects.filter(user=order.user, is_active=True).first()
+        if not dev_webhook or not dev_webhook.webhook_url:
+            return
+
+        items = order.items.select_related('tool').all()
+        tool_name = items.first().tool.name if (items.exists() and items.first().tool) else 'Tool'
+
+        payload = {
+            'event': 'order.fulfilled',
+            'order_id': order.id,
+            'order_number': order.order_number,
+            'tool_name': tool_name,
+            'delivery_email': order.delivery_email,
+            'access_details': order.access_details or '',
+            'total_amount_ngn': float(order.total_amount_ngn),
+            'fulfilled_at': order.updated_at.isoformat() if hasattr(order, 'updated_at') else order.created_at.isoformat()
+        }
+
+        payload_bytes = json.dumps(payload, separators=(',', ':')).encode('utf-8')
+        timestamp = str(int(time.time()))
+        signature_payload = f"t={timestamp}.".encode('utf-8') + payload_bytes
+        signature = hmac.new(dev_webhook.secret.encode('utf-8'), signature_payload, hashlib.sha256).hexdigest()
+
+        headers = {
+            'Content-Type': 'application/json',
+            'X-OneSol-Signature': f"t={timestamp},v1={signature}"
+        }
+
+        requests.post(dev_webhook.webhook_url, data=payload_bytes, headers=headers, timeout=5)
+    except Exception as e:
+        print(f"Webhook dispatch error for Order #{order.id}: {e}")
+
+
 
 def credit_referral_commission(order):
     """

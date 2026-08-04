@@ -2,7 +2,7 @@ from django.contrib import admin
 from django.contrib.auth.admin import UserAdmin as BaseUserAdmin
 from django.utils.html import format_html
 from django.utils import timezone
-from .models import User, Profile, Referral, WithdrawalRequest, WalletTransaction
+from .models import User, Profile, Referral, WithdrawalRequest, WalletTransaction, APIKey, DeveloperWebhook
 from core.admin_utils import export_as_csv
 
 
@@ -309,3 +309,18 @@ class WalletTransactionAdmin(admin.ModelAdmin):
     @admin.display(description='Amount (NGN)')
     def amount_ngn_display(self, obj):
         return f"NGN {obj.amount_ngn:,.2f}"
+
+
+@admin.register(APIKey)
+class APIKeyAdmin(admin.ModelAdmin):
+    list_display = ('user', 'name', 'public_key', 'is_active', 'created_at', 'last_used_at')
+    search_fields = ('user__email', 'name', 'public_key', 'secret_key')
+    list_filter = ('is_active', 'created_at')
+
+
+@admin.register(DeveloperWebhook)
+class DeveloperWebhookAdmin(admin.ModelAdmin):
+    list_display = ('user', 'webhook_url', 'is_active', 'created_at')
+    search_fields = ('user__email', 'webhook_url')
+    list_filter = ('is_active', 'created_at')
+

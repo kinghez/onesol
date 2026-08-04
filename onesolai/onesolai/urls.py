@@ -35,6 +35,9 @@ urlpatterns = [
 
     # AI Agent Integration API
     path('api/agent/', include('core.agent_urls')),
+
+    # Public Developer API (v1)
+    path('api/v1/', include('core.api_v1_urls')),
 ]
 
 from django.conf import settings

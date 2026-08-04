@@ -146,3 +146,79 @@ def contact_us(request):
             messages.error(request, "Please fill in all required fields.")
 
     return render(request, 'pages/contact.html')
+
+
+def api_docs_view(request):
+    """Render public Developer API documentation page."""
+    return render(request, 'core/api_docs.html')
+
+
+from django.contrib.auth.decorators import login_required
+from django.contrib import messages
+from accounts.models import APIKey, DeveloperWebhook
+
+@login_required
+def developer_keys_view(request):
+    """Render Developer API Key & Webhook management in user dashboard."""
+    user = request.user
+    if request.method == 'POST':
+        action = request.POST.get('action')
+
+        if action == 'generate_key':
+            name = request.POST.get('key_name', 'Default Key').strip() or 'Default Key'
+            APIKey.generate_key_pair(user=user, name=name)
+            messages.success(request, f"New API Key pair '{name}' generated successfully!")
+
+        elif action == 'revoke_key':
+            key_id = request.POST.get('key_id')
+            APIKey.objects.filter(id=key_id, user=user).delete()
+            messages.success(request, "API Key revoked successfully.")
+
+        elif action == 'save_webhook':
+            url = request.POST.get('webhook_url', '').strip()
+            if url:
+                webhook_obj, created = DeveloperWebhook.objects.get_or_create(user=user)
+                webhook_obj.webhook_url = url
+                webhook_obj.is_active = True
+                webhook_obj.save()
+                messages.success(request, "Developer Webhook URL saved successfully!")
+            else:
+                DeveloperWebhook.objects.filter(user=user).delete()
+                messages.info(request, "Webhook URL cleared.")
+
+        elif action == 'test_webhook':
+            dev_webhook = DeveloperWebhook.objects.filter(user=user, is_active=True).first()
+            if dev_webhook and dev_webhook.webhook_url:
+                try:
+                    import hmac, hashlib, json, time, requests
+                    payload = {
+                        'event': 'test.ping',
+                        'message': 'Webhook test ping from OneSol AI Hub Developer Portal',
+                        'timestamp': int(time.time())
+                    }
+                    payload_bytes = json.dumps(payload).encode('utf-8')
+                    timestamp = str(int(time.time()))
+                    signature_payload = f"t={timestamp}.".encode('utf-8') + payload_bytes
+                    signature = hmac.new(dev_webhook.secret.encode('utf-8'), signature_payload, hashlib.sha256).hexdigest()
+
+                    headers = {
+                        'Content-Type': 'application/json',
+                        'X-OneSol-Signature': f"t={timestamp},v1={signature}"
+                    }
+                    res = requests.post(dev_webhook.webhook_url, data=payload_bytes, headers=headers, timeout=5)
+                    messages.success(request, f"Test ping sent! Endpoint returned HTTP {res.status_code}.")
+                except Exception as ex:
+                    messages.error(request, f"Webhook test ping failed: {ex}")
+
+        from django.shortcuts import redirect
+        return redirect('dashboard:developer_keys')
+
+    api_keys = APIKey.objects.filter(user=user, is_active=True).order_by('-created_at')
+    webhook = DeveloperWebhook.objects.filter(user=user).first()
+
+    return render(request, 'core/developer_keys.html', {
+        'api_keys': api_keys,
+        'webhook': webhook,
+        'active_tab': 'developer'
+    })
+

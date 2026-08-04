@@ -12,4 +12,5 @@ urlpatterns = [
     path('features/', views.features_page, name='features'),
     path('contact/', views.contact_us, name='contact_us'),
     path('refer-and-earn/', views.refer_and_earn, name='refer_and_earn'),
+    path('developer/docs/', views.api_docs_view, name='api_docs'),
 ]

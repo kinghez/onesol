@@ -169,6 +169,50 @@ class WalletTransaction(models.Model):
         return f"{self.user.email} - {self.transaction_type} - {self.amount_ngn}"
 
 
+import secrets
+
+
+class APIKey(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='api_keys')
+    name = models.CharField(max_length=100, default='Default Key')
+    public_key = models.CharField(max_length=100, unique=True, db_index=True)
+    secret_key = models.CharField(max_length=100, unique=True, db_index=True)
+    is_active = models.BooleanField(default=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    last_used_at = models.DateTimeField(null=True, blank=True)
+
+    def __str__(self):
+        return f"{self.user.email} - {self.name} ({self.public_key})"
+
+    @classmethod
+    def generate_key_pair(cls, user, name='Default Key'):
+        pub = f"pk_live_{secrets.token_hex(16)}"
+        sec = f"sk_live_{secrets.token_hex(24)}"
+        return cls.objects.create(
+            user=user,
+            name=name,
+            public_key=pub,
+            secret_key=sec,
+        )
+
+
+class DeveloperWebhook(models.Model):
+    user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='developer_webhook')
+    webhook_url = models.URLField(max_length=500)
+    secret = models.CharField(max_length=100, blank=True)
+    is_active = models.BooleanField(default=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    def save(self, *args, **kwargs):
+        if not self.secret:
+            self.secret = f"whsec_{secrets.token_hex(20)}"
+        super().save(*args, **kwargs)
+
+    def __str__(self):
+        return f"Webhook ({self.user.email}) -> {self.webhook_url}"
+
+
 from django.db.models.signals import post_save, post_delete
 from django.contrib.auth.signals import user_logged_in, user_login_failed
 from django.dispatch import receiver
