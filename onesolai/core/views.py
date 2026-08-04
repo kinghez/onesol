@@ -216,7 +216,7 @@ def developer_keys_view(request):
     api_keys = APIKey.objects.filter(user=user, is_active=True).order_by('-created_at')
     webhook = DeveloperWebhook.objects.filter(user=user).first()
 
-    return render(request, 'core/developer_keys.html', {
+    return render(request, 'dashboard/developer_keys.html', {
         'api_keys': api_keys,
         'webhook': webhook,
         'active_tab': 'developer'

@@ -1,164 +1,210 @@
-{% extends "base_public.html" %}
+{% extends 'base_public.html' %}
 {% load static %}
 
-{% block title %}Developer API Documentation | OneSol AI Hub{% endblock %}
+{% block title %}Developer API Documentation - OneSol AI Hub{% endblock %}
+{% block meta_description %}Official OneSol AI REST API v1 Documentation. Learn how to query tools, check stock levels, purchase subscriptions, and integrate AI bots.{% endblock %}
 
 {% block extra_css %}
 <style>
-    .docs-container {
-        max-width: 1240px;
+    .docs-page {
+        padding: 140px 24px 100px;
+        max-width: 1150px;
         margin: 0 auto;
-        padding: 40px 20px 80px 20px;
-        display: grid;
-        grid-template-columns: 260px 1fr;
-        gap: 40px;
     }
-    @media (max-width: 900px) {
-        .docs-container { grid-template-columns: 1fr; }
-        .docs-sidebar { display: none; }
+    .docs-card {
+        background: rgba(15, 21, 53, 0.95);
+        border: 1px solid rgba(255, 255, 255, 0.12);
+        border-radius: 24px;
+        padding: 48px 40px;
+        backdrop-filter: blur(20px);
+        box-shadow: 0 20px 50px rgba(0,0,0,0.6);
     }
-    .docs-nav-link {
-        display: block;
-        padding: 10px 14px;
-        border-radius: 8px;
-        color: #94A3B8;
-        font-weight: 500;
-        font-size: 14px;
-        text-decoration: none;
-        transition: all 0.2s ease;
+    .docs-hero {
+        text-align: center;
+        margin-bottom: 40px;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        padding-bottom: 32px;
     }
-    .docs-nav-link:hover, .docs-nav-link.active {
-        background: rgba(91, 99, 246, 0.15);
-        color: #8E6CFF;
-        font-weight: 700;
-    }
-    .endpoint-card {
-        background: rgba(30, 41, 59, 0.6);
-        border: 1px solid rgba(255, 255, 255, 0.08);
-        border-radius: 16px;
-        padding: 24px;
-        margin-bottom: 32px;
-    }
-    .badge-method {
+    .docs-badge {
         display: inline-block;
-        padding: 4px 10px;
-        border-radius: 6px;
-        font-weight: 800;
-        font-size: 12px;
-        font-family: monospace;
-    }
-    .badge-get { background: rgba(56, 189, 248, 0.2); color: #38BDF8; border: 1px solid rgba(56, 189, 248, 0.4); }
-    .badge-post { background: rgba(16, 185, 129, 0.2); color: #10B981; border: 1px solid rgba(16, 185, 129, 0.4); }
-    .badge-delete { background: rgba(239, 68, 68, 0.2); color: #EF4444; border: 1px solid rgba(239, 68, 68, 0.4); }
-    
-    code-block {
-        background: #0F172A;
-        border: 1px solid rgba(255,255,255,0.08);
-        border-radius: 10px;
-        padding: 16px;
-        color: #E2E8F0;
-        font-family: monospace;
+        padding: 6px 16px;
+        background: rgba(142, 108, 255, 0.15);
+        border: 1px solid rgba(142, 108, 255, 0.35);
+        border-radius: 20px;
+        color: #A78BFA;
         font-size: 13px;
-        display: block;
+        font-weight: 600;
+        margin-bottom: 16px;
+        letter-spacing: 0.5px;
+        text-transform: uppercase;
+    }
+    .docs-title {
+        font-size: 38px;
+        font-weight: 800;
+        color: #FFF;
+        margin-bottom: 12px;
+        line-height: 1.25;
+    }
+    .docs-subtitle {
+        color: #AEB5CA;
+        font-size: 16px;
+        max-width: 720px;
+        margin: 0 auto 28px;
+        line-height: 1.6;
+    }
+    .docs-nav-tabs {
+        display: flex;
+        justify-content: center;
+        gap: 10px;
+        flex-wrap: wrap;
+        margin-bottom: 40px;
+    }
+    .docs-tab-btn {
+        padding: 10px 18px;
+        border-radius: 12px;
+        background: rgba(255, 255, 255, 0.05);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        color: #AEB5CA;
+        font-size: 13px;
+        font-weight: 600;
+        text-decoration: none;
+        transition: all 0.25s ease;
+    }
+    .docs-tab-btn:hover, .docs-tab-btn.active {
+        background: linear-gradient(135deg, #5B63F6, #8E6CFF);
+        color: #FFF;
+        border-color: transparent;
+        box-shadow: 0 4px 15px rgba(91, 99, 246, 0.4);
+    }
+    .docs-section {
+        margin-bottom: 44px;
+        padding-bottom: 36px;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+    }
+    .docs-section-title {
+        font-size: 22px;
+        font-weight: 700;
+        color: #FFF;
+        margin-bottom: 14px;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+    .docs-text {
+        color: #AEB5CA;
+        font-size: 15px;
+        line-height: 1.7;
+        margin-bottom: 16px;
+    }
+    .code-box {
+        background: #0B1120;
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        border-radius: 14px;
+        padding: 20px;
+        color: #E2E8F0;
+        font-family: 'Fira Code', 'Courier New', monospace;
+        font-size: 13px;
+        line-height: 1.6;
         white-space: pre-wrap;
+        word-break: break-word;
+        margin-bottom: 18px;
         overflow-x: auto;
+    }
+    .badge-get { background: rgba(56, 189, 248, 0.2); color: #38BDF8; border: 1px solid rgba(56, 189, 248, 0.4); padding: 4px 10px; border-radius: 6px; font-weight: 800; font-size: 12px; font-family: monospace; }
+    .badge-post { background: rgba(16, 185, 129, 0.2); color: #10B981; border: 1px solid rgba(16, 185, 129, 0.4); padding: 4px 10px; border-radius: 6px; font-weight: 800; font-size: 12px; font-family: monospace; }
+    .badge-delete { background: rgba(239, 68, 68, 0.2); color: #EF4444; border: 1px solid rgba(239, 68, 68, 0.4); padding: 4px 10px; border-radius: 6px; font-weight: 800; font-size: 12px; font-family: monospace; }
+
+    .hint-card {
+        background: rgba(91, 99, 246, 0.1);
+        border: 1px solid rgba(142, 108, 255, 0.3);
+        border-radius: 14px;
+        padding: 20px;
+        margin-bottom: 24px;
+    }
+    @media (max-width: 768px) {
+        .docs-page { padding: 110px 16px 60px; }
+        .docs-card { padding: 28px 20px; }
+        .docs-title { font-size: 28px; }
     }
 </style>
 {% endblock %}
 
 {% block content %}
-<div style="background: linear-gradient(180deg, rgba(15, 23, 42, 0.9) 0%, rgba(10, 15, 30, 1) 100%); border-bottom: 1px solid rgba(255,255,255,0.08); padding: 50px 20px;">
-    <div style="max-width: 1240px; margin: 0 auto;">
-        <span style="background: rgba(91, 99, 246, 0.15); color: #8E6CFF; font-weight: 700; padding: 6px 14px; border-radius: 20px; font-size: 13px;">DEVELOPER PORTAL</span>
-        <h1 style="color: #FFFFFF; font-size: 36px; font-weight: 800; margin: 16px 0 10px 0;">OneSol AI REST API v1 Documentation</h1>
-        <p style="color: #94A3B8; font-size: 16px; max-width: 720px; margin: 0;">
-            Programmatically query live AI tool prices, check stock availability, manage user wishlists, purchase tools via wallet balance, and receive instant delivery webhooks.
-        </p>
-    </div>
-</div>
+<div class="docs-page">
+    <div class="docs-card">
 
-<div class="docs-container">
-    <!-- Sidebar Navigation -->
-    <div class="docs-sidebar" style="position: sticky; top: 100px; height: fit-content;">
-        <div style="font-size: 11px; font-weight: 800; color: #64748B; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 12px;">Getting Started</div>
-        <a href="#overview" class="docs-nav-link active">Overview &amp; Base URL</a>
-        <a href="#authentication" class="docs-nav-link">Authentication &amp; Keys</a>
-        <a href="#ratelimit" class="docs-nav-link">Rate Limiting</a>
-        
-        <div style="font-size: 11px; font-weight: 800; color: #64748B; text-transform: uppercase; letter-spacing: 0.05em; margin: 24px 0 12px 0;">Catalog Endpoints</div>
-        <a href="#list-tools" class="docs-nav-link">GET /api/v1/tools/</a>
-        <a href="#tool-detail" class="docs-nav-link">GET /api/v1/tools/{id}/</a>
-        
-        <div style="font-size: 11px; font-weight: 800; color: #64748B; text-transform: uppercase; letter-spacing: 0.05em; margin: 24px 0 12px 0;">User &amp; Orders</div>
-        <a href="#user-profile" class="docs-nav-link">GET /api/v1/me/</a>
-        <a href="#user-orders" class="docs-nav-link">GET /api/v1/me/orders/</a>
-        <a href="#buy-tool" class="docs-nav-link">POST /api/v1/orders/buy/</a>
-        <a href="#wallet-topup" class="docs-nav-link">POST /api/v1/wallet/topup/</a>
-        <a href="#wishlist" class="docs-nav-link">Wishlist API</a>
+        <!-- Hero Header -->
+        <div class="docs-hero">
+            <span class="docs-badge"><i class="fa-solid fa-code"></i> Developer API v1 Reference</span>
+            <h1 class="docs-title">OneSol AI Developer API Documentation</h1>
+            <p class="docs-subtitle">
+                Build custom integrations, connect external chatbots, programmatically manage tool orders, check stock levels, and receive real-time webhooks.
+            </p>
 
-        <div style="font-size: 11px; font-weight: 800; color: #64748B; text-transform: uppercase; letter-spacing: 0.05em; margin: 24px 0 12px 0;">Webhooks</div>
-        <a href="#webhooks" class="docs-nav-link">Fulfillment Webhooks</a>
-    </div>
-
-    <!-- Main Content -->
-    <div>
-
-        <!-- Overview -->
-        <section id="overview" class="endpoint-card">
-            <h2 style="color: #FFFFFF; font-size: 24px; font-weight: 700; margin: 0 0 12px 0;">Base URL</h2>
-            <p style="color: #94A3B8; font-size: 14px;">All REST API endpoints are served over HTTPS under the following base URL:</p>
-            <div style="background: #0F172A; border: 1px solid rgba(255,255,255,0.1); border-radius: 10px; padding: 14px; color: #38BDF8; font-family: monospace; font-size: 15px; font-weight: 700;">
-                https://onesolai.com/api/v1/
+            <div class="docs-nav-tabs">
+                <a href="#overview" class="docs-tab-btn active">Overview</a>
+                <a href="#auth" class="docs-tab-btn">Authentication</a>
+                <a href="#tools-api" class="docs-tab-btn">Tools Catalog</a>
+                <a href="#purchasing" class="docs-tab-btn">Purchasing &amp; Wallet</a>
+                <a href="#webhooks" class="docs-tab-btn">Webhooks</a>
+                <a href="#ai-studio-hint" class="docs-tab-btn">AutomateSocial / AI Studio</a>
             </div>
+        </div>
+
+        <!-- Section 1: Overview -->
+        <section id="overview" class="docs-section">
+            <h2 class="docs-section-title"><i class="fa-solid fa-globe" style="color: #38BDF8;"></i> 1. Base URL &amp; Response Format</h2>
+            <p class="docs-text">
+                All API endpoints are served over HTTPS and return JSON responses. Errors use standard HTTP status codes (400, 401, 403, 404, 429, 500) with a structured <code style="color: #F43F5E;">error</code> field.
+            </p>
+
+            <div class="code-box" style="color: #38BDF8; font-size: 15px; font-weight: bold;">https://onesolai.com/api/v1/</div>
         </section>
 
-        <!-- Authentication -->
-        <section id="authentication" class="endpoint-card">
-            <h2 style="color: #FFFFFF; font-size: 24px; font-weight: 700; margin: 0 0 12px 0;">Authentication</h2>
-            <p style="color: #94A3B8; font-size: 14px;">
-                Authenticate your API requests by sending your API Key in an HTTP Header:
+        <!-- Section 2: Authentication -->
+        <section id="auth" class="docs-section">
+            <h2 class="docs-section-title"><i class="fa-solid fa-key" style="color: #F59E0B;"></i> 2. Authentication &amp; API Keys</h2>
+            <p class="docs-text">
+                Generate your API keys in your <a href="{% url 'dashboard:developer_keys' %}" style="color: #8E6CFF; font-weight: 700;">Developer Dashboard</a>. Every request must include an API Key in an HTTP Header:
             </p>
-            <div style="background: #0F172A; border: 1px solid rgba(255,255,255,0.1); border-radius: 10px; padding: 14px; color: #10B981; font-family: monospace; font-size: 14px; margin-bottom: 16px;">
-                Authorization: Bearer sk_live_your_secret_key_here
-            </div>
-            <p style="color: #94A3B8; font-size: 13px;">Or using custom header: <code style="color: #8E6CFF;">X-API-KEY: sk_live_...</code></p>
-            
-            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-top: 20px;">
-                <div style="background: rgba(15, 23, 42, 0.7); border: 1px solid rgba(255,255,255,0.06); padding: 16px; border-radius: 10px;">
-                    <div style="color: #38BDF8; font-weight: 700; font-size: 14px;">Public Key (pk_live_...)</div>
-                    <p style="color: #94A3B8; font-size: 12px; margin: 6px 0 0 0;">Read-only access. Used to query tools, check stock levels, and view pricing.</p>
+
+            <div class="code-box" style="color: #10B981;">Authorization: Bearer sk_live_your_secret_key_here</div>
+
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 16px; margin-top: 16px;">
+                <div style="background: rgba(15, 23, 42, 0.6); border: 1px solid rgba(255,255,255,0.08); padding: 18px; border-radius: 12px;">
+                    <h4 style="color: #38BDF8; margin: 0 0 6px 0; font-size: 15px;">Public Key (<code style="color: #38BDF8;">pk_live_...</code>)</h4>
+                    <p style="color: #AEB5CA; font-size: 13px; margin: 0; line-height: 1.5;">Read-only scope. Use this key for querying tools catalog, stock availability, and prices.</p>
                 </div>
-                <div style="background: rgba(15, 23, 42, 0.7); border: 1px solid rgba(255,255,255,0.06); padding: 16px; border-radius: 10px;">
-                    <div style="color: #F43F5E; font-weight: 700; font-size: 14px;">Secret Key (sk_live_...)</div>
-                    <p style="color: #94A3B8; font-size: 12px; margin: 6px 0 0 0;">Full access. Required to purchase tools, check user profile, and initiate wallet top-ups.</p>
+                <div style="background: rgba(15, 23, 42, 0.6); border: 1px solid rgba(255,255,255,0.08); padding: 18px; border-radius: 12px;">
+                    <h4 style="color: #F43F5E; margin: 0 0 6px 0; font-size: 15px;">Secret Key (<code style="color: #F43F5E;">sk_live_...</code>)</h4>
+                    <p style="color: #AEB5CA; font-size: 13px; margin: 0; line-height: 1.5;">Full control scope. Required to purchase tools using your wallet balance and manage orders.</p>
                 </div>
             </div>
         </section>
 
-        <!-- Rate Limiting -->
-        <section id="ratelimit" class="endpoint-card">
-            <h2 style="color: #FFFFFF; font-size: 24px; font-weight: 700; margin: 0 0 12px 0;">Rate Limiting</h2>
-            <p style="color: #94A3B8; font-size: 14px;">
-                API requests are capped at <strong>60 requests per minute</strong> per API key. Exceeding this limit returns HTTP <code style="color: #F59E0B;">429 Too Many Requests</code> with a <code style="color: #8E6CFF;">Retry-After: 60</code> header.
-            </p>
-        </section>
+        <!-- Section 3: Tools Catalog API -->
+        <section id="tools-api" class="docs-section">
+            <h2 class="docs-section-title"><i class="fa-solid fa-layer-group" style="color: #8E6CFF;"></i> 3. Tools &amp; Stock Availability API</h2>
 
-        <!-- List Tools -->
-        <section id="list-tools" class="endpoint-card">
-            <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 12px;">
-                <span class="badge-method badge-get">GET</span>
-                <span style="color: #FFFFFF; font-family: monospace; font-size: 16px; font-weight: 700;">/api/v1/tools/</span>
-            </div>
-            <p style="color: #94A3B8; font-size: 14px;">List active AI tools with live prices in NGN/USD and stock availability.</p>
-            
-            <h4 style="color: #CBD5E1; font-size: 13px; margin: 16px 0 8px 0;">Query Parameters:</h4>
-            <ul style="color: #94A3B8; font-size: 13px; margin: 0 0 16px 20px; padding: 0;">
-                <li><code style="color: #38BDF8;">query</code> (optional string): Search keyword e.g. <code style="color: #CBD5E1;">chatgpt</code></li>
-                <li><code style="color: #38BDF8;">category</code> (optional string): Category slug e.g. <code style="color: #CBD5E1;">ai-chatbots</code></li>
-            </ul>
+            <div style="margin-bottom: 24px;">
+                <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 8px;">
+                    <span class="badge-get">GET</span>
+                    <span style="color: #FFF; font-family: monospace; font-size: 16px; font-weight: 700;">/api/v1/tools/</span>
+                </div>
+                <p class="docs-text">Query live products, prices in NGN and USD, stock availability, and categories.</p>
+                
+                <p style="color: #CBD5E1; font-size: 13px; font-weight: 700; margin-bottom: 6px;">Query Parameters:</p>
+                <ul style="color: #AEB5CA; font-size: 13px; margin: 0 0 14px 20px;">
+                    <li><code style="color: #38BDF8;">query</code> (optional string): Search keyword e.g. <code style="color: #FFF;">capcut</code></li>
+                    <li><code style="color: #38BDF8;">category</code> (optional string): Category slug e.g. <code style="color: #FFF;">video-creation</code></li>
+                </ul>
 
-            <h4 style="color: #CBD5E1; font-size: 13px; margin: 16px 0 8px 0;">Example Response (200 OK):</h4>
-            <div class="code-block">{
+                <p style="color: #CBD5E1; font-size: 13px; font-weight: 700; margin-bottom: 6px;">Example Request (cURL):</p>
+                <div class="code-box">curl -X GET "https://onesolai.com/api/v1/tools/?query=capcut" \
+  -H "Authorization: Bearer pk_live_your_public_key"</div>
+
+                <p style="color: #CBD5E1; font-size: 13px; font-weight: 700; margin-bottom: 6px;">Example Response (200 OK):</p>
+                <div class="code-box">{
   "success": true,
   "count": 1,
   "tools": [
@@ -175,24 +221,28 @@
     }
   ]
 }</div>
+            </div>
         </section>
 
-        <!-- Buy Tool -->
-        <section id="buy-tool" class="endpoint-card">
-            <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 12px;">
-                <span class="badge-method badge-post">POST</span>
-                <span style="color: #FFFFFF; font-family: monospace; font-size: 16px; font-weight: 700;">/api/v1/orders/buy/</span>
-            </div>
-            <p style="color: #94A3B8; font-size: 14px;">Purchase an AI tool using your wallet balance. Triggers instant vendor fulfillment and returns activation details.</p>
-            
-            <h4 style="color: #CBD5E1; font-size: 13px; margin: 16px 0 8px 0;">Request Body (JSON):</h4>
-            <div class="code-block">{
+        <!-- Section 4: Purchasing & Wallet -->
+        <section id="purchasing" class="docs-section">
+            <h2 class="docs-section-title"><i class="fa-solid fa-cart-shopping" style="color: #10B981;"></i> 4. Purchasing Tools &amp; Wallet API</h2>
+
+            <div style="margin-bottom: 24px;">
+                <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 8px;">
+                    <span class="badge-post">POST</span>
+                    <span style="color: #FFF; font-family: monospace; font-size: 16px; font-weight: 700;">/api/v1/orders/buy/</span>
+                </div>
+                <p class="docs-text">Purchase an AI tool programmatically. Automatically deducts the price from your wallet balance, triggers instant vendor fulfillment, and returns activation details.</p>
+
+                <p style="color: #CBD5E1; font-size: 13px; font-weight: 700; margin-bottom: 6px;">Request Body (JSON):</p>
+                <div class="code-box">{
   "tool_id": 60,
-  "delivery_email": "user@example.com"
+  "delivery_email": "customer@example.com"
 }</div>
 
-            <h4 style="color: #CBD5E1; font-size: 13px; margin: 16px 0 8px 0;">Example Response (200 OK):</h4>
-            <div class="code-block">{
+                <p style="color: #CBD5E1; font-size: 13px; font-weight: 700; margin-bottom: 6px;">Example Response (200 OK):</p>
+                <div class="code-box">{
   "success": true,
   "message": "Successfully purchased CapCut Pro 30 Days! Order #ORD-849201 processed.",
   "order": {
@@ -200,56 +250,49 @@
     "order_number": "ORD-849201",
     "tool_name": "CapCut Pro 30 Days",
     "amount_paid_ngn": 9103.04,
-    "delivery_email": "user@example.com",
-    "access_details": "Login Email: user@vip.com | Pass: CapCut2026! | Activation Link: https://..."
+    "delivery_email": "customer@example.com",
+    "access_details": "Login Email: user@vip.com | Pass: CapCut2026! | Link: https://..."
   }
 }</div>
-        </section>
-
-        <!-- Wallet Top-up -->
-        <section id="wallet-topup" class="endpoint-card">
-            <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 12px;">
-                <span class="badge-method badge-post">POST</span>
-                <span style="color: #FFFFFF; font-family: monospace; font-size: 16px; font-weight: 700;">/api/v1/wallet/topup/</span>
             </div>
-            <p style="color: #94A3B8; font-size: 14px;">Initiates a Paystack checkout transaction to credit your wallet balance.</p>
-
-            <h4 style="color: #CBD5E1; font-size: 13px; margin: 16px 0 8px 0;">Request Body (JSON):</h4>
-            <div class="code-block">{
-  "amount_ngn": 5000
-}</div>
-
-            <h4 style="color: #CBD5E1; font-size: 13px; margin: 16px 0 8px 0;">Example Response (200 OK):</h4>
-            <div class="code-block">{
-  "success": true,
-  "reference": "WAPI_a1b2c3d4",
-  "amount_ngn": 5000.0,
-  "authorization_url": "https://checkout.paystack.com/39a01fd..."
-}</div>
         </section>
 
-        <!-- Webhooks -->
-        <section id="webhooks" class="endpoint-card">
-            <h2 style="color: #FFFFFF; font-size: 24px; font-weight: 700; margin: 0 0 12px 0;">Fulfillment Webhooks</h2>
-            <p style="color: #94A3B8; font-size: 14px;">
-                Configure your Webhook URL in your <a href="{% url 'dashboard:developer_keys' %}" style="color: #8E6CFF; font-weight: 700;">Developer Dashboard</a>. Whenever an order is completed, OneSol AI sends an HTTP POST request to your endpoint.
+        <!-- Section 5: Webhooks -->
+        <section id="webhooks" class="docs-section">
+            <h2 class="docs-section-title"><i class="fa-solid fa-bolt" style="color: #F59E0B;"></i> 5. Real-Time Fulfillment Webhooks</h2>
+            <p class="docs-text">
+                When you save a Webhook URL in your dashboard, OneSol AI sends an instant HTTP POST event whenever an order delivery is completed.
             </p>
 
-            <h4 style="color: #CBD5E1; font-size: 13px; margin: 16px 0 8px 0;">Webhook Payload:</h4>
-            <div class="code-block">{
+            <p style="color: #CBD5E1; font-size: 13px; font-weight: 700; margin-bottom: 6px;">Webhook Payload:</p>
+            <div class="code-box">{
   "event": "order.fulfilled",
   "order_id": 142,
   "order_number": "ORD-849201",
   "tool_name": "CapCut Pro 30 Days",
-  "delivery_email": "user@example.com",
-  "access_details": "Login Email: ...",
+  "delivery_email": "customer@example.com",
+  "access_details": "Login Email: user@vip.com | Pass: ...",
   "total_amount_ngn": 9103.04,
-  "fulfilled_at": "2026-08-04T17:00:00Z"
+  "fulfilled_at": "2026-08-04T17:30:00Z"
 }</div>
 
-            <h4 style="color: #CBD5E1; font-size: 13px; margin: 16px 0 8px 0;">Signature Verification Header:</h4>
-            <div style="background: #0F172A; border: 1px solid rgba(255,255,255,0.1); border-radius: 10px; padding: 14px; color: #10B981; font-family: monospace; font-size: 13px;">
-                X-OneSol-Signature: t=1722790800,v1=9f8a... (HMAC SHA256)
+            <p style="color: #CBD5E1; font-size: 13px; font-weight: 700; margin-bottom: 6px;">Signature Header:</p>
+            <div class="code-box" style="color: #10B981;">X-OneSol-Signature: t=1722790800,v1=9f8a2b3c4...</div>
+        </section>
+
+        <!-- Section 6: AI Studio / AutomateSocial Integration Hint -->
+        <section id="ai-studio-hint" class="docs-section" style="border-bottom: none;">
+            <div class="hint-card">
+                <h3 style="color: #FFF; font-size: 17px; font-weight: 700; margin: 0 0 10px 0; display: flex; align-items: center; gap: 8px;">
+                    <i class="fa-solid fa-robot" style="color: #8E6CFF;"></i> AutomateSocial / AI Studio Integration Example
+                </h3>
+                <p style="color: #CBD5E1; font-size: 14px; margin: 0 0 12px 0; line-height: 1.6;">
+                    If you are building an AI chatbot on AutomateSocial (`hglobal.store`), configure your tools in AI Studio as follows:
+                </p>
+                <div style="background: rgba(15, 23, 42, 0.8); border: 1px solid rgba(255,255,255,0.1); border-radius: 10px; padding: 14px; font-size: 13px; color: #AEB5CA;">
+                    • <strong>Tool 1 (Stock Check):</strong> HTTP Method: <code style="color:#38BDF8;">GET</code> | URL: <code style="color:#FFF;">https://onesolai.com/api/agent/tools/</code><br>
+                    • <strong>Tool 2 (Buy Tool):</strong> HTTP Method: <code style="color:#10B981;">POST</code> | URL: <code style="color:#FFF;">https://onesolai.com/api/agent/buy-tool/</code> | Header: <code style="color:#F59E0B;">X-Agent-Secret: onesol_agent_secret_2026</code>
+                </div>
             </div>
         </section>
 
