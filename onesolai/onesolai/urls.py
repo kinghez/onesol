@@ -32,6 +32,9 @@ urlpatterns = [
 
     # Custom Admin Analytics
     path('dashboard/admin-analytics/', include('analytics.urls')),
+
+    # AI Agent Integration API
+    path('api/agent/', include('core.agent_urls')),
 ]
 
 from django.conf import settings
