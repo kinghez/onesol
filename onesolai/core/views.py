@@ -222,3 +222,20 @@ def developer_keys_view(request):
         'active_tab': 'developer'
     })
 
+
+from django.contrib.admin.views.decorators import staff_member_required
+
+@staff_member_required
+def automatesocial_docs_view(request):
+    """
+    Render AutomateSocial AI Chatbot Agent integration documentation.
+    Restricted exclusively to Staff & Admin users.
+    """
+    cfg = SiteSettings.get()
+    agent_key = getattr(cfg, 'agent_api_key', None) or 'onesol_agent_secret_2026'
+    return render(request, 'dashboard/automatesocial_docs.html', {
+        'agent_secret_key': agent_key,
+        'active_tab': 'automatesocial_docs'
+    })
+
+

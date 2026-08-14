@@ -1,0 +1,614 @@
+{% extends 'base_dashboard.html' %}
+{% load static %}
+
+{% block title %}AutomateSocial AI Bot Integration – Admin Docs – OneSol AI Hub{% endblock %}
+{% block nav_automatesocial %}active{% endblock %}
+
+{% block content %}
+<div class="profile-page fade-in">
+
+    <!-- Header -->
+    <div class="profile-header fade-up" style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 16px; margin-bottom: 24px;">
+        <div>
+            <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 8px;">
+                <span style="background: rgba(16, 185, 129, 0.15); color: #10B981; font-size: 12px; font-weight: 700; padding: 4px 12px; border-radius: 20px; border: 1px solid rgba(16, 185, 129, 0.3);">
+                    <i class="fa-solid fa-lock"></i> ADMIN ACCESS ONLY
+                </span>
+                <span style="background: rgba(142, 108, 255, 0.15); color: #A78BFA; font-size: 12px; font-weight: 700; padding: 4px 12px; border-radius: 20px; border: 1px solid rgba(142, 108, 255, 0.3);">
+                    AutomateSocial AI Studio (hglobal.store)
+                </span>
+            </div>
+            <h1 class="page-title" style="font-size: 26px; font-weight: 800; color: #FFFFFF; margin: 0 0 6px 0; display: flex; align-items: center; gap: 10px;">
+                <i class="fa-solid fa-robot" style="color: #10B981;"></i> AutomateSocial Bot Tool Endpoints
+            </h1>
+            <p class="page-sub" style="color: #AEB5CA; font-size: 14px; margin: 0;">
+                Configure your OneSol AI Livechat Chatbot Agent on AutomateSocial with these 8 dedicated tool endpoints.
+            </p>
+        </div>
+        <a href="https://hglobal.store/ai-studio/5" target="_blank" class="btn-primary" style="background: #10B981; text-decoration: none; padding: 12px 22px; font-size: 13px; font-weight: 700; border-radius: 12px; display: inline-flex; align-items: center; gap: 8px;">
+            <i class="fa-solid fa-arrow-up-right-from-square"></i> Open AutomateSocial AI Studio
+        </a>
+    </div>
+
+    <!-- Global Authentication Key Card -->
+    <div class="glass-card" style="padding: 24px; margin-bottom: 28px; background: rgba(16, 185, 129, 0.08); border: 1px solid rgba(16, 185, 129, 0.3);">
+        <div style="display: flex; align-items: flex-start; justify-content: space-between; flex-wrap: wrap; gap: 16px;">
+            <div style="flex: 1; min-width: 280px;">
+                <h3 style="color: #FFFFFF; font-size: 16px; font-weight: 700; margin: 0 0 8px 0; display: flex; align-items: center; gap: 8px;">
+                    <i class="fa-solid fa-key" style="color: #10B981;"></i> Agent Secret Authentication Header
+                </h3>
+                <p style="color: #CBD5E1; font-size: 13px; margin: 0 0 12px 0; line-height: 1.5;">
+                    Add this header under <strong>Auth / Custom Headers (optional)</strong> when creating any write/user-specific tool in AutomateSocial AI Studio:
+                </p>
+                <div style="display: flex; gap: 10px; flex-wrap: wrap; align-items: center;">
+                    <div style="background: #0F172A; border: 1px solid rgba(255,255,255,0.12); padding: 8px 14px; border-radius: 8px; font-family: monospace; font-size: 13px; color: #10B981;">
+                        Header Name: <strong>X-Agent-Secret</strong>
+                    </div>
+                    <div style="background: #0F172A; border: 1px solid rgba(255,255,255,0.12); padding: 8px 14px; border-radius: 8px; font-family: monospace; font-size: 13px; color: #38BDF8; display: flex; align-items: center; gap: 8px;">
+                        Header Value: <span id="agentSecretVal">{{ agent_secret_key }}</span>
+                        <button onclick="copyText('{{ agent_secret_key }}', 'Header Secret Key')" style="background: rgba(56, 189, 248, 0.2); border: none; color: #38BDF8; padding: 3px 8px; border-radius: 6px; cursor: pointer; font-size: 11px; font-weight: 700;">
+                            <i class="fa-regular fa-copy"></i> Copy
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Quick Tool Index Tabs -->
+    <div style="display: flex; gap: 10px; overflow-x: auto; padding-bottom: 12px; margin-bottom: 24px;">
+        <a href="#tool_inventory" style="background: rgba(15, 23, 42, 0.8); color: #38BDF8; border: 1px solid rgba(56, 189, 248, 0.3); padding: 8px 16px; border-radius: 20px; text-decoration: none; font-size: 12px; font-weight: 700; white-space: nowrap;">
+            1. check_inventory
+        </a>
+        <a href="#tool_buy" style="background: rgba(15, 23, 42, 0.8); color: #10B981; border: 1px solid rgba(16, 185, 129, 0.3); padding: 8px 16px; border-radius: 20px; text-decoration: none; font-size: 12px; font-weight: 700; white-space: nowrap;">
+            2. buy_tool_for_user
+        </a>
+        <a href="#tool_wishlist" style="background: rgba(15, 23, 42, 0.8); color: #EC4899; border: 1px solid rgba(236, 72, 153, 0.3); padding: 8px 16px; border-radius: 20px; text-decoration: none; font-size: 12px; font-weight: 700; white-space: nowrap;">
+            3. add_to_wishlist
+        </a>
+        <a href="#tool_profile" style="background: rgba(15, 23, 42, 0.8); color: #A78BFA; border: 1px solid rgba(167, 139, 250, 0.3); padding: 8px 16px; border-radius: 20px; text-decoration: none; font-size: 12px; font-weight: 700; white-space: nowrap;">
+            4. check_user_profile
+        </a>
+        <a href="#tool_wallet" style="background: rgba(15, 23, 42, 0.8); color: #F59E0B; border: 1px solid rgba(245, 158, 11, 0.3); padding: 8px 16px; border-radius: 20px; text-decoration: none; font-size: 12px; font-weight: 700; white-space: nowrap;">
+            5. check_user_wallet
+        </a>
+        <a href="#tool_referrals" style="background: rgba(15, 23, 42, 0.8); color: #6366F1; border: 1px solid rgba(99, 102, 241, 0.3); padding: 8px 16px; border-radius: 20px; text-decoration: none; font-size: 12px; font-weight: 700; white-space: nowrap;">
+            6. check_user_referrals
+        </a>
+        <a href="#tool_withdrawals" style="background: rgba(15, 23, 42, 0.8); color: #F43F5E; border: 1px solid rgba(244, 63, 94, 0.3); padding: 8px 16px; border-radius: 20px; text-decoration: none; font-size: 12px; font-weight: 700; white-space: nowrap;">
+            7. check_user_withdrawals
+        </a>
+        <a href="#tool_orders" style="background: rgba(15, 23, 42, 0.8); color: #14B8A6; border: 1px solid rgba(20, 184, 166, 0.3); padding: 8px 16px; border-radius: 20px; text-decoration: none; font-size: 12px; font-weight: 700; white-space: nowrap;">
+            8. check_order_status
+        </a>
+    </div>
+
+    <!-- ─────────────────────────────────────────────── -->
+    <!-- TOOL 1: check_inventory -->
+    <!-- ─────────────────────────────────────────────── -->
+    <div id="tool_inventory" class="glass-card" style="padding: 24px; margin-bottom: 24px;">
+        <div style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12px; border-bottom: 1px solid rgba(255,255,255,0.08); padding-bottom: 14px; margin-bottom: 16px;">
+            <div style="display: flex; align-items: center; gap: 10px;">
+                <span style="background: #0284C7; color: #FFF; font-size: 11px; font-weight: 800; padding: 4px 10px; border-radius: 6px;">GET</span>
+                <h3 style="color: #FFFFFF; font-size: 18px; font-weight: 700; margin: 0;">1. check_inventory</h3>
+            </div>
+            <span style="color: #38BDF8; font-size: 13px; font-weight: 600;">Product Search &amp; Stock Check</span>
+        </div>
+
+        <div style="display: grid; grid-template-columns: 1fr; gap: 14px; margin-bottom: 16px;">
+            <div>
+                <label style="display: block; color: #94A3B8; font-size: 11px; font-weight: 700; text-transform: uppercase; margin-bottom: 4px;">Endpoint URL</label>
+                <div style="display: flex; gap: 8px;">
+                    <input type="text" readonly value="https://onesolai.com/api/agent/tools/" id="url_inv" style="width: 100%; background: #0F172A; border: 1px solid rgba(255,255,255,0.12); color: #38BDF8; font-family: monospace; font-size: 13px; padding: 10px 14px; border-radius: 8px;">
+                    <button onclick="copyInput('url_inv', 'Endpoint URL')" class="btn-primary" style="padding: 0 16px; font-size: 12px;">Copy</button>
+                </div>
+            </div>
+            <div>
+                <label style="display: block; color: #94A3B8; font-size: 11px; font-weight: 700; text-transform: uppercase; margin-bottom: 4px;">Description for AI</label>
+                <div style="display: flex; gap: 8px;">
+                    <input type="text" readonly value="Use this when the user asks about tool prices, availability, stock levels, or available AI products on OneSol AI." id="desc_inv" style="width: 100%; background: #0F172A; border: 1px solid rgba(255,255,255,0.12); color: #E2E8F0; font-size: 13px; padding: 10px 14px; border-radius: 8px;">
+                    <button onclick="copyInput('desc_inv', 'Description')" class="btn-primary" style="padding: 0 16px; font-size: 12px;">Copy</button>
+                </div>
+            </div>
+        </div>
+
+        <div style="margin-bottom: 14px;">
+            <div style="color: #94A3B8; font-size: 12px; font-weight: 700; text-transform: uppercase; margin-bottom: 8px;">Parameters</div>
+            <table style="width: 100%; border-collapse: collapse; background: #0F172A; border-radius: 8px; overflow: hidden; font-size: 13px; color: #CBD5E1;">
+                <thead>
+                    <tr style="background: rgba(255,255,255,0.05); text-align: left; color: #94A3B8; font-size: 11px; text-transform: uppercase;">
+                        <th style="padding: 10px 14px;">Name</th>
+                        <th style="padding: 10px 14px;">Type</th>
+                        <th style="padding: 10px 14px;">Description</th>
+                        <th style="padding: 10px 14px;">Required</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td style="padding: 10px 14px; font-family: monospace; color: #38BDF8;">query</td>
+                        <td style="padding: 10px 14px;">String</td>
+                        <td style="padding: 10px 14px;">Search keyword e.g. chatgpt, gemini, capcut</td>
+                        <td style="padding: 10px 14px; color: #94A3B8;">No</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+
+    <!-- ─────────────────────────────────────────────── -->
+    <!-- TOOL 2: buy_tool_for_user -->
+    <!-- ─────────────────────────────────────────────── -->
+    <div id="tool_buy" class="glass-card" style="padding: 24px; margin-bottom: 24px;">
+        <div style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12px; border-bottom: 1px solid rgba(255,255,255,0.08); padding-bottom: 14px; margin-bottom: 16px;">
+            <div style="display: flex; align-items: center; gap: 10px;">
+                <span style="background: #16A34A; color: #FFF; font-size: 11px; font-weight: 800; padding: 4px 10px; border-radius: 6px;">POST</span>
+                <h3 style="color: #FFFFFF; font-size: 18px; font-weight: 700; margin: 0;">2. buy_tool_for_user</h3>
+            </div>
+            <span style="color: #10B981; font-size: 13px; font-weight: 600;">Process Tool Purchase via Wallet</span>
+        </div>
+
+        <div style="display: grid; grid-template-columns: 1fr; gap: 14px; margin-bottom: 16px;">
+            <div>
+                <label style="display: block; color: #94A3B8; font-size: 11px; font-weight: 700; text-transform: uppercase; margin-bottom: 4px;">Endpoint URL</label>
+                <div style="display: flex; gap: 8px;">
+                    <input type="text" readonly value="https://onesolai.com/api/agent/buy-tool/" id="url_buy" style="width: 100%; background: #0F172A; border: 1px solid rgba(255,255,255,0.12); color: #38BDF8; font-family: monospace; font-size: 13px; padding: 10px 14px; border-radius: 8px;">
+                    <button onclick="copyInput('url_buy', 'Endpoint URL')" class="btn-primary" style="padding: 0 16px; font-size: 12px;">Copy</button>
+                </div>
+            </div>
+            <div>
+                <label style="display: block; color: #94A3B8; font-size: 11px; font-weight: 700; text-transform: uppercase; margin-bottom: 4px;">Description for AI</label>
+                <div style="display: flex; gap: 8px;">
+                    <input type="text" readonly value="Use this when a user wants to buy or purchase an AI tool using their wallet balance." id="desc_buy" style="width: 100%; background: #0F172A; border: 1px solid rgba(255,255,255,0.12); color: #E2E8F0; font-size: 13px; padding: 10px 14px; border-radius: 8px;">
+                    <button onclick="copyInput('desc_buy', 'Description')" class="btn-primary" style="padding: 0 16px; font-size: 12px;">Copy</button>
+                </div>
+            </div>
+            <div>
+                <label style="display: block; color: #94A3B8; font-size: 11px; font-weight: 700; text-transform: uppercase; margin-bottom: 4px;">Auth / Custom Header Required</label>
+                <div style="background: #0F172A; border: 1px solid rgba(16, 185, 129, 0.3); padding: 10px 14px; border-radius: 8px; font-family: monospace; font-size: 13px; color: #10B981;">
+                    X-Agent-Secret: {{ agent_secret_key }}
+                </div>
+            </div>
+        </div>
+
+        <div style="margin-bottom: 14px;">
+            <div style="color: #94A3B8; font-size: 12px; font-weight: 700; text-transform: uppercase; margin-bottom: 8px;">Parameters</div>
+            <table style="width: 100%; border-collapse: collapse; background: #0F172A; border-radius: 8px; overflow: hidden; font-size: 13px; color: #CBD5E1;">
+                <thead>
+                    <tr style="background: rgba(255,255,255,0.05); text-align: left; color: #94A3B8; font-size: 11px; text-transform: uppercase;">
+                        <th style="padding: 10px 14px;">Name</th>
+                        <th style="padding: 10px 14px;">Type</th>
+                        <th style="padding: 10px 14px;">Description</th>
+                        <th style="padding: 10px 14px;">Required</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr style="border-bottom: 1px solid rgba(255,255,255,0.05);">
+                        <td style="padding: 10px 14px; font-family: monospace; color: #38BDF8;">user_email</td>
+                        <td style="padding: 10px 14px;">String</td>
+                        <td style="padding: 10px 14px;">User's email address on OneSol AI</td>
+                        <td style="padding: 10px 14px; color: #EF4444; font-weight: 700;">Yes</td>
+                    </tr>
+                    <tr style="border-bottom: 1px solid rgba(255,255,255,0.05);">
+                        <td style="padding: 10px 14px; font-family: monospace; color: #38BDF8;">tool_id</td>
+                        <td style="padding: 10px 14px;">Integer</td>
+                        <td style="padding: 10px 14px;">ID of the tool to buy (obtained from check_inventory)</td>
+                        <td style="padding: 10px 14px; color: #EF4444; font-weight: 700;">Yes</td>
+                    </tr>
+                    <tr>
+                        <td style="padding: 10px 14px; font-family: monospace; color: #38BDF8;">payment_method</td>
+                        <td style="padding: 10px 14px;">String</td>
+                        <td style="padding: 10px 14px;">Set to 'wallet' (defaults to wallet)</td>
+                        <td style="padding: 10px 14px; color: #94A3B8;">No</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+
+    <!-- ─────────────────────────────────────────────── -->
+    <!-- TOOL 3: add_to_wishlist -->
+    <!-- ─────────────────────────────────────────────── -->
+    <div id="tool_wishlist" class="glass-card" style="padding: 24px; margin-bottom: 24px;">
+        <div style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12px; border-bottom: 1px solid rgba(255,255,255,0.08); padding-bottom: 14px; margin-bottom: 16px;">
+            <div style="display: flex; align-items: center; gap: 10px;">
+                <span style="background: #EC4899; color: #FFF; font-size: 11px; font-weight: 800; padding: 4px 10px; border-radius: 6px;">POST</span>
+                <h3 style="color: #FFFFFF; font-size: 18px; font-weight: 700; margin: 0;">3. add_to_wishlist</h3>
+            </div>
+            <span style="color: #EC4899; font-size: 13px; font-weight: 600;">Save Tool to User Wishlist</span>
+        </div>
+
+        <div style="display: grid; grid-template-columns: 1fr; gap: 14px; margin-bottom: 16px;">
+            <div>
+                <label style="display: block; color: #94A3B8; font-size: 11px; font-weight: 700; text-transform: uppercase; margin-bottom: 4px;">Endpoint URL</label>
+                <div style="display: flex; gap: 8px;">
+                    <input type="text" readonly value="https://onesolai.com/api/agent/add-to-wishlist/" id="url_wish" style="width: 100%; background: #0F172A; border: 1px solid rgba(255,255,255,0.12); color: #38BDF8; font-family: monospace; font-size: 13px; padding: 10px 14px; border-radius: 8px;">
+                    <button onclick="copyInput('url_wish', 'Endpoint URL')" class="btn-primary" style="padding: 0 16px; font-size: 12px;">Copy</button>
+                </div>
+            </div>
+            <div>
+                <label style="display: block; color: #94A3B8; font-size: 11px; font-weight: 700; text-transform: uppercase; margin-bottom: 4px;">Description for AI</label>
+                <div style="display: flex; gap: 8px;">
+                    <input type="text" readonly value="Use this when the user asks to add a tool or product to their wishlist or saved items." id="desc_wish" style="width: 100%; background: #0F172A; border: 1px solid rgba(255,255,255,0.12); color: #E2E8F0; font-size: 13px; padding: 10px 14px; border-radius: 8px;">
+                    <button onclick="copyInput('desc_wish', 'Description')" class="btn-primary" style="padding: 0 16px; font-size: 12px;">Copy</button>
+                </div>
+            </div>
+            <div>
+                <label style="display: block; color: #94A3B8; font-size: 11px; font-weight: 700; text-transform: uppercase; margin-bottom: 4px;">Auth / Custom Header Required</label>
+                <div style="background: #0F172A; border: 1px solid rgba(236, 72, 153, 0.3); padding: 10px 14px; border-radius: 8px; font-family: monospace; font-size: 13px; color: #EC4899;">
+                    X-Agent-Secret: {{ agent_secret_key }}
+                </div>
+            </div>
+        </div>
+
+        <div style="margin-bottom: 14px;">
+            <div style="color: #94A3B8; font-size: 12px; font-weight: 700; text-transform: uppercase; margin-bottom: 8px;">Parameters</div>
+            <table style="width: 100%; border-collapse: collapse; background: #0F172A; border-radius: 8px; overflow: hidden; font-size: 13px; color: #CBD5E1;">
+                <thead>
+                    <tr style="background: rgba(255,255,255,0.05); text-align: left; color: #94A3B8; font-size: 11px; text-transform: uppercase;">
+                        <th style="padding: 10px 14px;">Name</th>
+                        <th style="padding: 10px 14px;">Type</th>
+                        <th style="padding: 10px 14px;">Description</th>
+                        <th style="padding: 10px 14px;">Required</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr style="border-bottom: 1px solid rgba(255,255,255,0.05);">
+                        <td style="padding: 10px 14px; font-family: monospace; color: #38BDF8;">user_email</td>
+                        <td style="padding: 10px 14px;">String</td>
+                        <td style="padding: 10px 14px;">User's email address on OneSol AI</td>
+                        <td style="padding: 10px 14px; color: #EF4444; font-weight: 700;">Yes</td>
+                    </tr>
+                    <tr>
+                        <td style="padding: 10px 14px; font-family: monospace; color: #38BDF8;">tool_id</td>
+                        <td style="padding: 10px 14px;">Integer</td>
+                        <td style="padding: 10px 14px;">ID of the tool to add to wishlist</td>
+                        <td style="padding: 10px 14px; color: #EF4444; font-weight: 700;">Yes</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+
+    <!-- ─────────────────────────────────────────────── -->
+    <!-- TOOL 4: check_user_profile -->
+    <!-- ─────────────────────────────────────────────── -->
+    <div id="tool_profile" class="glass-card" style="padding: 24px; margin-bottom: 24px;">
+        <div style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12px; border-bottom: 1px solid rgba(255,255,255,0.08); padding-bottom: 14px; margin-bottom: 16px;">
+            <div style="display: flex; align-items: center; gap: 10px;">
+                <span style="background: #7C3AED; color: #FFF; font-size: 11px; font-weight: 800; padding: 4px 10px; border-radius: 6px;">GET</span>
+                <h3 style="color: #FFFFFF; font-size: 18px; font-weight: 700; margin: 0;">4. check_user_profile</h3>
+            </div>
+            <span style="color: #A78BFA; font-size: 13px; font-weight: 600;">Fetch User Profile Summary</span>
+        </div>
+
+        <div style="display: grid; grid-template-columns: 1fr; gap: 14px; margin-bottom: 16px;">
+            <div>
+                <label style="display: block; color: #94A3B8; font-size: 11px; font-weight: 700; text-transform: uppercase; margin-bottom: 4px;">Endpoint URL</label>
+                <div style="display: flex; gap: 8px;">
+                    <input type="text" readonly value="https://onesolai.com/api/agent/user-profile/" id="url_prof" style="width: 100%; background: #0F172A; border: 1px solid rgba(255,255,255,0.12); color: #38BDF8; font-family: monospace; font-size: 13px; padding: 10px 14px; border-radius: 8px;">
+                    <button onclick="copyInput('url_prof', 'Endpoint URL')" class="btn-primary" style="padding: 0 16px; font-size: 12px;">Copy</button>
+                </div>
+            </div>
+            <div>
+                <label style="display: block; color: #94A3B8; font-size: 11px; font-weight: 700; text-transform: uppercase; margin-bottom: 4px;">Description for AI</label>
+                <div style="display: flex; gap: 8px;">
+                    <input type="text" readonly value="Use this to look up a user's basic profile summary, including full name, account join date, wallet balance, and total orders count." id="desc_prof" style="width: 100%; background: #0F172A; border: 1px solid rgba(255,255,255,0.12); color: #E2E8F0; font-size: 13px; padding: 10px 14px; border-radius: 8px;">
+                    <button onclick="copyInput('desc_prof', 'Description')" class="btn-primary" style="padding: 0 16px; font-size: 12px;">Copy</button>
+                </div>
+            </div>
+            <div>
+                <label style="display: block; color: #94A3B8; font-size: 11px; font-weight: 700; text-transform: uppercase; margin-bottom: 4px;">Auth / Custom Header Required</label>
+                <div style="background: #0F172A; border: 1px solid rgba(167, 139, 250, 0.3); padding: 10px 14px; border-radius: 8px; font-family: monospace; font-size: 13px; color: #A78BFA;">
+                    X-Agent-Secret: {{ agent_secret_key }}
+                </div>
+            </div>
+        </div>
+
+        <div style="margin-bottom: 14px;">
+            <div style="color: #94A3B8; font-size: 12px; font-weight: 700; text-transform: uppercase; margin-bottom: 8px;">Parameters</div>
+            <table style="width: 100%; border-collapse: collapse; background: #0F172A; border-radius: 8px; overflow: hidden; font-size: 13px; color: #CBD5E1;">
+                <thead>
+                    <tr style="background: rgba(255,255,255,0.05); text-align: left; color: #94A3B8; font-size: 11px; text-transform: uppercase;">
+                        <th style="padding: 10px 14px;">Name</th>
+                        <th style="padding: 10px 14px;">Type</th>
+                        <th style="padding: 10px 14px;">Description</th>
+                        <th style="padding: 10px 14px;">Required</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td style="padding: 10px 14px; font-family: monospace; color: #38BDF8;">user_email</td>
+                        <td style="padding: 10px 14px;">String</td>
+                        <td style="padding: 10px 14px;">User's email address on OneSol AI</td>
+                        <td style="padding: 10px 14px; color: #EF4444; font-weight: 700;">Yes</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+
+    <!-- ─────────────────────────────────────────────── -->
+    <!-- TOOL 5: check_user_wallet -->
+    <!-- ─────────────────────────────────────────────── -->
+    <div id="tool_wallet" class="glass-card" style="padding: 24px; margin-bottom: 24px;">
+        <div style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12px; border-bottom: 1px solid rgba(255,255,255,0.08); padding-bottom: 14px; margin-bottom: 16px;">
+            <div style="display: flex; align-items: center; gap: 10px;">
+                <span style="background: #D97706; color: #FFF; font-size: 11px; font-weight: 800; padding: 4px 10px; border-radius: 6px;">GET</span>
+                <h3 style="color: #FFFFFF; font-size: 18px; font-weight: 700; margin: 0;">5. check_user_wallet</h3>
+            </div>
+            <span style="color: #F59E0B; font-size: 13px; font-weight: 600;">Check Wallet Balance &amp; Transactions</span>
+        </div>
+
+        <div style="display: grid; grid-template-columns: 1fr; gap: 14px; margin-bottom: 16px;">
+            <div>
+                <label style="display: block; color: #94A3B8; font-size: 11px; font-weight: 700; text-transform: uppercase; margin-bottom: 4px;">Endpoint URL</label>
+                <div style="display: flex; gap: 8px;">
+                    <input type="text" readonly value="https://onesolai.com/api/agent/user-wallet/" id="url_wal" style="width: 100%; background: #0F172A; border: 1px solid rgba(255,255,255,0.12); color: #38BDF8; font-family: monospace; font-size: 13px; padding: 10px 14px; border-radius: 8px;">
+                    <button onclick="copyInput('url_wal', 'Endpoint URL')" class="btn-primary" style="padding: 0 16px; font-size: 12px;">Copy</button>
+                </div>
+            </div>
+            <div>
+                <label style="display: block; color: #94A3B8; font-size: 11px; font-weight: 700; text-transform: uppercase; margin-bottom: 4px;">Description for AI</label>
+                <div style="display: flex; gap: 8px;">
+                    <input type="text" readonly value="Use this to check a user's current OneSol wallet balance and view their recent wallet deposit/purchase transactions." id="desc_wal" style="width: 100%; background: #0F172A; border: 1px solid rgba(255,255,255,0.12); color: #E2E8F0; font-size: 13px; padding: 10px 14px; border-radius: 8px;">
+                    <button onclick="copyInput('desc_wal', 'Description')" class="btn-primary" style="padding: 0 16px; font-size: 12px;">Copy</button>
+                </div>
+            </div>
+            <div>
+                <label style="display: block; color: #94A3B8; font-size: 11px; font-weight: 700; text-transform: uppercase; margin-bottom: 4px;">Auth / Custom Header Required</label>
+                <div style="background: #0F172A; border: 1px solid rgba(245, 158, 11, 0.3); padding: 10px 14px; border-radius: 8px; font-family: monospace; font-size: 13px; color: #F59E0B;">
+                    X-Agent-Secret: {{ agent_secret_key }}
+                </div>
+            </div>
+        </div>
+
+        <div style="margin-bottom: 14px;">
+            <div style="color: #94A3B8; font-size: 12px; font-weight: 700; text-transform: uppercase; margin-bottom: 8px;">Parameters</div>
+            <table style="width: 100%; border-collapse: collapse; background: #0F172A; border-radius: 8px; overflow: hidden; font-size: 13px; color: #CBD5E1;">
+                <thead>
+                    <tr style="background: rgba(255,255,255,0.05); text-align: left; color: #94A3B8; font-size: 11px; text-transform: uppercase;">
+                        <th style="padding: 10px 14px;">Name</th>
+                        <th style="padding: 10px 14px;">Type</th>
+                        <th style="padding: 10px 14px;">Description</th>
+                        <th style="padding: 10px 14px;">Required</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td style="padding: 10px 14px; font-family: monospace; color: #38BDF8;">user_email</td>
+                        <td style="padding: 10px 14px;">String</td>
+                        <td style="padding: 10px 14px;">User's email address on OneSol AI</td>
+                        <td style="padding: 10px 14px; color: #EF4444; font-weight: 700;">Yes</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+
+    <!-- ─────────────────────────────────────────────── -->
+    <!-- TOOL 6: check_user_referrals -->
+    <!-- ─────────────────────────────────────────────── -->
+    <div id="tool_referrals" class="glass-card" style="padding: 24px; margin-bottom: 24px;">
+        <div style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12px; border-bottom: 1px solid rgba(255,255,255,0.08); padding-bottom: 14px; margin-bottom: 16px;">
+            <div style="display: flex; align-items: center; gap: 10px;">
+                <span style="background: #4F46E5; color: #FFF; font-size: 11px; font-weight: 800; padding: 4px 10px; border-radius: 6px;">GET</span>
+                <h3 style="color: #FFFFFF; font-size: 18px; font-weight: 700; margin: 0;">6. check_user_referrals</h3>
+            </div>
+            <span style="color: #6366F1; font-size: 13px; font-weight: 600;">Fetch Referrals, Links &amp; Earnings</span>
+        </div>
+
+        <div style="display: grid; grid-template-columns: 1fr; gap: 14px; margin-bottom: 16px;">
+            <div>
+                <label style="display: block; color: #94A3B8; font-size: 11px; font-weight: 700; text-transform: uppercase; margin-bottom: 4px;">Endpoint URL</label>
+                <div style="display: flex; gap: 8px;">
+                    <input type="text" readonly value="https://onesolai.com/api/agent/user-referrals/" id="url_ref" style="width: 100%; background: #0F172A; border: 1px solid rgba(255,255,255,0.12); color: #38BDF8; font-family: monospace; font-size: 13px; padding: 10px 14px; border-radius: 8px;">
+                    <button onclick="copyInput('url_ref', 'Endpoint URL')" class="btn-primary" style="padding: 0 16px; font-size: 12px;">Copy</button>
+                </div>
+            </div>
+            <div>
+                <label style="display: block; color: #94A3B8; font-size: 11px; font-weight: 700; text-transform: uppercase; margin-bottom: 4px;">Description for AI</label>
+                <div style="display: flex; gap: 8px;">
+                    <input type="text" readonly value="Use this to retrieve a user's referral code, shareable signup link, referral earnings balance, total referrals count, and recent referred users." id="desc_ref" style="width: 100%; background: #0F172A; border: 1px solid rgba(255,255,255,0.12); color: #E2E8F0; font-size: 13px; padding: 10px 14px; border-radius: 8px;">
+                    <button onclick="copyInput('desc_ref', 'Description')" class="btn-primary" style="padding: 0 16px; font-size: 12px;">Copy</button>
+                </div>
+            </div>
+            <div>
+                <label style="display: block; color: #94A3B8; font-size: 11px; font-weight: 700; text-transform: uppercase; margin-bottom: 4px;">Auth / Custom Header Required</label>
+                <div style="background: #0F172A; border: 1px solid rgba(99, 102, 241, 0.3); padding: 10px 14px; border-radius: 8px; font-family: monospace; font-size: 13px; color: #6366F1;">
+                    X-Agent-Secret: {{ agent_secret_key }}
+                </div>
+            </div>
+        </div>
+
+        <div style="margin-bottom: 14px;">
+            <div style="color: #94A3B8; font-size: 12px; font-weight: 700; text-transform: uppercase; margin-bottom: 8px;">Parameters</div>
+            <table style="width: 100%; border-collapse: collapse; background: #0F172A; border-radius: 8px; overflow: hidden; font-size: 13px; color: #CBD5E1;">
+                <thead>
+                    <tr style="background: rgba(255,255,255,0.05); text-align: left; color: #94A3B8; font-size: 11px; text-transform: uppercase;">
+                        <th style="padding: 10px 14px;">Name</th>
+                        <th style="padding: 10px 14px;">Type</th>
+                        <th style="padding: 10px 14px;">Description</th>
+                        <th style="padding: 10px 14px;">Required</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td style="padding: 10px 14px; font-family: monospace; color: #38BDF8;">user_email</td>
+                        <td style="padding: 10px 14px;">String</td>
+                        <td style="padding: 10px 14px;">User's email address on OneSol AI</td>
+                        <td style="padding: 10px 14px; color: #EF4444; font-weight: 700;">Yes</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+
+    <!-- ─────────────────────────────────────────────── -->
+    <!-- TOOL 7: check_user_withdrawals -->
+    <!-- ─────────────────────────────────────────────── -->
+    <div id="tool_withdrawals" class="glass-card" style="padding: 24px; margin-bottom: 24px;">
+        <div style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12px; border-bottom: 1px solid rgba(255,255,255,0.08); padding-bottom: 14px; margin-bottom: 16px;">
+            <div style="display: flex; align-items: center; gap: 10px;">
+                <span style="background: #E11D48; color: #FFF; font-size: 11px; font-weight: 800; padding: 4px 10px; border-radius: 6px;">GET</span>
+                <h3 style="color: #FFFFFF; font-size: 18px; font-weight: 700; margin: 0;">7. check_user_withdrawals</h3>
+            </div>
+            <span style="color: #F43F5E; font-size: 13px; font-weight: 600;">Fetch Withdrawal History &amp; Payout Details</span>
+        </div>
+
+        <div style="display: grid; grid-template-columns: 1fr; gap: 14px; margin-bottom: 16px;">
+            <div>
+                <label style="display: block; color: #94A3B8; font-size: 11px; font-weight: 700; text-transform: uppercase; margin-bottom: 4px;">Endpoint URL</label>
+                <div style="display: flex; gap: 8px;">
+                    <input type="text" readonly value="https://onesolai.com/api/agent/user-withdrawals/" id="url_wth" style="width: 100%; background: #0F172A; border: 1px solid rgba(255,255,255,0.12); color: #38BDF8; font-family: monospace; font-size: 13px; padding: 10px 14px; border-radius: 8px;">
+                    <button onclick="copyInput('url_wth', 'Endpoint URL')" class="btn-primary" style="padding: 0 16px; font-size: 12px;">Copy</button>
+                </div>
+            </div>
+            <div>
+                <label style="display: block; color: #94A3B8; font-size: 11px; font-weight: 700; text-transform: uppercase; margin-bottom: 4px;">Description for AI</label>
+                <div style="display: flex; gap: 8px;">
+                    <input type="text" readonly value="Use this to check a user's referral withdrawal request history, withdrawal status, payout bank or crypto wallet details, and minimum withdrawal threshold." id="desc_wth" style="width: 100%; background: #0F172A; border: 1px solid rgba(255,255,255,0.12); color: #E2E8F0; font-size: 13px; padding: 10px 14px; border-radius: 8px;">
+                    <button onclick="copyInput('desc_wth', 'Description')" class="btn-primary" style="padding: 0 16px; font-size: 12px;">Copy</button>
+                </div>
+            </div>
+            <div>
+                <label style="display: block; color: #94A3B8; font-size: 11px; font-weight: 700; text-transform: uppercase; margin-bottom: 4px;">Auth / Custom Header Required</label>
+                <div style="background: #0F172A; border: 1px solid rgba(244, 63, 94, 0.3); padding: 10px 14px; border-radius: 8px; font-family: monospace; font-size: 13px; color: #F43F5E;">
+                    X-Agent-Secret: {{ agent_secret_key }}
+                </div>
+            </div>
+        </div>
+
+        <div style="margin-bottom: 14px;">
+            <div style="color: #94A3B8; font-size: 12px; font-weight: 700; text-transform: uppercase; margin-bottom: 8px;">Parameters</div>
+            <table style="width: 100%; border-collapse: collapse; background: #0F172A; border-radius: 8px; overflow: hidden; font-size: 13px; color: #CBD5E1;">
+                <thead>
+                    <tr style="background: rgba(255,255,255,0.05); text-align: left; color: #94A3B8; font-size: 11px; text-transform: uppercase;">
+                        <th style="padding: 10px 14px;">Name</th>
+                        <th style="padding: 10px 14px;">Type</th>
+                        <th style="padding: 10px 14px;">Description</th>
+                        <th style="padding: 10px 14px;">Required</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td style="padding: 10px 14px; font-family: monospace; color: #38BDF8;">user_email</td>
+                        <td style="padding: 10px 14px;">String</td>
+                        <td style="padding: 10px 14px;">User's email address on OneSol AI</td>
+                        <td style="padding: 10px 14px; color: #EF4444; font-weight: 700;">Yes</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+
+    <!-- ─────────────────────────────────────────────── -->
+    <!-- TOOL 8: check_order_status -->
+    <!-- ─────────────────────────────────────────────── -->
+    <div id="tool_orders" class="glass-card" style="padding: 24px; margin-bottom: 24px;">
+        <div style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12px; border-bottom: 1px solid rgba(255,255,255,0.08); padding-bottom: 14px; margin-bottom: 16px;">
+            <div style="display: flex; align-items: center; gap: 10px;">
+                <span style="background: #0D9488; color: #FFF; font-size: 11px; font-weight: 800; padding: 4px 10px; border-radius: 6px;">GET</span>
+                <h3 style="color: #FFFFFF; font-size: 18px; font-weight: 700; margin: 0;">8. check_order_status</h3>
+            </div>
+            <span style="color: #14B8A6; font-size: 13px; font-weight: 600;">Fetch Order Credentials &amp; Status</span>
+        </div>
+
+        <div style="display: grid; grid-template-columns: 1fr; gap: 14px; margin-bottom: 16px;">
+            <div>
+                <label style="display: block; color: #94A3B8; font-size: 11px; font-weight: 700; text-transform: uppercase; margin-bottom: 4px;">Endpoint URL</label>
+                <div style="display: flex; gap: 8px;">
+                    <input type="text" readonly value="https://onesolai.com/api/agent/order-status/" id="url_ord" style="width: 100%; background: #0F172A; border: 1px solid rgba(255,255,255,0.12); color: #38BDF8; font-family: monospace; font-size: 13px; padding: 10px 14px; border-radius: 8px;">
+                    <button onclick="copyInput('url_ord', 'Endpoint URL')" class="btn-primary" style="padding: 0 16px; font-size: 12px;">Copy</button>
+                </div>
+            </div>
+            <div>
+                <label style="display: block; color: #94A3B8; font-size: 11px; font-weight: 700; text-transform: uppercase; margin-bottom: 4px;">Description for AI</label>
+                <div style="display: flex; gap: 8px;">
+                    <input type="text" readonly value="Use this to look up an order status, check delivery status, or retrieve login credentials and activation details for a paid order using an order number (e.g. OS-00025) or user email." id="desc_ord" style="width: 100%; background: #0F172A; border: 1px solid rgba(255,255,255,0.12); color: #E2E8F0; font-size: 13px; padding: 10px 14px; border-radius: 8px;">
+                    <button onclick="copyInput('desc_ord', 'Description')" class="btn-primary" style="padding: 0 16px; font-size: 12px;">Copy</button>
+                </div>
+            </div>
+            <div>
+                <label style="display: block; color: #94A3B8; font-size: 11px; font-weight: 700; text-transform: uppercase; margin-bottom: 4px;">Auth / Custom Header Required</label>
+                <div style="background: #0F172A; border: 1px solid rgba(20, 184, 166, 0.3); padding: 10px 14px; border-radius: 8px; font-family: monospace; font-size: 13px; color: #14B8A6;">
+                    X-Agent-Secret: {{ agent_secret_key }}
+                </div>
+            </div>
+        </div>
+
+        <div style="margin-bottom: 14px;">
+            <div style="color: #94A3B8; font-size: 12px; font-weight: 700; text-transform: uppercase; margin-bottom: 8px;">Parameters</div>
+            <table style="width: 100%; border-collapse: collapse; background: #0F172A; border-radius: 8px; overflow: hidden; font-size: 13px; color: #CBD5E1;">
+                <thead>
+                    <tr style="background: rgba(255,255,255,0.05); text-align: left; color: #94A3B8; font-size: 11px; text-transform: uppercase;">
+                        <th style="padding: 10px 14px;">Name</th>
+                        <th style="padding: 10px 14px;">Type</th>
+                        <th style="padding: 10px 14px;">Description</th>
+                        <th style="padding: 10px 14px;">Required</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr style="border-bottom: 1px solid rgba(255,255,255,0.05);">
+                        <td style="padding: 10px 14px; font-family: monospace; color: #38BDF8;">order_number</td>
+                        <td style="padding: 10px 14px;">String</td>
+                        <td style="padding: 10px 14px;">Specific order number e.g. OS-00025 or 25</td>
+                        <td style="padding: 10px 14px; color: #F59E0B; font-weight: 700;">Either order_number or user_email</td>
+                    </tr>
+                    <tr>
+                        <td style="padding: 10px 14px; font-family: monospace; color: #38BDF8;">user_email</td>
+                        <td style="padding: 10px 14px;">String</td>
+                        <td style="padding: 10px 14px;">User's email to fetch their 5 recent orders</td>
+                        <td style="padding: 10px 14px; color: #F59E0B; font-weight: 700;">Either order_number or user_email</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+</div>
+
+<script>
+function copyInput(elementId, label) {
+    const input = document.getElementById(elementId);
+    if (!input) return;
+    input.select();
+    input.setSelectionRange(0, 99999);
+    navigator.clipboard.writeText(input.value);
+    showToast(label + ' copied to clipboard!');
+}
+
+function copyText(text, label) {
+    navigator.clipboard.writeText(text);
+    showToast(label + ' copied to clipboard!');
+}
+
+function showToast(msg) {
+    const toast = document.createElement('div');
+    toast.style.position = 'fixed';
+    toast.style.bottom = '24px';
+    toast.style.right = '24px';
+    toast.style.background = '#10B981';
+    toast.style.color = '#FFFFFF';
+    toast.style.padding = '12px 24px';
+    toast.style.borderRadius = '10px';
+    toast.style.fontWeight = '700';
+    toast.style.fontSize = '14px';
+    toast.style.boxShadow = '0 10px 25px rgba(16, 185, 129, 0.4)';
+    toast.style.zIndex = '99999';
+    toast.innerText = msg;
+    document.body.appendChild(toast);
+    setTimeout(() => {
+        toast.style.opacity = '0';
+        toast.style.transition = 'opacity 0.3s ease';
+        setTimeout(() => toast.remove(), 300);
+    }, 2500);
+}
+</script>
+{% endblock %}
