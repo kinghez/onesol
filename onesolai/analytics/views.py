@@ -617,8 +617,6 @@ def buy_tool_for_user_api(request):
             return JsonResponse({'success': False, 'error': 'Tool selection is required.'}, status=400)
 
         user = User.objects.filter(email__iexact=email).first()
-        if not user:
-            return JsonResponse({'success': False, 'error': f'No user account found with email "{email}".'}, status=404)
 
         tool = Tool.objects.filter(id=tool_id, is_active=True).first()
         if not tool:
@@ -626,35 +624,57 @@ def buy_tool_for_user_api(request):
 
         price_ngn = Decimal(str(round(tool.get_ngn_price(), 2)))
 
-        profile = user.profile
-        if payment_method == 'wallet':
-            if profile.wallet_balance < price_ngn:
+        import uuid
+        claim_token = None
+
+        if not user:
+            if payment_method == 'wallet':
                 return JsonResponse({
                     'success': False,
-                    'error': f"User has insufficient wallet balance (Bal: NGN {profile.wallet_balance:,.2f}, Tool Price: NGN {price_ngn:,.2f}). Please fund user's wallet first or select Complimentary Admin Gift."
+                    'error': f'No account found with email "{email}". Please select "🎁 Complimentary Admin Gift / Cash Paid Direct" to purchase for an unregistered customer.'
                 }, status=400)
 
-            profile.wallet_balance -= price_ngn
-            profile.save(update_fields=['wallet_balance'])
-
-            WalletTransaction.objects.create(
-                user=user,
-                transaction_type='purchase',
-                amount_ngn=price_ngn,
-                status='success',
-                reference=f"ADMIN_BUY_{tool.id}",
-                description=f"Purchased {tool.name} (Admin Purchase)"
+            claim_token = f"CLAIM_{uuid.uuid4().hex}"
+            order = Order.objects.create(
+                user=None,
+                claim_token=claim_token,
+                total_amount_ngn=price_ngn,
+                local_currency='NGN',
+                local_amount=price_ngn,
+                exchange_rate=Decimal('1500.00'),
+                delivery_email=email,
+                status='paid',
             )
+        else:
+            profile = user.profile
+            if payment_method == 'wallet':
+                if profile.wallet_balance < price_ngn:
+                    return JsonResponse({
+                        'success': False,
+                        'error': f"User has insufficient wallet balance (Bal: NGN {profile.wallet_balance:,.2f}, Tool Price: NGN {price_ngn:,.2f}). Please fund user's wallet first or select Complimentary Admin Gift."
+                    }, status=400)
 
-        order = Order.objects.create(
-            user=user,
-            total_amount_ngn=price_ngn,
-            local_currency='NGN',
-            local_amount=price_ngn,
-            exchange_rate=Decimal('1500.00'),
-            delivery_email=user.email,
-            status='paid',
-        )
+                profile.wallet_balance -= price_ngn
+                profile.save(update_fields=['wallet_balance'])
+
+                WalletTransaction.objects.create(
+                    user=user,
+                    transaction_type='purchase',
+                    amount_ngn=price_ngn,
+                    status='success',
+                    reference=f"ADMIN_BUY_{tool.id}",
+                    description=f"Purchased {tool.name} (Admin Purchase)"
+                )
+
+            order = Order.objects.create(
+                user=user,
+                total_amount_ngn=price_ngn,
+                local_currency='NGN',
+                local_amount=price_ngn,
+                exchange_rate=Decimal('1500.00'),
+                delivery_email=user.email,
+                status='paid',
+            )
 
         OrderItem.objects.create(
             order=order,
@@ -664,7 +684,7 @@ def buy_tool_for_user_api(request):
 
         PaymentTransaction.objects.create(
             order=order,
-            gateway='wallet' if payment_method == 'wallet' else 'manual',
+            gateway='wallet' if (user and payment_method == 'wallet') else 'manual',
             transaction_id=f"ADMIN_PAY_{order.id}",
             reference=f"ADMIN_PAY_{order.id}",
             status='success',
@@ -674,8 +694,8 @@ def buy_tool_for_user_api(request):
 
         ActivityLog.log(
             action_type='wallet_purchase',
-            title=f"Admin Purchased {tool.name} for {user.email}",
-            details=f"Order #{order.order_number} | Amount: NGN {price_ngn:,.2f} | Payment: {payment_method.title()} | Admin: {request.user.email}",
+            title=f"Admin Purchased {tool.name} for {email}",
+            details=f"Order #{order.order_number} | Amount: NGN {price_ngn:,.2f} | Payment: {payment_method.title()} | Admin: {request.user.email} | User Registered: {bool(user)}",
             user=user,
             performed_by=request.user,
             severity='success'
@@ -689,11 +709,43 @@ def buy_tool_for_user_api(request):
 
         trigger_delivery(order)
 
+        claim_url = None
+        if not user and claim_token:
+            from core.models import SiteSettings
+            cfg = SiteSettings.get()
+            base_site_url = (cfg.site_url or 'https://onesolai.com').rstrip('/')
+            claim_url = f"{base_site_url}/auth/signup/?claim_token={claim_token}&email={email}"
+            
+            try:
+                from core.email_utils import send_async_email
+                sub = f"🎁 Action Required: Claim your {tool.name} Access on {cfg.site_name or 'OneSol AI Hub'}"
+                msg = f"Hello,\n\nAn order for {tool.name} has been processed for your email address.\n\nPlease register your account using the link below to view your activation credentials in your dashboard:\n{claim_url}\n\nThank you,\n{cfg.site_name or 'OneSol AI Hub'} Team"
+                html_msg = f"""
+                <div style="font-family: Arial, sans-serif; background: #0b0f29; color: #ffffff; padding: 30px; border-radius: 12px; max-width: 550px; margin: 0 auto;">
+                    <h2 style="color: #6366F1; margin-top: 0;">🎁 {tool.name} Purchased For You!</h2>
+                    <p style="color: #aeb5ca; font-size: 15px; line-height: 1.6;">
+                        An order for <strong>{tool.name}</strong> has been processed for your email address.
+                    </p>
+                    <div style="background: #161b40; padding: 20px; border-radius: 10px; margin: 20px 0; border: 1px solid rgba(255,255,255,0.1);">
+                        <p style="margin: 0 0 10px 0; font-size: 14px; color: #aeb5ca;">Click the button below to create your free account and access your product credentials instantly in your User Dashboard:</p>
+                        <div style="text-align: center; margin-top: 15px;">
+                            <a href="{claim_url}" style="background: linear-gradient(135deg, #6366f1, #4f46e5); color: #ffffff; text-decoration: none; padding: 12px 24px; border-radius: 8px; font-weight: bold; display: inline-block;">Create Account &amp; Claim Credentials</a>
+                        </div>
+                    </div>
+                    <p style="color: #6b7280; font-size: 12px;">Or copy &amp; paste this URL in your browser: <br><a href="{claim_url}" style="color: #8c9eff;">{claim_url}</a></p>
+                </div>
+                """
+                send_async_email(sub, msg, [email], html_message=html_msg)
+            except Exception as em_err:
+                logger.error(f"Failed to send claim email to {email}: {em_err}")
+
         return JsonResponse({
             'success': True,
             'order_id': order.id,
             'order_number': order.order_number,
-            'message': f"Successfully purchased {tool.name} for {user.email}! Order #{order.order_number} processed and delivered."
+            'is_new_user': not bool(user),
+            'claim_url': claim_url,
+            'message': f"Successfully purchased {tool.name} for {email}! Order #{order.order_number} processed." + (f" Registration link generated." if claim_url else "")
         })
 
     return JsonResponse({'success': False, 'error': 'Invalid request method.'}, status=405)

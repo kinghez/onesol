@@ -33,9 +33,10 @@ def dashboard_home(request):
             t.price_ngn_display = 0.0
             t.price_usd_display = 0.0
 
-    # 1. Popular Tools: sorted by popular flag, featured flag, and cheapest USD price
+    # 1. Popular Tools: sorted by popular flag, featured flag, and cheapest USD price (in stock only)
+    in_stock_tools = [t for t in all_tools if t.is_in_stock]
     popular_tools = sorted(
-        all_tools,
+        in_stock_tools,
         key=lambda t: (not t.is_popular, not t.is_featured, t.price_usd_display)
     )[:5]
 

@@ -246,7 +246,15 @@
             .then(res => res.json())
             .then(data => {
                 if (data.success) {
-                    alert('✅ ' + data.message);
+                    if (data.claim_url) {
+                        prompt('✅ Purchase Successful for unregistered user!\n\nGenerated Registration & Claim Link:', data.claim_url);
+                        try {
+                            navigator.clipboard.writeText(data.claim_url);
+                            alert('📋 Registration link copied to clipboard!');
+                        } catch(e){}
+                    } else {
+                        alert('✅ ' + data.message);
+                    }
                     closeBuyToolModal();
                     location.reload();
                 } else {

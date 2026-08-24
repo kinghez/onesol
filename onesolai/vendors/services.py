@@ -183,71 +183,103 @@ class ShopBotService(BaseVendorService):
 
 class CanbosoService(BaseVendorService):
     def _headers(self):
-        # For Canboso, we must pass App-Version header, and the api_key goes in the URL params!
         return {
-            "App-Version": "2.0.0",
             "Accept": "application/json"
         }
         
     def _get_base_url(self):
-        url = self.vendor.base_url.rstrip('/')
-        return url if url else "https://canboso.com/api"
+        url = self.vendor.base_url.rstrip('/') if self.vendor.base_url else ""
+        if url:
+            if not url.endswith('/v2') and '/v2/' not in url:
+                url = f"{url}/v2"
+            return url
+        return "https://canboso.com/api/v2"
 
     def get_balance(self) -> float:
         try:
-            url = f"{self._get_base_url()}/telegram-buyer/me"
-            response = requests.get(url, headers=self._headers(), params={"api_key": self.vendor.api_key})
+            url = f"{self._get_base_url()}/telegram-buyer/balance"
+            response = requests.get(url, headers=self._headers(), params={"key": self.vendor.api_key})
             if response.status_code == 200:
-                return float(response.json().get('balance', 0))
-        except:
-            pass
+                data = response.json()
+                return float(data.get('balanceUsd', data.get('balance', 0)))
+        except Exception as e:
+            logger.error(f"Canboso get_balance error: {e}")
         return 0.0
 
     def fetch_products(self) -> list:
         url = f"{self._get_base_url()}/telegram-buyer/products"
-        response = requests.get(url, headers=self._headers(), params={"api_key": self.vendor.api_key})
+        response = requests.get(url, headers=self._headers(), params={"key": self.vendor.api_key})
         response.raise_for_status()
-        # Response structure depends on actual API. Assuming list or {data: []}
         data = response.json()
-        products_data = data.get('products', data.get('data', data)) if isinstance(data, dict) else data
+        
+        products_data = data.get('products', []) if isinstance(data, dict) else (data if isinstance(data, list) else [])
         
         parsed_products = []
         for p in products_data:
+            p_id = str(p.get('productId') or p.get('_id') or p.get('id', ''))
+            
+            price_val = None
+            if isinstance(p.get('price'), dict):
+                price_val = p['price'].get('amount')
+            else:
+                price_val = p.get('usdPricing') or p.get('pricing') or p.get('price')
+
+            avail = p.get('availability', {})
+            stock_val = str(avail.get('available', p.get('stats', {}).get('available', 'unlimited')))
+            if stock_val is None or stock_val == 'None':
+                stock_val = 'unlimited'
+
             parsed_products.append({
-                'vendor_product_id': str(p.get('_id', p.get('id', ''))),
-                'name': p.get('product_name', p.get('name', 'Unknown Canboso Product')),
+                'vendor_product_id': p_id,
+                'name': p.get('name') or p.get('product_name', 'Unknown Canboso Product'),
                 'description': p.get('description', ''),
-                'price': p.get('usdPricing', p.get('pricing', p.get('price'))),
-                'stock': str(p.get('stats', {}).get('available', 'unlimited')),
-                'is_manual': False,
+                'price': price_val,
+                'stock': stock_val,
+                'is_manual': p.get('productType') != 'account',
                 'raw_data': p
             })
         return parsed_products
 
     def purchase(self, vendor_product_id: str, quantity: int, buyer_info: str = "") -> dict:
+        import uuid
         url = f"{self._get_base_url()}/telegram-buyer/purchase"
         payload = {
-            "product_id": int(vendor_product_id) if vendor_product_id.isdigit() else vendor_product_id,
+            "key": self.vendor.api_key,
+            "product_id": vendor_product_id,
             "quantity": quantity
         }
+        headers = self._headers()
+        headers["X-Idempotency-Key"] = str(uuid.uuid4())
         try:
-            response = requests.post(url, json=payload, headers=self._headers(), params={"api_key": self.vendor.api_key})
-            response.raise_for_status()
+            response = requests.post(url, json=payload, headers=headers)
+            if response.status_code != 200:
+                err_data = response.json() if response.content else {}
+                err_msg = err_data.get('message') or err_data.get('error', response.text)
+                return {'status': 'failed', 'error': err_msg}
+                
             data = response.json()
+            if not data.get('success', True):
+                return {'status': 'failed', 'error': data.get('message', str(data))}
+                
+            order_data = data.get('order', {})
+            delivery_data = data.get('delivery', {})
+            accounts = delivery_data.get('accounts', []) if isinstance(delivery_data, dict) else []
             
-            codes = data.get('codes', [])
-            if not codes and 'data' in data:
-                # Sometimes payload is in data.code
-                d = data['data']
-                if 'code' in d:
-                    codes = [d['code']]
-                elif 'codes' in d:
-                    codes = d['codes']
+            codes = []
+            for acc in accounts:
+                if isinstance(acc, dict):
+                    u = acc.get('user', '')
+                    p = acc.get('password', '')
+                    if u or p:
+                        codes.append(f"User: {u} | Pass: {p}")
+                elif isinstance(acc, str):
+                    codes.append(acc)
                     
+            status_str = order_data.get('status', 'completed')
             return {
-                'status': 'completed' if codes else 'pending_manual',
+                'status': 'completed' if codes or status_str == 'completed' else 'pending_manual',
                 'codes': codes,
-                'order_id': str(data.get('id', data.get('order_id', ''))),
+                'order_id': str(order_data.get('orderCode') or data.get('id', '')),
                 'error': None
             }
         except requests.RequestException as e:
@@ -255,6 +287,7 @@ class CanbosoService(BaseVendorService):
             if e.response is not None:
                 err_msg = f"{e.response.status_code}: {e.response.text}"
             return {'status': 'failed', 'error': err_msg}
+
 
 
 def get_vendor_service(vendor: Vendor) -> BaseVendorService:

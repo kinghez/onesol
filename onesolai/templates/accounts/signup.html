@@ -18,6 +18,13 @@
             </div>
 
             <div class="auth-actions">
+                {% if has_claim %}
+                <div class="alert alert-info" style="background: rgba(16, 185, 129, 0.15); border: 1px solid #10B981; color: #10B981; padding: 14px; border-radius: 10px; margin-bottom: 20px; font-size: 14px; text-align: center;">
+                    <i class="fa-solid fa-gift" style="font-size: 16px;"></i> <strong>Purchased Product Waiting!</strong><br>
+                    <span style="font-size: 13px; color: #aeb5ca;">Complete your registration to claim your tool access credentials instantly in your dashboard.</span>
+                </div>
+                {% endif %}
+
                 {% if referrer_name %}
                 <div class="alert alert-info" style="background: rgba(142, 108, 255, 0.1); color: #8E6CFF; padding: 12px; border-radius: 8px; margin-bottom: 20px; font-size: 14px; text-align: center;">
                     <i class="fa-solid fa-gift"></i> You were referred by <strong>{{ referrer_name }}</strong>
@@ -55,7 +62,7 @@
                         <label class="form-label" for="email">Email address</label>
                         <div class="form-input-wrapper">
                             <i class="fa-regular fa-envelope form-input-icon"></i>
-                            <input type="email" id="email" name="email" class="form-input has-icon" placeholder="john@example.com" required>
+                            <input type="email" id="email" name="email" class="form-input has-icon" placeholder="john@example.com" value="{{ claim_email }}" required>
                         </div>
                     </div>
 

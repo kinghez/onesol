@@ -163,6 +163,9 @@ def checkout_view(request):
 
     local_amount = Decimal(str(round(float(usd_price) * float(rate), 2)))
 
+    submitted_email = request.POST.get('delivery_email', '').strip()
+    target_delivery_email = submitted_email if submitted_email else request.user.email
+
     # Create Order
     order = Order.objects.create(
         user=request.user,
@@ -170,7 +173,7 @@ def checkout_view(request):
         local_currency=user_currency,
         local_amount=local_amount,
         exchange_rate=Decimal(str(rate)),
-        delivery_email=request.user.email,
+        delivery_email=target_delivery_email,
         status='pending',
     )
     OrderItem.objects.create(

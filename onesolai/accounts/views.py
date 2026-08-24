@@ -123,13 +123,48 @@ def signup_view(request):
             from core.email_utils import send_welcome_email
             send_welcome_email(user)
 
+            # ── Automatic Order Claiming ──
+            try:
+                from orders.models import Order
+                from notifications.models import Notification
+
+                unclaimed_orders = Order.objects.filter(delivery_email__iexact=email, user__isnull=True)
+                claimed_count = 0
+                for order in unclaimed_orders:
+                    order.user = user
+                    order.save(update_fields=['user'])
+                    claimed_count += 1
+
+                    items = order.items.select_related('tool').all()
+                    tool_name = items.first().tool.name if (items.exists() and items.first().tool) else 'Purchased Tool'
+
+                    notif_msg = f"Your order #{order.order_number} for {tool_name} is now linked to your account!"
+                    if order.access_details:
+                        notif_msg += f"\n\nActivation Details:\n{order.access_details}"
+
+                    Notification.objects.create(
+                        user=user,
+                        title=f"🎉 {tool_name} Linked to Your Account!",
+                        message=notif_msg,
+                        notification_type='order',
+                        action_url="/dashboard/orders/"
+                    )
+
+                if claimed_count > 0:
+                    messages.success(request, f"Welcome! {claimed_count} pre-purchased product(s) have been linked to your new account.")
+            except Exception as claim_err:
+                print(f"Error claiming orders on signup: {claim_err}")
+
             login(request, user)
             messages.success(request, f'Welcome to OneSol AI Hub, {first_name}!')
             return redirect('dashboard:home')
 
+    claim_email = request.GET.get('email', '').strip()
     context = {
         'ref_code': ref_code,
-        'referrer_name': referrer_name
+        'referrer_name': referrer_name,
+        'claim_email': claim_email,
+        'has_claim': bool(claim_email or request.GET.get('claim_token')),
     }
     return render(request, 'accounts/signup.html', context)
 

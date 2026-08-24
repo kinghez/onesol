@@ -20,7 +20,8 @@ PAYMENT_GATEWAY_CHOICES = [
 
 
 class Order(models.Model):
-    user = models.ForeignKey(settings.AUTH_USER_MODEL, related_name='orders', on_delete=models.CASCADE)
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, null=True, blank=True, related_name='orders', on_delete=models.SET_NULL)
+    claim_token = models.CharField(max_length=100, blank=True, null=True, db_index=True, help_text="Token for unregistered user to claim order upon signup")
     total_amount_ngn = models.DecimalField(max_digits=10, decimal_places=2)
     local_currency = models.CharField(max_length=10, default='NGN')
     local_amount = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True)
@@ -51,7 +52,8 @@ class Order(models.Model):
         ordering = ['-created_at']
 
     def __str__(self):
-        return f"Order #{self.order_number} ({self.id}) – {self.user.email} – {self.status.upper()}"
+        email_str = self.user.email if self.user else (self.delivery_email or 'Guest')
+        return f"Order #{self.order_number} ({self.id}) – {email_str} – {self.status.upper()}"
 
     @property
     def order_number(self):

@@ -57,13 +57,14 @@ def trigger_delivery(order):
         if order.access_details:
             notif_msg += f"\n\nActivation Details:\n{order.access_details}"
 
-        Notification.objects.create(
-            user=order.user,
-            title=f"🎉 {tool_name} Access Delivered!",
-            message=notif_msg,
-            notification_type='order',
-            action_url=f"/dashboard/orders/"
-        )
+        if order.user:
+            Notification.objects.create(
+                user=order.user,
+                title=f"🎉 {tool_name} Access Delivered!",
+                message=notif_msg,
+                notification_type='order',
+                action_url=f"/dashboard/orders/"
+            )
     except Exception:
         order.delivery_status = 'failed'
 

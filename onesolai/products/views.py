@@ -202,17 +202,21 @@ def tool_detail(request, slug):
 def get_popular_tools(limit=10, category_name=None):
     """
     Automated Popular Tools selection:
-    Top 10 most recent items purchased on platform or added to tool table.
-    If recently purchased items < limit, complete list with recently added tools.
+    Top 10 most recent items purchased on platform or added to tool table that are in stock.
+    If recently purchased items < limit, complete list with recently added in-stock tools.
     """
     from orders.models import OrderItem
     base_qs = Tool.objects.filter(is_active=True).select_related('category', 'vendor_product')
     if category_name and category_name != 'all':
         base_qs = base_qs.filter(category__name__iexact=category_name.strip())
 
+    base_tools = [t for t in base_qs if t.is_in_stock]
+    in_stock_ids = [t.id for t in base_tools]
+    base_dict = {t.id: t for t in base_tools}
+
     purchased_ids = []
     order_items = (
-        OrderItem.objects.filter(order__status='paid', tool__in=base_qs)
+        OrderItem.objects.filter(order__status='paid', tool_id__in=in_stock_ids)
         .order_by('-order__created_at')
         .select_related('tool')
     )
@@ -224,29 +228,26 @@ def get_popular_tools(limit=10, category_name=None):
 
     needed = limit - len(purchased_ids)
     if needed > 0:
-        recent_ids = list(
-            base_qs.exclude(id__in=purchased_ids)
-            .order_by('-created_at')
-            .values_list('id', flat=True)[:needed]
-        )
+        recent_in_stock = [t for t in base_tools if t.id not in purchased_ids]
+        recent_in_stock.sort(key=lambda t: t.created_at, reverse=True)
+        recent_ids = [t.id for t in recent_in_stock[:needed]]
         popular_ids = purchased_ids + recent_ids
     else:
         popular_ids = purchased_ids[:limit]
 
-    tools_dict = {t.id: t for t in base_qs.filter(id__in=popular_ids)}
-    return [tools_dict[tid] for tid in popular_ids if tid in tools_dict]
+    return [base_dict[tid] for tid in popular_ids if tid in base_dict]
 
 
 def get_cheapest_tools(limit=10, category_name=None):
     """
     Automated Top & Best Selling Tools selection:
-    Top 10 cheapest tools in the tool table.
+    Top 10 cheapest tools in the tool table that are currently in stock.
     """
     base_qs = Tool.objects.filter(is_active=True).select_related('category', 'vendor_product')
     if category_name and category_name != 'all':
         base_qs = base_qs.filter(category__name__iexact=category_name.strip())
 
-    tools = list(base_qs)
+    tools = [t for t in base_qs if t.is_in_stock]
     tools.sort(key=lambda t: t.get_usd_price())
     return tools[:limit]
 
@@ -261,9 +262,10 @@ def api_tools_json(request):
     elif filter_type == 'featured':
         tools = get_cheapest_tools(limit=10, category_name=category_filter)
     else:
-        tools = Tool.objects.filter(is_active=True).select_related('category')
+        tools_qs = Tool.objects.filter(is_active=True).select_related('category', 'vendor_product')
         if category_filter and category_filter != 'all':
-            tools = tools.filter(category__name__iexact=category_filter.strip())
+            tools_qs = tools_qs.filter(category__name__iexact=category_filter.strip())
+        tools = [t for t in tools_qs if t.is_in_stock]
 
     # Get user wishlisted tool IDs if authenticated
     user_wishlist_ids = set()

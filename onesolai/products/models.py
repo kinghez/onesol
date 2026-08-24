@@ -133,9 +133,14 @@ class Tool(models.Model):
 
     def get_stock_status(self):
         if self.vendor_product:
-            stock_str = self.vendor_product.stock.lower().strip()
-            if stock_str in ['0', 'none', 'out of stock', 'out_of_stock']:
+            stock_str = str(self.vendor_product.stock or '').lower().strip()
+            if stock_str in ['0', '0.0', 'none', 'out of stock', 'out_of_stock', 'false', '']:
                 return "Out of Stock"
+            try:
+                if float(stock_str) <= 0:
+                    return "Out of Stock"
+            except ValueError:
+                pass
             return "In Stock"
         return "In Stock"
 
