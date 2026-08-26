@@ -35,6 +35,49 @@
     {% else %}
     <link rel="icon" href="{% static 'assets/logo.png' %}">
     {% endif %}
+    <script>
+        window.liveUsdRates = {{ live_rates_json|safe }};
+        window.currencySymbols = {{ currency_symbols_json|safe }};
+        window.userCurrency = "{{ user_currency|default:'NGN' }}";
+        window.userCountryCode = "{{ user_country_code|default:'' }}";
+
+        window.formatToolPrice = function(usdPrice) {
+            var curr = (window.userCurrency || 'NGN').toUpperCase();
+            var countryCode = (window.userCountryCode || '').toUpperCase();
+            usdPrice = typeof usdPrice === 'number' ? usdPrice : parseFloat(usdPrice || 0);
+            var rates = window.liveUsdRates || { 'USD': 1, 'NGN': 1500, 'GBP': 0.78, 'EUR': 0.92, 'GHS': 15.4, 'KES': 129.5 };
+            var symbols = window.currencySymbols || { 'USD': '$', 'NGN': '₦', 'GBP': '£', 'EUR': '€', 'GHS': 'GH₵', 'KES': 'KSh' };
+            var rate = (rates[curr] !== undefined && rates[curr] > 0) ? rates[curr] : (curr === 'NGN' ? 1500 : 1.0);
+            var primaryAmount = usdPrice * rate;
+            var primarySymbol = symbols[curr] || curr;
+            var formattedPrimaryAmount = primaryAmount.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2});
+            var primaryDisplay = primarySymbol + ' ' + formattedPrimaryAmount + ' ' + curr;
+            var isUsa = (curr === 'USD') || (countryCode === 'US') || (countryCode === 'USA');
+            var secondaryDisplay = '';
+            if (isUsa) {
+                var gbpRate = rates['GBP'] || 0.78;
+                var gbpAmount = usdPrice * gbpRate;
+                var formattedGbp = gbpAmount.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2});
+                secondaryDisplay = '£' + formattedGbp + ' GBP';
+            } else {
+                secondaryDisplay = '$' + usdPrice.toFixed(2) + ' USD';
+            }
+            return { primary: primaryDisplay, secondary: secondaryDisplay, currency: curr };
+        };
+
+        window.formatNgnAmount = function(ngnAmount) {
+            var curr = (window.userCurrency || 'NGN').toUpperCase();
+            ngnAmount = typeof ngnAmount === 'number' ? ngnAmount : parseFloat(ngnAmount || 0);
+            var rates = window.liveUsdRates || { 'USD': 1, 'NGN': 1500 };
+            var symbols = window.currencySymbols || { 'USD': '$', 'NGN': '₦' };
+            var ngnRate = rates['NGN'] || 1500.0;
+            var usdVal = ngnAmount / ngnRate;
+            var targetRate = (rates[curr] !== undefined && rates[curr] > 0) ? rates[curr] : 1.0;
+            var finalVal = (curr === 'NGN') ? ngnAmount : (usdVal * targetRate);
+            var symbol = symbols[curr] || curr;
+            return symbol + ' ' + finalVal.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2}) + ' ' + curr;
+        };
+    </script>
 </head>
 <body class="fade-in">
     {% include 'includes/toast_messages.html' %}

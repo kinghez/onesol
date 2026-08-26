@@ -1,4 +1,5 @@
 {% extends 'base_dashboard.html' %}
+{% load currency_tags %}
 {% load static %}
 
 {% block title %}Referrals & Earnings – OneSol AI Hub{% endblock %}
@@ -37,14 +38,14 @@
     </div>
     <div class="ref-stat-card">
       <div class="ref-stat-icon gold"><i class="fa-solid fa-sack-dollar"></i></div>
-      <div class="ref-stat-val gradient-text">NGN {{ total_earned|floatformat:0 }}</div>
+      <div class="ref-stat-val gradient-text">{{ total_earned|convert_ngn:user_currency }}</div>
       <div class="ref-stat-label">Total Earned</div>
     </div>
     <div class="ref-stat-card highlight">
       <div class="ref-stat-icon blue"><i class="fa-solid fa-wallet"></i></div>
-      <div class="ref-stat-val gradient-text-green">NGN {{ available_balance|floatformat:0 }}</div>
+      <div class="ref-stat-val gradient-text-green">{{ available_balance|convert_ngn:user_currency }}</div>
       <div class="ref-stat-label">Available Balance</div>
-      <div class="ref-stat-sub">Min. withdrawal: NGN {{ min_withdrawal|floatformat:0 }}</div>
+      <div class="ref-stat-sub">Min. withdrawal: {{ min_withdrawal|convert_ngn:user_currency }}</div>
     </div>
   </div>
 
@@ -57,7 +58,7 @@
         <i class="fa-solid fa-link"></i> Your Referral Link
       </div>
       <p class="ref-card-desc">
-        Share your unique link and earn <strong class="text-purple">NGN {{ commission_per_referral|floatformat:0 }}</strong>
+        Share your unique link and earn <strong class="text-purple">{{ commission_per_referral|convert_ngn:user_currency }}</strong>
         for every friend who makes their first purchase.
       </p>
 
@@ -112,7 +113,7 @@
           </div>
           <div class="ref-how-step">
             <div class="ref-step-num">4</div>
-            <div class="ref-step-text">You earn <strong>NGN {{ commission_per_referral|floatformat:0 }}</strong> instantly!</div>
+            <div class="ref-step-text">You earn <strong>{{ commission_per_referral|convert_ngn:user_currency }}</strong> instantly!</div>
           </div>
         </div>
       </div>
@@ -151,7 +152,7 @@
       <div class="ref-empty">
         <div class="ref-empty-icon"><i class="fa-solid fa-money-bill-wave"></i></div>
         <p>No withdrawal requests yet.</p>
-        <p class="ref-empty-sub">When you have NGN {{ min_withdrawal|floatformat:0 }}+ in earnings, you can withdraw here.</p>
+        <p class="ref-empty-sub">When you have {{ min_withdrawal|convert_ngn:user_currency }}+ in earnings, you can withdraw here.</p>
       </div>
       {% endif %}
     </div>
@@ -228,7 +229,7 @@
     <div class="modal-header">
       <div class="modal-icon"><i class="fa-solid fa-money-bill-transfer"></i></div>
       <h2 class="modal-title">Withdraw Earnings</h2>
-      <p class="modal-sub">Available: <strong class="text-green">NGN {{ available_balance|floatformat:0 }}</strong></p>
+      <p class="modal-sub">Available: <strong class="text-green">{{ available_balance|convert_ngn:user_currency }}</strong></p>
     </div>
 
     <form method="POST" action="{% url 'dashboard:withdraw' %}" class="modal-form" id="withdrawForm">
@@ -242,7 +243,7 @@
             min="{{ min_withdrawal }}" max="{{ available_balance }}"
             placeholder="{{ min_withdrawal|floatformat:0 }}" required step="100">
         </div>
-        <span class="mf-hint">Minimum: NGN {{ min_withdrawal|floatformat:0 }}</span>
+        <span class="mf-hint">Minimum: {{ min_withdrawal|convert_ngn:user_currency }}</span>
       </div>
 
       <div class="mf-group">

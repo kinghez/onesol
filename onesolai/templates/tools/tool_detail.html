@@ -1,4 +1,5 @@
 {% extends 'base_public.html' %}
+{% load currency_tags %}
 {% load static %}
 
 {% block title %}OneSol AI Hub - Tool Details{% endblock %}
@@ -60,7 +61,7 @@
                         <label style="font-size:12px; color:#AEB5CA; display:block; margin-bottom:4px; font-weight:600;">Payment Gateway</label>
                         <select name="payment_method" style="background:#0f1535; border:1px solid rgba(255,255,255,0.2); color:#fff; font-size:13px; padding:10px 12px; border-radius:8px; width:100%; cursor:pointer;">
                             {% if user.is_authenticated and user.profile.wallet_balance > 0 %}
-                            <option value="wallet" style="background:#0f1535; color:#ffffff; font-weight:bold;">👛 Pay with Wallet (Bal: ₦{{ user.profile.wallet_balance|floatformat:2 }})</option>
+                            <option value="wallet" style="background:#0f1535; color:#ffffff; font-weight:bold;">👛 Pay with Wallet (Bal: {{ user.profile.wallet_balance|convert_ngn:user_currency }})</option>
                             {% endif %}
                             <option value="card" style="background:#0f1535; color:#ffffff;">💳 Card / Bank Transfer (Paystack / Flutterwave)</option>
                             <option value="crypto" style="background:#0f1535; color:#ffffff;">🪙 Crypto (USDT TRC20 / BEP20)</option>

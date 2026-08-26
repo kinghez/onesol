@@ -1,4 +1,5 @@
 {% extends 'base_dashboard.html' %}
+{% load currency_tags %}
 {% load static %}
 
 {% block title %}OneSol AI Hub - Dashboard{% endblock %}
@@ -20,7 +21,7 @@
                 </div>
                 Referral Earnings
             </div>
-            <div class="stat-number mb-2">NGN {{ referral_earnings|default:"0.00" }}</div>
+            <div class="stat-number mb-2">{{ profile.earnings|convert_ngn:user_currency }}</div>
             <a href="{% url 'dashboard:referrals' %}" class="card-link">View referrals &rarr;</a>
         </div>
 
@@ -31,7 +32,7 @@
                 </div>
                 Wallet Balance
             </div>
-            <div class="stat-number mb-2">NGN {{ wallet_balance|default:"0.00" }}</div>
+            <div class="stat-number mb-2">{{ profile.wallet_balance|convert_ngn:user_currency }}</div>
             <a href="{% url 'dashboard:wallet' %}" class="card-link">Top up wallet &rarr;</a>
         </div>
     </div>
@@ -84,8 +85,8 @@
                     </div>
                     <div class="list-item-right">
                         <div style="text-align:right;">
-                            <div class="list-item-value" style="color:#4ade80;">NGN {{ tool.price_ngn_display|floatformat:0 }}</div>
-                            <div class="text-secondary text-small" style="font-size:11px; color:#AEB5CA;">${{ tool.price_usd_display|floatformat:2 }} USD</div>
+                            <div class="list-item-value" style="color:#4ade80;">{{ tool.get_usd_price|convert_usd:user_currency }}</div>
+                            <div class="text-secondary text-small" style="font-size:11px; color:#AEB5CA;"></div>
                         </div>
                         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="text-secondary" style="width:16px; margin-left:10px;"><polyline points="9 18 15 12 9 6"></polyline></svg>
                     </div>
@@ -129,8 +130,8 @@
                     </div>
                     <div class="list-item-right">
                         <div style="text-align:right;">
-                            <div class="list-item-value" style="color:#A78BFA;">NGN {{ tool.price_ngn_display|floatformat:0 }}</div>
-                            <div class="text-secondary text-small" style="font-size:11px; color:#AEB5CA;">${{ tool.price_usd_display|floatformat:2 }} USD</div>
+                            <div class="list-item-value" style="color:#A78BFA;">{{ tool.get_usd_price|convert_usd:user_currency }}</div>
+                            <div class="text-secondary text-small" style="font-size:11px; color:#AEB5CA;"></div>
                         </div>
                         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="text-secondary" style="width:16px; margin-left:10px;"><polyline points="9 18 15 12 9 6"></polyline></svg>
                     </div>

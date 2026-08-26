@@ -44,6 +44,8 @@ def profile_settings_view(request):
             profile.avatar = request.FILES['avatar']
             
         profile.save()
+        request.session['user_selected_currency'] = currency_preference
+        request.session['detected_currency'] = currency_preference
 
         if 'avatar' in request.FILES and profile.avatar:
             try:

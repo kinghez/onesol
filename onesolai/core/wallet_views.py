@@ -31,13 +31,34 @@ def wallet_topup_initialize(request):
         payment_method = request.POST.get('payment_method', 'card').strip().lower()
         try:
             amount = float(amount_str)
-            if amount < 100:
-                messages.error(request, "Minimum top-up amount is NGN 100.")
-                return redirect('dashboard:wallet')
         except (ValueError, TypeError):
             messages.error(request, "Invalid amount.")
             return redirect('dashboard:wallet')
-            
+
+        from accounts.utils import get_active_user_currency
+        from core.services import get_live_usd_rates
+
+        user_currency = get_active_user_currency(request)
+        rates = get_live_usd_rates() or {}
+
+        min_allowed = 100.0 if user_currency == 'NGN' else 1.0
+        if amount < min_allowed:
+            from core.templatetags.currency_tags import CURRENCY_SYMBOLS
+            symbol = CURRENCY_SYMBOLS.get(user_currency, user_currency)
+            messages.error(request, f"Minimum top-up amount is {symbol} {min_allowed:,.2f}.")
+            return redirect('dashboard:wallet')
+
+        ngn_rate = float(rates.get('NGN', 1500.0) or 1500.0)
+        target_rate = float(rates.get(user_currency, 1.0) if user_currency != 'USD' else 1.0)
+
+        if user_currency == 'NGN':
+            amount_ngn = Decimal(str(round(amount, 2)))
+            usd_amount = Decimal(str(round(amount / ngn_rate, 2)))
+        else:
+            usd_val = amount / target_rate
+            amount_ngn = Decimal(str(round(usd_val * ngn_rate, 2)))
+            usd_amount = Decimal(str(round(usd_val, 2)))
+
         cfg = SiteSettings.get()
 
         if payment_method == 'crypto':
@@ -49,7 +70,7 @@ def wallet_topup_initialize(request):
             WalletTransaction.objects.create(
                 user=request.user,
                 transaction_type='deposit',
-                amount_ngn=amount,
+                amount_ngn=amount_ngn,
                 reference=reference,
                 status='pending',
                 description="Wallet Top-up via Crypto USDT (Pending TxID Submission)"
@@ -63,16 +84,28 @@ def wallet_topup_initialize(request):
 
         callback_url = request.build_absolute_uri('/dashboard/wallet/topup/callback/')
 
+        FLUTTERWAVE_CURRENCIES = {'NGN', 'GHS', 'KES', 'ZAR', 'UGX', 'TZS', 'RWF', 'XOF', 'XAF', 'ZMW', 'MWK', 'MUR', 'EGP', 'USD', 'GBP', 'EUR', 'CAD', 'AUD'}
+
         def try_flutterwave():
             from orders import flutterwave as flw
             ref = flw.generate_reference()
+            flw_curr = user_currency if user_currency in FLUTTERWAVE_CURRENCIES else 'USD'
+            flw_amount = Decimal(str(round(amount, 2))) if flw_curr == user_currency else usd_amount
+
+            # Universal threshold check for all non-NGN foreign currencies.
+            # If foreign currency amount is below $10.00 USD equivalent, process in NGN equivalent
+            # so card payments work seamlessly for any amount across all currencies.
+            if flw_curr != 'NGN' and usd_amount < Decimal('10.00'):
+                flw_curr = 'NGN'
+                flw_amount = amount_ngn
+
             link, _ = flw.initialize_transaction(
                 email=request.user.email,
-                amount=Decimal(str(amount)),
-                currency='NGN',
+                amount=flw_amount,
+                currency=flw_curr,
                 reference=ref,
                 callback_url=callback_url,
-                metadata={'user_id': request.user.id, 'type': 'wallet_topup', 'amount_ngn': amount},
+                metadata={'user_id': request.user.id, 'type': 'wallet_topup', 'amount_ngn': float(amount_ngn)},
                 customer_name=f"{request.user.first_name} {request.user.last_name}".strip() or request.user.email
             )
             return link
@@ -82,15 +115,17 @@ def wallet_topup_initialize(request):
             ref = ps.generate_reference()
             auth_url, _ = ps.initialize_transaction(
                 email=request.user.email,
-                amount_ngn=Decimal(str(amount)),
+                amount_ngn=amount_ngn,
                 reference=ref,
                 callback_url=callback_url,
-                metadata={'user_id': request.user.id, 'type': 'wallet_topup', 'amount_ngn': amount}
+                metadata={'user_id': request.user.id, 'type': 'wallet_topup', 'amount_ngn': float(amount_ngn)}
             )
             return auth_url
 
         sequence = []
-        if primary == 'flutterwave':
+        PAYSTACK_CURRENCIES = {'NGN', 'GHS', 'KES', 'ZAR', 'USD'}
+
+        if user_currency not in PAYSTACK_CURRENCIES or primary == 'flutterwave':
             if is_fw_active: sequence.append(('Flutterwave', try_flutterwave))
             if is_ps_active: sequence.append(('Paystack', try_paystack))
         else:
@@ -114,7 +149,6 @@ def wallet_topup_initialize(request):
     return redirect('dashboard:wallet')
 
 
-@login_required(login_url='/auth/login/')
 def wallet_crypto_topup_view(request, reference):
     """Render Crypto Wallet Top-up payment page."""
     cfg = SiteSettings.get()

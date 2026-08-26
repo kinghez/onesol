@@ -1,4 +1,5 @@
 {% extends 'base_dashboard.html' %}
+{% load currency_tags %}
 {% load static %}
 
 {% block title %}Crypto Wallet Top-up – OneSol AI Hub{% endblock %}
@@ -26,7 +27,7 @@
             </div>
             <div style="text-align: right;">
                 <span style="font-size: 13px; color: #8E6CFF; background: rgba(142,108,255,0.15); padding: 6px 12px; border-radius: 20px; font-weight: 600;">
-                    ₦{{ amount_ngn|floatformat:2 }} NGN
+                    {{ amount_ngn|convert_ngn:user_currency }}
                 </span>
             </div>
         </div>

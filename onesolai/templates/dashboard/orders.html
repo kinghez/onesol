@@ -1,4 +1,5 @@
 {% extends 'base_dashboard.html' %}
+{% load currency_tags %}
 {% load static %}
 
 {% block title %}Order History – OneSol AI Hub{% endblock %}
@@ -30,7 +31,7 @@
               <tr>
                 <th>Order ID</th>
                 <th>Date</th>
-                <th>Amount (NGN)</th>
+                <th>Amount</th>
                 <th>Status</th>
                 <th>Delivery</th>
                 <th>Action</th>
@@ -41,7 +42,7 @@
               <tr class="order-row">
                 <td class="col-id font-mono">#{{ order.order_number }}</td>
                 <td class="col-date">{{ order.created_at|date:"d M Y, H:i" }}</td>
-                <td class="col-amount font-mono">₦{{ order.total_amount_ngn|floatformat:0 }}</td>
+                <td class="col-amount font-mono">{{ order.total_amount_ngn|convert_ngn:user_currency }}</td>
                 <td class="col-status">
                   <span class="status-pill status-{{ order.status }}">{{ order.status|title }}</span>
                 </td>

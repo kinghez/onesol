@@ -1,3 +1,4 @@
+{% load currency_tags %}
 <div class="od-header">
   <div class="od-title">Order #{{ order.order_number }}</div>
   <div class="od-date">{{ order.created_at|date:"d M Y, H:i" }}</div>
@@ -16,14 +17,14 @@
         <div class="od-item-name">{{ item.tool.name|default:"Deleted Tool" }}</div>
         <div class="od-item-plan">{{ item.plan.name|default:"Monthly Subscription" }}</div>
       </div>
-      <div class="od-item-price">₦{{ item.price_ngn|floatformat:0 }}</div>
+      <div class="od-item-price">{{ item.price_ngn|convert_ngn:user_currency }}</div>
     </div>
     {% endfor %}
 
     <div class="od-section-label mt-4">Order Summary</div>
     <div class="od-summary-card">
       <div class="od-row"><span>Status</span> <span class="status-pill status-{{ order.status }}">{{ order.status|title }}</span></div>
-      <div class="od-row"><span>Total Amount</span> <span class="od-val-white font-mono">₦{{ order.total_amount_ngn|floatformat:0 }}</span></div>
+      <div class="od-row"><span>Total Amount</span> <span class="od-val-white font-mono">{{ order.total_amount_ngn|convert_ngn:user_currency }}</span></div>
       {% if order.paystack_reference %}
         <div class="od-row"><span>Payment Ref</span> <span class="od-val-mono">{{ order.paystack_reference }}</span></div>
       {% endif %}
@@ -137,8 +138,13 @@
 
 <script>
 function copyAccessInfo(btn) {
-  var content = document.querySelector('.od-access-content').innerText;
-  navigator.clipboard.writeText(content).then(function() {
+  var container = btn ? btn.closest('.od-access-card') : document;
+  var contentEl = container ? container.querySelector('.od-access-content') : document.querySelector('.od-access-content');
+  if (!contentEl) return;
+  var content = (contentEl.innerText || contentEl.textContent || '').trim();
+
+  function markCopied() {
+    if (!btn) return;
     var oldHtml = btn.innerHTML;
     btn.innerHTML = '<i class="fa-solid fa-check"></i> Copied!';
     btn.style.background = 'rgba(34,197,94,.15)';
@@ -150,6 +156,36 @@ function copyAccessInfo(btn) {
       btn.style.borderColor = '';
       btn.style.color = '';
     }, 2000);
-  });
+  }
+
+  function fallbackCopy(text) {
+    try {
+      var textArea = document.createElement("textarea");
+      textArea.value = text;
+      textArea.style.position = "fixed";
+      textArea.style.left = "-999999px";
+      textArea.style.top = "-999999px";
+      document.body.appendChild(textArea);
+      textArea.focus();
+      textArea.select();
+      var successful = document.execCommand('copy');
+      document.body.removeChild(textArea);
+      if (successful) {
+        markCopied();
+      } else {
+        prompt("Copy access details link below:", text);
+      }
+    } catch (err) {
+      prompt("Copy access details link below:", text);
+    }
+  }
+
+  if (navigator.clipboard && window.isSecureContext) {
+    navigator.clipboard.writeText(content).then(markCopied).catch(function() {
+      fallbackCopy(content);
+    });
+  } else {
+    fallbackCopy(content);
+  }
 }
 </script>

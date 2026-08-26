@@ -72,6 +72,13 @@ def initiate_gateway_payment(order, tool, price_ngn, local_amount, user_currency
         flw_curr = user_curr if user_curr in FLUTTERWAVE_CURRENCIES else 'NGN'
         flw_amount = local_amount if flw_curr == user_curr else price_ngn
 
+        # Universal threshold check for all non-NGN foreign currencies.
+        # If foreign currency amount is below $10.00 USD equivalent, process in NGN equivalent
+        # so card payments work seamlessly for any amount across all currencies.
+        if flw_curr != 'NGN' and usd_price < Decimal('10.00'):
+            flw_curr = 'NGN'
+            flw_amount = price_ngn
+
         auth_url, confirmed_ref = flw.initialize_transaction(
             email=request.user.email,
             amount=flw_amount,
@@ -149,11 +156,8 @@ def checkout_view(request):
     price_ngn = Decimal(str(round(tool.get_ngn_price(), 2)))
     usd_price = Decimal(str(round(tool.get_usd_price(), 2)))
 
-    user_currency = request.session.get('detected_currency')
-    if not user_currency and hasattr(request.user, 'profile') and request.user.profile.currency_preference:
-        user_currency = request.user.profile.currency_preference
-    if not user_currency:
-        user_currency = 'NGN'
+    from accounts.utils import get_active_user_currency
+    user_currency = get_active_user_currency(request)
 
     from core.services import get_live_usd_rates
     rates = get_live_usd_rates() or {}

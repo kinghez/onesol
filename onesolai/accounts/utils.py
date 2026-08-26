@@ -75,3 +75,13 @@ def get_location_data_from_ip(ip):
         logger.error(f"IP Geolocation failed for IP {ip}: {e}")
 
     return {'country': None, 'country_code': None, 'currency': None}
+
+
+def get_active_user_currency(request):
+    """
+    Returns active user currency code (e.g. 'USD', 'NGN', 'GBP').
+    Strict precedence: profile settings > session manual > IP detected > 'NGN'.
+    """
+    if hasattr(request, 'user') and request.user.is_authenticated and hasattr(request.user, 'profile') and request.user.profile.currency_preference:
+        return request.user.profile.currency_preference.upper()
+    return (request.session.get('user_selected_currency') or request.session.get('detected_currency') or 'NGN').upper()
