@@ -479,6 +479,65 @@
 
     {% block extra_js %}{% endblock %}
 
+    <!-- Global Copy Access Info Helper for Modals & Dashboard -->
+    <script>
+    function copyAccessInfo(btn) {
+        var container = btn ? (btn.closest('.od-access-card') || btn.closest('.modal-box') || document) : document;
+        var contentEl = container.querySelector('.od-access-content') || document.querySelector('.od-access-content');
+        if (!contentEl) return;
+        var content = (contentEl.innerText || contentEl.textContent || '').trim();
+        if (!content) return;
+
+        function markCopied() {
+            if (!btn) return;
+            var oldHtml = btn.innerHTML;
+            btn.innerHTML = '<i class="fa-solid fa-check"></i> Copied to Clipboard!';
+            btn.style.background = 'rgba(34,197,94,.25)';
+            btn.style.borderColor = 'rgba(34,197,94,.5)';
+            btn.style.color = '#4ade80';
+            setTimeout(function() {
+                btn.innerHTML = oldHtml;
+                btn.style.background = '';
+                btn.style.borderColor = '';
+                btn.style.color = '';
+            }, 2500);
+        }
+
+        if (navigator.clipboard && window.isSecureContext) {
+            navigator.clipboard.writeText(content).then(function() {
+                markCopied();
+            }).catch(function() {
+                fallbackCopy(content);
+            });
+        } else {
+            fallbackCopy(content);
+        }
+
+        function fallbackCopy(text) {
+            try {
+                var textArea = document.createElement("textarea");
+                textArea.value = text;
+                textArea.style.position = "fixed";
+                textArea.style.left = "-999999px";
+                textArea.style.top = "-999999px";
+                document.body.appendChild(textArea);
+                textArea.focus();
+                textArea.select();
+                var successful = document.execCommand('copy');
+                document.body.removeChild(textArea);
+                if (successful) {
+                    markCopied();
+                } else {
+                    prompt("Copy activation link below:", text);
+                }
+            } catch (err) {
+                prompt("Copy activation link below:", text);
+            }
+        }
+    }
+    </script>
+
+
     <!-- Live Chat Widget (controlled from Admin → Site Settings → Live Chat Widget) -->
     {% if livechat_enabled and livechat_show_on_dashboard and livechat_script %}
       {{ livechat_script|safe }}
