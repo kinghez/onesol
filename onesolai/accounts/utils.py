@@ -10,6 +10,17 @@ CURRENCY_TO_FLAG = {
     'ZMW': 'zm', 'MWK': 'mw', 'MUR': 'mu', 'EGP': 'eg',
     'ETB': 'et', 'CAD': 'ca', 'AUD': 'au', 'INR': 'in',
     'BRL': 'br', 'JPY': 'jp', 'CNY': 'cn', 'MAD': 'ma',
+    'NZD': 'nz', 'CHF': 'ch', 'MXN': 'mx', 'SAR': 'sa',
+    'AED': 'ae', 'QAR': 'qa', 'KWD': 'kw', 'OMR': 'om',
+    'BHD': 'bh', 'JOD': 'jo', 'TRY': 'tr', 'SGD': 'sg',
+    'MYR': 'my', 'THB': 'th', 'IDR': 'id', 'PHP': 'ph',
+    'VND': 'vn', 'PKR': 'pk', 'BDT': 'bd', 'LKR': 'lk',
+    'NPR': 'np', 'KRW': 'kr', 'HKD': 'hk', 'TWD': 'tw',
+    'ILS': 'il', 'RUB': 'ru', 'PLN': 'pl', 'SEK': 'se',
+    'NOK': 'no', 'DKK': 'dk', 'CZK': 'cz', 'HUF': 'hu',
+    'RON': 'ro', 'BGN': 'bg', 'UAH': 'ua', 'ARS': 'ar',
+    'CLP': 'cl', 'COP': 'co', 'PEN': 'pe', 'UYU': 'uy',
+    'DZD': 'dz', 'AOA': 'ao', 'BWP': 'bw', 'NAD': 'na',
 }
 
 COUNTRY_TO_CURRENCY = {

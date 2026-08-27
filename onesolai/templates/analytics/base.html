@@ -101,7 +101,80 @@
                     <input type="email" id="fundUserEmail" required placeholder="user@example.com" style="width:100%; background:#161B40; border:1px solid rgba(255,255,255,0.2); color:#fff; padding:10px 12px; border-radius:8px; font-size:14px;">
                 </div>
                 <div style="margin-bottom:14px;">
-                    <label style="display:block; font-size:12px; color:#AEB5CA; margin-bottom:4px; font-weight:600;">Amount (NGN) *</label>
+                    <label style="display:block; font-size:12px; color:#AEB5CA; margin-bottom:4px; font-weight:600;">Fund Currency / Country (Optional)</label>
+                    <select id="fundCurrency" onchange="updateFundAmountLabel()" style="width:100%; background:#161B40; border:1px solid rgba(255,255,255,0.2); color:#fff; padding:10px 12px; border-radius:8px; font-size:13px;">
+                        <option value="DZD">🇩🇿 Algeria (DZD)</option>
+                        <option value="AOA">🇦🇴 Angola (AOA)</option>
+                        <option value="ARS">🇦🇷 Argentina (ARS)</option>
+                        <option value="AUD">🇦🇺 Australia (AUD)</option>
+                        <option value="BHD">🇧🇭 Bahrain (BHD)</option>
+                        <option value="BDT">🇧🇩 Bangladesh (BDT)</option>
+                        <option value="XOF">🇧🇯 Benin / West Africa (XOF)</option>
+                        <option value="BWP">🇧🇼 Botswana (BWP)</option>
+                        <option value="BRL">🇧🇷 Brazil (BRL)</option>
+                        <option value="BGN">🇧🇬 Bulgaria (BGN)</option>
+                        <option value="XAF">🇨🇲 Cameroon / Central Africa (XAF)</option>
+                        <option value="CAD">🇨🇦 Canada (CAD)</option>
+                        <option value="CLP">🇨🇱 Chile (CLP)</option>
+                        <option value="CNY">🇨🇳 China (CNY)</option>
+                        <option value="COP">🇨🇴 Colombia (COP)</option>
+                        <option value="CZK">🇨🇿 Czechia (CZK)</option>
+                        <option value="DKK">🇩🇰 Denmark (DKK)</option>
+                        <option value="EGP">🇪🇬 Egypt (EGP)</option>
+                        <option value="ETB">🇪🇹 Ethiopia (ETB)</option>
+                        <option value="EUR">🇪🇺 Eurozone - EU Countries (EUR)</option>
+                        <option value="GHS">🇬🇭 Ghana (GHS)</option>
+                        <option value="HKD">🇭🇰 Hong Kong (HKD)</option>
+                        <option value="HUF">🇭🇺 Hungary (HUF)</option>
+                        <option value="INR">🇮🇳 India (INR)</option>
+                        <option value="IDR">🇮🇩 Indonesia (IDR)</option>
+                        <option value="ILS">🇮🇱 Israel (ILS)</option>
+                        <option value="JPY">🇯🇵 Japan (JPY)</option>
+                        <option value="JOD">🇯🇴 Jordan (JOD)</option>
+                        <option value="KES">🇰🇪 Kenya (KES)</option>
+                        <option value="KWD">🇰🇼 Kuwait (KWD)</option>
+                        <option value="MWK">🇲🇼 Malawi (MWK)</option>
+                        <option value="MYR">🇲🇾 Malaysia (MYR)</option>
+                        <option value="MUR">🇲🇺 Mauritius (MUR)</option>
+                        <option value="MXN">🇲🇽 Mexico (MXN)</option>
+                        <option value="MAD">🇲🇦 Morocco (MAD)</option>
+                        <option value="NAD">🇳🇦 Namibia (NAD)</option>
+                        <option value="NPR">🇳🇵 Nepal (NPR)</option>
+                        <option value="NZD">🇳🇿 New Zealand (NZD)</option>
+                        <option value="NGN" selected>🇳🇬 Nigeria (NGN)</option>
+                        <option value="NOK">🇳🇴 Norway (NOK)</option>
+                        <option value="OMR">🇴🇲 Oman (OMR)</option>
+                        <option value="PKR">🇵🇰 Pakistan (PKR)</option>
+                        <option value="PEN">🇵🇪 Peru (PEN)</option>
+                        <option value="PHP">🇵🇭 Philippines (PHP)</option>
+                        <option value="PLN">🇵🇱 Poland (PLN)</option>
+                        <option value="QAR">🇶🇦 Qatar (QAR)</option>
+                        <option value="RON">🇷🇴 Romania (RON)</option>
+                        <option value="RUB">🇷🇺 Russia (RUB)</option>
+                        <option value="RWF">🇷🇼 Rwanda (RWF)</option>
+                        <option value="SAR">🇸🇦 Saudi Arabia (SAR)</option>
+                        <option value="SGD">🇸🇬 Singapore (SGD)</option>
+                        <option value="ZAR">🇿🇦 South Africa (ZAR)</option>
+                        <option value="KRW">🇰🇷 South Korea (KRW)</option>
+                        <option value="LKR">🇱🇰 Sri Lanka (LKR)</option>
+                        <option value="SEK">🇸🇪 Sweden (SEK)</option>
+                        <option value="CHF">🇨🇭 Switzerland (CHF)</option>
+                        <option value="TWD">🇹🇼 Taiwan (TWD)</option>
+                        <option value="TZS">🇹🇿 Tanzania (TZS)</option>
+                        <option value="THB">🇹🇭 Thailand (THB)</option>
+                        <option value="TRY">🇹🇷 Turkey (TRY)</option>
+                        <option value="UGX">🇺🇬 Uganda (UGX)</option>
+                        <option value="UAH">🇺🇦 Ukraine (UAH)</option>
+                        <option value="AED">🇦🇪 United Arab Emirates (AED)</option>
+                        <option value="GBP">🇬🇧 United Kingdom (GBP)</option>
+                        <option value="USD">🇺🇸 United States / Worldwide (USD)</option>
+                        <option value="UYU">🇺🇾 Uruguay (UYU)</option>
+                        <option value="VND">🇻🇳 Vietnam (VND)</option>
+                        <option value="ZMW">🇿🇲 Zambia (ZMW)</option>
+                    </select>
+                </div>
+                <div style="margin-bottom:14px;">
+                    <label id="fundAmountLabel" style="display:block; font-size:12px; color:#AEB5CA; margin-bottom:4px; font-weight:600;">Amount (NGN) *</label>
                     <input type="number" step="0.01" id="fundAmount" required placeholder="5000" style="width:100%; background:#161B40; border:1px solid rgba(255,255,255,0.2); color:#fff; padding:10px 12px; border-radius:8px; font-size:14px;">
                 </div>
                 <div style="margin-bottom:14px;">
@@ -137,8 +210,81 @@
                     <label style="display:block; font-size:12px; color:#AEB5CA; margin-bottom:4px; font-weight:600;">User Email or Order ID (e.g. OS-00014) *</label>
                     <input type="text" id="refundUserOrOrder" required placeholder="user@example.com or OS-00014" style="width:100%; background:#161B40; border:1px solid rgba(255,255,255,0.2); color:#fff; padding:10px 12px; border-radius:8px; font-size:14px;">
                 </div>
+                                <div style="margin-bottom:14px;">
+                    <label style="display:block; font-size:12px; color:#AEB5CA; margin-bottom:4px; font-weight:600;">Refund Currency / Country (Optional)</label>
+                    <select id="refundCurrency" onchange="updateRefundAmountLabel()" style="width:100%; background:#161B40; border:1px solid rgba(255,255,255,0.2); color:#fff; padding:10px 12px; border-radius:8px; font-size:13px;">
+                        <option value="DZD">🇩🇿 Algeria (DZD)</option>
+                        <option value="AOA">🇦🇴 Angola (AOA)</option>
+                        <option value="ARS">🇦🇷 Argentina (ARS)</option>
+                        <option value="AUD">🇦🇺 Australia (AUD)</option>
+                        <option value="BHD">🇧🇭 Bahrain (BHD)</option>
+                        <option value="BDT">🇧🇩 Bangladesh (BDT)</option>
+                        <option value="XOF">🇧🇯 Benin / West Africa (XOF)</option>
+                        <option value="BWP">🇧🇼 Botswana (BWP)</option>
+                        <option value="BRL">🇧🇷 Brazil (BRL)</option>
+                        <option value="BGN">🇧🇬 Bulgaria (BGN)</option>
+                        <option value="XAF">🇨🇲 Cameroon / Central Africa (XAF)</option>
+                        <option value="CAD">🇨🇦 Canada (CAD)</option>
+                        <option value="CLP">🇨🇱 Chile (CLP)</option>
+                        <option value="CNY">🇨🇳 China (CNY)</option>
+                        <option value="COP">🇨🇴 Colombia (COP)</option>
+                        <option value="CZK">🇨🇿 Czechia (CZK)</option>
+                        <option value="DKK">🇩🇰 Denmark (DKK)</option>
+                        <option value="EGP">🇪🇬 Egypt (EGP)</option>
+                        <option value="ETB">🇪🇹 Ethiopia (ETB)</option>
+                        <option value="EUR">🇪🇺 Eurozone - EU Countries (EUR)</option>
+                        <option value="GHS">🇬🇭 Ghana (GHS)</option>
+                        <option value="HKD">🇭🇰 Hong Kong (HKD)</option>
+                        <option value="HUF">🇭🇺 Hungary (HUF)</option>
+                        <option value="INR">🇮🇳 India (INR)</option>
+                        <option value="IDR">🇮🇩 Indonesia (IDR)</option>
+                        <option value="ILS">🇮🇱 Israel (ILS)</option>
+                        <option value="JPY">🇯🇵 Japan (JPY)</option>
+                        <option value="JOD">🇯🇴 Jordan (JOD)</option>
+                        <option value="KES">🇰🇪 Kenya (KES)</option>
+                        <option value="KWD">🇰🇼 Kuwait (KWD)</option>
+                        <option value="MWK">🇲🇼 Malawi (MWK)</option>
+                        <option value="MYR">🇲🇾 Malaysia (MYR)</option>
+                        <option value="MUR">🇲🇺 Mauritius (MUR)</option>
+                        <option value="MXN">🇲🇽 Mexico (MXN)</option>
+                        <option value="MAD">🇲🇦 Morocco (MAD)</option>
+                        <option value="NAD">🇳🇦 Namibia (NAD)</option>
+                        <option value="NPR">🇳🇵 Nepal (NPR)</option>
+                        <option value="NZD">🇳🇿 New Zealand (NZD)</option>
+                        <option value="NGN" selected>🇳🇬 Nigeria (NGN)</option>
+                        <option value="NOK">🇳🇴 Norway (NOK)</option>
+                        <option value="OMR">🇴🇲 Oman (OMR)</option>
+                        <option value="PKR">🇵🇰 Pakistan (PKR)</option>
+                        <option value="PEN">🇵🇪 Peru (PEN)</option>
+                        <option value="PHP">🇵🇭 Philippines (PHP)</option>
+                        <option value="PLN">🇵🇱 Poland (PLN)</option>
+                        <option value="QAR">🇶🇦 Qatar (QAR)</option>
+                        <option value="RON">🇷🇴 Romania (RON)</option>
+                        <option value="RUB">🇷🇺 Russia (RUB)</option>
+                        <option value="RWF">🇷🇼 Rwanda (RWF)</option>
+                        <option value="SAR">🇸🇦 Saudi Arabia (SAR)</option>
+                        <option value="SGD">🇸🇬 Singapore (SGD)</option>
+                        <option value="ZAR">🇿🇦 South Africa (ZAR)</option>
+                        <option value="KRW">🇰🇷 South Korea (KRW)</option>
+                        <option value="LKR">🇱🇰 Sri Lanka (LKR)</option>
+                        <option value="SEK">🇸🇪 Sweden (SEK)</option>
+                        <option value="CHF">🇨🇭 Switzerland (CHF)</option>
+                        <option value="TWD">🇹🇼 Taiwan (TWD)</option>
+                        <option value="TZS">🇹🇿 Tanzania (TZS)</option>
+                        <option value="THB">🇹🇭 Thailand (THB)</option>
+                        <option value="TRY">🇹🇷 Turkey (TRY)</option>
+                        <option value="UGX">🇺🇬 Uganda (UGX)</option>
+                        <option value="UAH">🇺🇦 Ukraine (UAH)</option>
+                        <option value="AED">🇦🇪 United Arab Emirates (AED)</option>
+                        <option value="GBP">🇬🇧 United Kingdom (GBP)</option>
+                        <option value="USD">🇺🇸 United States / Worldwide (USD)</option>
+                        <option value="UYU">🇺🇾 Uruguay (UYU)</option>
+                        <option value="VND">🇻🇳 Vietnam (VND)</option>
+                        <option value="ZMW">🇿🇲 Zambia (ZMW)</option>
+                    </select>
+                </div>
                 <div style="margin-bottom:14px;">
-                    <label style="display:block; font-size:12px; color:#AEB5CA; margin-bottom:4px; font-weight:600;">Refund Amount (NGN) *</label>
+                    <label id="refundAmountLabel" style="display:block; font-size:12px; color:#AEB5CA; margin-bottom:4px; font-weight:600;">Refund Amount (NGN) *</label>
                     <input type="number" step="0.01" id="refundAmount" required placeholder="2387" style="width:100%; background:#161B40; border:1px solid rgba(255,255,255,0.2); color:#fff; padding:10px 12px; border-radius:8px; font-size:14px;">
                 </div>
                 <div style="margin-bottom:20px;">
@@ -166,11 +312,84 @@
                     <input type="email" id="buyUserEmail" required placeholder="customer@example.com" style="width:100%; background:#161B40; border:1px solid rgba(255,255,255,0.2); color:#fff; padding:10px 12px; border-radius:8px; font-size:14px;">
                 </div>
                 <div style="margin-bottom:14px;">
+                    <label style="display:block; font-size:12px; color:#AEB5CA; margin-bottom:4px; font-weight:600;">Display Currency / Country (Optional)</label>
+                    <select id="buyToolCurrency" onchange="updateBuyToolPrices()" style="width:100%; background:#161B40; border:1px solid rgba(255,255,255,0.2); color:#fff; padding:10px 12px; border-radius:8px; font-size:13px;">
+                        <option value="DZD">🇩🇿 Algeria (DZD)</option>
+                        <option value="AOA">🇦🇴 Angola (AOA)</option>
+                        <option value="ARS">🇦🇷 Argentina (ARS)</option>
+                        <option value="AUD">🇦🇺 Australia (AUD)</option>
+                        <option value="BHD">🇧🇭 Bahrain (BHD)</option>
+                        <option value="BDT">🇧🇩 Bangladesh (BDT)</option>
+                        <option value="XOF">🇧🇯 Benin / West Africa (XOF)</option>
+                        <option value="BWP">🇧🇼 Botswana (BWP)</option>
+                        <option value="BRL">🇧🇷 Brazil (BRL)</option>
+                        <option value="BGN">🇧🇬 Bulgaria (BGN)</option>
+                        <option value="XAF">🇨🇲 Cameroon / Central Africa (XAF)</option>
+                        <option value="CAD">🇨🇦 Canada (CAD)</option>
+                        <option value="CLP">🇨🇱 Chile (CLP)</option>
+                        <option value="CNY">🇨🇳 China (CNY)</option>
+                        <option value="COP">🇨🇴 Colombia (COP)</option>
+                        <option value="CZK">🇨🇿 Czechia (CZK)</option>
+                        <option value="DKK">🇩🇰 Denmark (DKK)</option>
+                        <option value="EGP">🇪🇬 Egypt (EGP)</option>
+                        <option value="ETB">🇪🇹 Ethiopia (ETB)</option>
+                        <option value="EUR">🇪🇺 Eurozone - EU Countries (EUR)</option>
+                        <option value="GHS">🇬🇭 Ghana (GHS)</option>
+                        <option value="HKD">🇭🇰 Hong Kong (HKD)</option>
+                        <option value="HUF">🇭🇺 Hungary (HUF)</option>
+                        <option value="INR">🇮🇳 India (INR)</option>
+                        <option value="IDR">🇮🇩 Indonesia (IDR)</option>
+                        <option value="ILS">🇮🇱 Israel (ILS)</option>
+                        <option value="JPY">🇯🇵 Japan (JPY)</option>
+                        <option value="JOD">🇯🇴 Jordan (JOD)</option>
+                        <option value="KES">🇰🇪 Kenya (KES)</option>
+                        <option value="KWD">🇰🇼 Kuwait (KWD)</option>
+                        <option value="MWK">🇲🇼 Malawi (MWK)</option>
+                        <option value="MYR">🇲🇾 Malaysia (MYR)</option>
+                        <option value="MUR">🇲🇺 Mauritius (MUR)</option>
+                        <option value="MXN">🇲🇽 Mexico (MXN)</option>
+                        <option value="MAD">🇲🇦 Morocco (MAD)</option>
+                        <option value="NAD">🇳🇦 Namibia (NAD)</option>
+                        <option value="NPR">🇳🇵 Nepal (NPR)</option>
+                        <option value="NZD">🇳🇿 New Zealand (NZD)</option>
+                        <option value="NGN" selected>🇳🇬 Nigeria (NGN)</option>
+                        <option value="NOK">🇳🇴 Norway (NOK)</option>
+                        <option value="OMR">🇴🇲 Oman (OMR)</option>
+                        <option value="PKR">🇵🇰 Pakistan (PKR)</option>
+                        <option value="PEN">🇵🇪 Peru (PEN)</option>
+                        <option value="PHP">🇵🇭 Philippines (PHP)</option>
+                        <option value="PLN">🇵🇱 Poland (PLN)</option>
+                        <option value="QAR">🇶🇦 Qatar (QAR)</option>
+                        <option value="RON">🇷🇴 Romania (RON)</option>
+                        <option value="RUB">🇷🇺 Russia (RUB)</option>
+                        <option value="RWF">🇷🇼 Rwanda (RWF)</option>
+                        <option value="SAR">🇸🇦 Saudi Arabia (SAR)</option>
+                        <option value="SGD">🇸🇬 Singapore (SGD)</option>
+                        <option value="ZAR">🇿🇦 South Africa (ZAR)</option>
+                        <option value="KRW">🇰🇷 South Korea (KRW)</option>
+                        <option value="LKR">🇱🇰 Sri Lanka (LKR)</option>
+                        <option value="SEK">🇸🇪 Sweden (SEK)</option>
+                        <option value="CHF">🇨🇭 Switzerland (CHF)</option>
+                        <option value="TWD">🇹🇼 Taiwan (TWD)</option>
+                        <option value="TZS">🇹🇿 Tanzania (TZS)</option>
+                        <option value="THB">🇹🇭 Thailand (THB)</option>
+                        <option value="TRY">🇹🇷 Turkey (TRY)</option>
+                        <option value="UGX">🇺🇬 Uganda (UGX)</option>
+                        <option value="UAH">🇺🇦 Ukraine (UAH)</option>
+                        <option value="AED">🇦🇪 United Arab Emirates (AED)</option>
+                        <option value="GBP">🇬🇧 United Kingdom (GBP)</option>
+                        <option value="USD">🇺🇸 United States / Worldwide (USD)</option>
+                        <option value="UYU">🇺🇾 Uruguay (UYU)</option>
+                        <option value="VND">🇻🇳 Vietnam (VND)</option>
+                        <option value="ZMW">🇿🇲 Zambia (ZMW)</option>
+                    </select>
+                </div>
+                <div style="margin-bottom:14px;">
                     <label style="display:block; font-size:12px; color:#AEB5CA; margin-bottom:4px; font-weight:600;">Select Tool to Purchase *</label>
                     <select id="buyToolId" required style="width:100%; background:#161B40; border:1px solid rgba(255,255,255,0.2); color:#fff; padding:10px 12px; border-radius:8px; font-size:13px; max-height:200px;">
                         <option value="">-- Choose a Tool --</option>
                         {% for tool in admin_active_tools %}
-                            <option value="{{ tool.id }}">{{ tool.name }} (₦{{ tool.price_ngn|floatformat:2 }})</option>
+                            <option value="{{ tool.id }}">{{ tool.name }} (₦{{ tool.price_ngn|floatformat:2 }} NGN)</option>
                         {% endfor %}
                     </select>
                 </div>
@@ -246,19 +465,14 @@
             .then(res => res.json())
             .then(data => {
                 if (data.success) {
-                    if (data.claim_url) {
-                        prompt('✅ Purchase Successful for unregistered user!\n\nGenerated Registration & Claim Link:', data.claim_url);
-                        try {
-                            navigator.clipboard.writeText(data.claim_url);
-                            alert('📋 Registration link copied to clipboard!');
-                        } catch(e){}
-                    } else {
-                        alert('✅ ' + data.message);
-                    }
                     closeBuyToolModal();
-                    location.reload();
+                    if (data.claim_url) {
+                        showAdminToast('success', 'Purchase Successful', 'Order completed for unregistered user! Share the claim link below to let them register and access their purchase.', data.claim_url, true);
+                    } else {
+                        showAdminToast('success', 'Purchase Successful', data.message, null, true);
+                    }
                 } else {
-                    alert('❌ Error: ' + data.error);
+                    showAdminToast('error', 'Purchase Failed', data.error, null, false);
                 }
             })
             .catch(err => {
@@ -285,6 +499,7 @@
                 body: JSON.stringify({
                     user_email: document.getElementById('fundUserEmail').value,
                     amount_ngn: document.getElementById('fundAmount').value,
+                    currency: (document.getElementById('fundCurrency') ? document.getElementById('fundCurrency').value : 'NGN'),
                     payment_source: document.getElementById('fundPaymentSource').value,
                     notes: document.getElementById('fundNotes').value
                 })
@@ -292,11 +507,10 @@
             .then(res => res.json())
             .then(data => {
                 if (data.success) {
-                    alert('✅ ' + data.message);
                     closeFundWalletModal();
-                    location.reload();
+                    showAdminToast('success', 'Wallet Credited Successfully', data.message, null, true);
                 } else {
-                    alert('❌ Error: ' + data.error);
+                    showAdminToast('error', 'Funding Failed', data.error, null, false);
                 }
             })
             .catch(err => {
@@ -373,5 +587,150 @@
     </script>
     
     {% block extra_js %}{% endblock %}
+
+    <script>
+        
+        var toastShouldReload = false;
+        function showAdminToast(type, title, message, copyUrl = null, shouldReload = false) {
+            toastShouldReload = shouldReload;
+            var modal = document.getElementById('adminToastModal');
+            var iconBox = document.getElementById('adminToastIcon');
+            var titleEl = document.getElementById('adminToastTitle');
+            var msgEl = document.getElementById('adminToastMessage');
+            var copyBox = document.getElementById('adminToastCopyBox');
+            var copyInput = document.getElementById('adminToastCopyInput');
+
+            titleEl.textContent = title || 'Notification';
+            msgEl.textContent = message || '';
+
+            if (type === 'success') {
+                iconBox.style.background = 'rgba(16, 185, 129, 0.15)';
+                iconBox.style.color = '#10B981';
+                iconBox.innerHTML = '<i class="fa-solid fa-check"></i>';
+            } else if (type === 'error') {
+                iconBox.style.background = 'rgba(239, 68, 68, 0.15)';
+                iconBox.style.color = '#EF4444';
+                iconBox.innerHTML = '<i class="fa-solid fa-xmark"></i>';
+            } else {
+                iconBox.style.background = 'rgba(245, 158, 11, 0.15)';
+                iconBox.style.color = '#F59E0B';
+                iconBox.innerHTML = '<i class="fa-solid fa-triangle-exclamation"></i>';
+            }
+
+            if (copyUrl) {
+                copyBox.style.display = 'block';
+                copyInput.value = copyUrl;
+            } else {
+                copyBox.style.display = 'none';
+            }
+
+            modal.style.display = 'flex';
+        }
+
+        function closeAdminToast() {
+            document.getElementById('adminToastModal').style.display = 'none';
+            if (toastShouldReload) {
+                location.reload();
+            }
+        }
+
+        function copyToastLink() {
+            var copyInput = document.getElementById('adminToastCopyInput');
+            var btnText = document.getElementById('toastCopyBtnText');
+            if (copyInput && copyInput.value) {
+                navigator.clipboard.writeText(copyInput.value).then(function() {
+                    btnText.textContent = '✓ Copied!';
+                    setTimeout(function() { btnText.textContent = 'Copy Registration & Claim Link'; }, 2500);
+                }).catch(function() {
+                    copyInput.select();
+                    document.execCommand('copy');
+                    btnText.textContent = '✓ Copied!';
+                    setTimeout(function() { btnText.textContent = 'Copy Registration & Claim Link'; }, 2500);
+                });
+            }
+        }
+
+        function updateRefundAmountLabel() {
+            var currSelect = document.getElementById('refundCurrency');
+            var curr = currSelect ? (currSelect.value || 'NGN').toUpperCase() : 'NGN';
+            var label = document.getElementById('refundAmountLabel');
+            if (label) {
+                label.textContent = 'Refund Amount (' + curr + ') *';
+            }
+        }
+
+        window.adminToolsData = [
+            {% for tool in admin_active_tools %}
+                { id: {{ tool.id }}, name: "{{ tool.name|escapejs }}", price_ngn: {{ tool.price_ngn|default:0 }}, price_usd: {{ tool.price_usd|default:0 }} }{% if not forloop.last %},{% endif %}
+            {% endfor %}
+        ];
+
+        function updateBuyToolPrices() {
+            var currSelect = document.getElementById('buyToolCurrency');
+            var curr = currSelect ? (currSelect.value || 'NGN').toUpperCase() : 'NGN';
+            var select = document.getElementById('buyToolId');
+            if (!select) return;
+            var selectedValue = select.value;
+
+            var rates = window.liveUsdRates || { 'USD': 1, 'NGN': 1500, 'GBP': 0.78, 'EUR': 0.92, 'GHS': 15.4, 'KES': 129.5 };
+            var symbols = window.currencySymbols || { 'USD': '$', 'NGN': '₦', 'GBP': '£', 'EUR': '€', 'GHS': 'GH₵', 'KES': 'KSh' };
+
+            var rate = (rates[curr] !== undefined && rates[curr] > 0) ? rates[curr] : (curr === 'NGN' ? 1500 : 1.0);
+            var symbol = symbols[curr] || curr;
+
+            select.innerHTML = '<option value="">-- Choose a Tool --</option>';
+
+            if (window.adminToolsData) {
+                window.adminToolsData.forEach(function(t) {
+                    var ngnRate = rates['NGN'] || 1500;
+                    var usdPrice = t.price_usd || (t.price_ngn / ngnRate);
+                    var convertedAmount = (curr === 'NGN') ? t.price_ngn : (usdPrice * rate);
+                    var formattedPrice = symbol + ' ' + convertedAmount.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2}) + ' ' + curr;
+
+                    var opt = document.createElement('option');
+                    opt.value = t.id;
+                    opt.textContent = t.name + ' (' + formattedPrice + ')';
+                    if (String(t.id) === String(selectedValue)) {
+                        opt.selected = true;
+                    }
+                    select.appendChild(opt);
+                });
+            }
+        }
+
+        function updateFundAmountLabel() {
+            var currSelect = document.getElementById('fundCurrency');
+            var curr = currSelect ? (currSelect.value || 'NGN').toUpperCase() : 'NGN';
+            var label = document.getElementById('fundAmountLabel');
+            if (label) {
+                label.textContent = 'Amount (' + curr + ') *';
+            }
+        }
+    </script>
+
+    <!-- MODERN ADMIN ALERT / TOAST MODAL -->
+    <div id="adminToastModal" style="display:none; position:fixed; top:0; left:0; width:100vw; height:100vh; background:rgba(10,14,35,0.85); backdrop-filter:blur(8px); z-index:999999; align-items:center; justify-content:center; padding:20px;">
+        <div style="background:#0F1535; border:1px solid rgba(255,255,255,0.15); border-radius:20px; padding:32px; width:90%; max-width:480px; text-align:center; color:#fff; box-shadow:0 25px 60px rgba(0,0,0,0.6); position:relative;">
+            <button onclick="closeAdminToast()" style="position:absolute; top:16px; right:20px; background:transparent; border:none; color:#AEB5CA; font-size:24px; cursor:pointer;">&times;</button>
+            
+            <div id="adminToastIcon" style="width:64px; height:64px; border-radius:50%; display:inline-flex; align-items:center; justify-content:center; font-size:28px; margin:0 auto 20px;">
+                <i class="fa-solid fa-check"></i>
+            </div>
+            
+            <h3 id="adminToastTitle" style="font-size:20px; font-weight:700; color:#fff; margin:0 0 10px;">Success</h3>
+            <p id="adminToastMessage" style="font-size:14px; color:#CBD5E1; margin:0 0 20px; line-height:1.6; word-break:break-word;"></p>
+
+            <div id="adminToastCopyBox" style="display:none; margin-bottom:20px;">
+                <input type="text" id="adminToastCopyInput" readonly style="width:100%; background:rgba(0,0,0,0.4); border:1px solid rgba(255,255,255,0.2); color:#A5F3FC; font-family:monospace; padding:12px; border-radius:10px; font-size:13px; margin-bottom:10px; text-align:center;">
+                <button type="button" onclick="copyToastLink()" style="background:rgba(91,99,246,0.2); border:1px solid rgba(91,99,246,0.4); color:#7C83FA; width:100%; padding:10px; border-radius:10px; font-weight:600; cursor:pointer;">
+                    <i class="fa-regular fa-copy"></i> <span id="toastCopyBtnText">Copy Registration & Claim Link</span>
+                </button>
+            </div>
+
+            <button type="button" onclick="closeAdminToast()" id="adminToastActionBtn" style="background:linear-gradient(135deg,#5B63F6,#8B3DFF); border:none; color:#fff; font-weight:700; padding:12px 32px; border-radius:12px; cursor:pointer; width:100%; font-size:15px; box-shadow:0 8px 20px rgba(91,99,246,0.3);">
+                OK
+            </button>
+        </div>
+    </div>
 </body>
 </html>

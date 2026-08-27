@@ -106,6 +106,7 @@ def dashboard_home(request):
     recommended_tools = recommended_list[:5]
 
     context = {
+        'profile': profile,
         'referral_earnings': referral_earnings,
         'wallet_balance': wallet_balance,
         'popular_tools': popular_tools,

@@ -16,6 +16,20 @@ CURRENCY_SYMBOLS = {
     'GHS': 'GH₵', 'KES': 'KSh', 'ZAR': 'R', 'CAD': 'CA$',
     'AUD': 'A$', 'JPY': '¥', 'INR': '₹', 'ZMW': 'ZK',
     'UGX': 'USh', 'TZS': 'TSh', 'RWF': 'FRw', 'EGP': 'E£',
+    'NZD': 'NZ$', 'CHF': 'CHF', 'CNY': '¥', 'BRL': 'R$',
+    'MXN': 'Mex$', 'SAR': 'SR', 'AED': 'AED', 'QAR': 'QR',
+    'KWD': 'KD', 'OMR': 'OMR', 'BHD': 'BD', 'JOD': 'JD',
+    'TRY': '₺', 'SGD': 'S$', 'MYR': 'RM', 'THB': '฿',
+    'IDR': 'Rp', 'PHP': '₱', 'VND': '₫', 'PKR': 'Rs',
+    'BDT': '৳', 'LKR': 'Rs', 'NPR': 'Rs', 'KRW': '₩',
+    'HKD': 'HK$', 'TWD': 'NT$', 'ILS': '₪', 'RUB': '₽',
+    'PLN': 'zł', 'SEK': 'kr', 'NOK': 'kr', 'DKK': 'kr',
+    'CZK': 'Kč', 'HUF': 'Ft', 'RON': 'lei', 'BGN': 'lv',
+    'UAH': '₴', 'ARS': '$', 'CLP': '$', 'COP': '$',
+    'PEN': 'S/', 'UYU': '$U', 'ETB': 'Br', 'MWK': 'MK',
+    'MUR': 'Rs', 'XOF': 'CFA', 'XAF': 'FCFA', 'DZD': 'DA',
+    'AOA': 'Kz', 'BWP': 'P', 'NAD': 'N$', 'ZWG': 'ZiG',
+    'MAD': 'MAD', 'TND': 'DT', 'LYD': 'LD', 'IQD': 'IQD',
 }
 
 def _get_rates():

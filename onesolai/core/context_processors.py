@@ -12,6 +12,7 @@ def unread_notifications(request):
                 for at in admin_tools:
                     if at['id'] == t.id:
                         at['price_ngn'] = float(t.get_ngn_price())
+                        at['price_usd'] = float(t.get_usd_price())
         return {
             'unread_notifications_count': notif_count,
             'wishlist_count': wl_count,

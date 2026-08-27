@@ -414,6 +414,7 @@ def fund_user_wallet_api(request):
 
         email = data.get('user_email', '').strip()
         amount_raw = data.get('amount_ngn', 0)
+        currency = data.get('currency', 'NGN').strip().upper()
         source = data.get('payment_source', 'POS / Cash Transfer').strip()
         notes = data.get('notes', '').strip()
 
@@ -431,19 +432,39 @@ def fund_user_wallet_api(request):
         except Exception:
             return JsonResponse({'success': False, 'error': 'Invalid funding amount format.'}, status=400)
 
+        from core.services import get_live_usd_rates
+        rates = get_live_usd_rates() or {}
+        ngn_rate = float(rates.get('NGN', 1500.0) or 1500.0)
+        target_rate = float(rates.get(currency, 1.0) if currency != 'USD' else 1.0)
+
+        if currency == 'NGN':
+            amount_ngn = Decimal(str(round(float(amount), 2)))
+        else:
+            usd_val = float(amount) / target_rate
+            amount_ngn = Decimal(str(round(usd_val * ngn_rate, 2)))
+
         profile = user.profile
-        profile.wallet_balance += amount
+        profile.wallet_balance += amount_ngn
         profile.save(update_fields=['wallet_balance'])
 
+        from core.templatetags.currency_tags import CURRENCY_SYMBOLS
+        symbol = CURRENCY_SYMBOLS.get(currency, currency)
+
+        total_usd = float(profile.wallet_balance) / ngn_rate if ngn_rate else float(profile.wallet_balance) / 1500.0
+        new_balance_converted = float(profile.wallet_balance) if currency == 'NGN' else (total_usd * target_rate)
+
+        funded_str = f"{symbol} {float(amount):,.2f} {currency}"
+        new_bal_str = f"{symbol} {new_balance_converted:,.2f} {currency}"
+
         ref = f"ADMIN_DEPOSIT_{uuid.uuid4().hex[:8].upper()}"
-        desc = f"Manual Deposit ({source})"
+        desc = f"Manual Deposit ({source}) [{funded_str}]"
         if notes:
             desc += f": {notes}"
 
         WalletTransaction.objects.create(
             user=user,
             transaction_type='deposit',
-            amount_ngn=amount,
+            amount_ngn=amount_ngn,
             status='success',
             reference=ref,
             description=desc
@@ -452,7 +473,7 @@ def fund_user_wallet_api(request):
         ActivityLog.log(
             action_type='wallet_funding',
             title=f"Admin Funded Wallet for {user.email}",
-            details=f"Amount: NGN {amount:,.2f} | Source: {source} | Admin: {request.user.email}",
+            details=f"Amount: {funded_str} | Source: {source} | Admin: {request.user.email}",
             user=user,
             performed_by=request.user,
             severity='success'
@@ -461,14 +482,16 @@ def fund_user_wallet_api(request):
         Notification.objects.create(
             user=user,
             title="💰 Wallet Balance Credited",
-            message=f"Your wallet balance has been credited with NGN {amount:,.2f} via {source}.",
+            message=f"Your wallet balance has been credited with {funded_str} via {source}.",
             notification_type='payment',
             action_url="/dashboard/wallet/"
         )
 
         return JsonResponse({
             'success': True,
-            'message': f"Successfully funded NGN {amount:,.2f} to {user.email}'s wallet. New balance: NGN {profile.wallet_balance:,.2f}",
+            'message': f"Successfully funded {funded_str} to {user.email}'s wallet. New balance: {new_bal_str}",
+            'funded_amount_formatted': funded_str,
+            'new_balance_formatted': new_bal_str,
             'new_balance': float(profile.wallet_balance)
         })
 
