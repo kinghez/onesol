@@ -53,23 +53,33 @@ def signup_view(request):
             if profile:
                 referrer_name = profile.user.get_full_name() or profile.user.email
 
+        from django.core.validators import validate_email
+        from django.core.exceptions import ValidationError
+
+        is_valid_email = True
+        if email:
+            try:
+                validate_email(email)
+            except ValidationError:
+                is_valid_email = False
+
         # Validation
         referrer_profile = None
         if post_ref_code:
             referrer_profile = Profile.objects.filter(referral_code__iexact=post_ref_code).first()
-            if not referrer_profile:
-                messages.error(request, 'The referral code provided is invalid.')
+
         if not terms:
             messages.error(request, 'You must accept the Terms and Privacy Policy.')
         elif not fullname or not email or not password:
             messages.error(request, 'All fields are required.')
+        elif not is_valid_email:
+            messages.error(request, 'Please enter a valid email address.')
+        elif post_ref_code and not referrer_profile:
+            messages.error(request, 'The referral code provided is invalid.')
         elif len(password) < 8:
             messages.error(request, 'Password must be at least 8 characters.')
         elif User.objects.filter(email=email).exists():
             messages.error(request, 'An account with this email already exists.')
-        elif post_ref_code and not referrer_profile:
-            # We already added an error message above for invalid referral code
-            pass
         else:
             parts = fullname.split(' ', 1)
             first_name = parts[0]
