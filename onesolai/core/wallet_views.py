@@ -40,24 +40,30 @@ def wallet_topup_initialize(request):
 
         user_currency = get_active_user_currency(request)
         rates = get_live_usd_rates() or {}
-
-        min_allowed = 100.0 if user_currency == 'NGN' else 1.0
-        if amount < min_allowed:
-            from core.templatetags.currency_tags import CURRENCY_SYMBOLS
-            symbol = CURRENCY_SYMBOLS.get(user_currency, user_currency)
-            messages.error(request, f"Minimum top-up amount is {symbol} {min_allowed:,.2f}.")
-            return redirect('dashboard:wallet')
-
         ngn_rate = float(rates.get('NGN', 1500.0) or 1500.0)
         target_rate = float(rates.get(user_currency, 1.0) if user_currency != 'USD' else 1.0)
 
-        if user_currency == 'NGN':
-            amount_ngn = Decimal(str(round(amount, 2)))
-            usd_amount = Decimal(str(round(amount / ngn_rate, 2)))
+        if payment_method == 'crypto':
+            if amount < 1.0:
+                messages.error(request, "Minimum crypto top-up amount is $1.00 USD.")
+                return redirect('dashboard:wallet')
+            usd_amount = Decimal(str(round(amount, 2)))
+            amount_ngn = Decimal(str(round(float(usd_amount) * ngn_rate, 2)))
         else:
-            usd_val = amount / target_rate
-            amount_ngn = Decimal(str(round(usd_val * ngn_rate, 2)))
-            usd_amount = Decimal(str(round(usd_val, 2)))
+            min_allowed = 100.0 if user_currency == 'NGN' else 1.0
+            if amount < min_allowed:
+                from core.templatetags.currency_tags import CURRENCY_SYMBOLS
+                symbol = CURRENCY_SYMBOLS.get(user_currency, user_currency)
+                messages.error(request, f"Minimum top-up amount is {symbol} {min_allowed:,.2f}.")
+                return redirect('dashboard:wallet')
+
+            if user_currency == 'NGN':
+                amount_ngn = Decimal(str(round(amount, 2)))
+                usd_amount = Decimal(str(round(amount / ngn_rate, 2)))
+            else:
+                usd_val = amount / target_rate
+                amount_ngn = Decimal(str(round(usd_val * ngn_rate, 2)))
+                usd_amount = Decimal(str(round(usd_val, 2)))
 
         cfg = SiteSettings.get()
 
