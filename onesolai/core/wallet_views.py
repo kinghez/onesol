@@ -92,10 +92,8 @@ def wallet_topup_initialize(request):
             flw_curr = user_currency if user_currency in FLUTTERWAVE_CURRENCIES else 'USD'
             flw_amount = Decimal(str(round(amount, 2))) if flw_curr == user_currency else usd_amount
 
-            # Universal threshold check for all non-NGN foreign currencies.
-            # If foreign currency amount is below $10.00 USD equivalent, process in NGN equivalent
-            # so card payments work seamlessly for any amount across all currencies.
-            if flw_curr != 'NGN' and usd_amount < Decimal('10.00'):
+            # Flutterwave enforces a minimum charge of $10.00 for direct USD charges.
+            if flw_curr == 'USD' and usd_amount < Decimal('10.00'):
                 flw_curr = 'NGN'
                 flw_amount = amount_ngn
 

@@ -64,18 +64,18 @@ def initiate_gateway_payment(order, tool, price_ngn, local_amount, user_currency
         )
         return auth_url
 
+    tool_usd = Decimal(str(round(tool.get_usd_price(), 2))) if tool else Decimal(str(round(float(price_ngn) / 1500.0, 2)))
+
     def try_flutterwave():
         ref = flw.generate_reference()
         order.paystack_reference = ref
         order.save(update_fields=['paystack_reference'])
 
-        flw_curr = user_curr if user_curr in FLUTTERWAVE_CURRENCIES else 'NGN'
-        flw_amount = local_amount if flw_curr == user_curr else price_ngn
+        flw_curr = user_curr if user_curr in FLUTTERWAVE_CURRENCIES else 'USD'
+        flw_amount = local_amount if flw_curr == user_curr else tool_usd
 
-        # Universal threshold check for all non-NGN foreign currencies.
-        # If foreign currency amount is below $10.00 USD equivalent, process in NGN equivalent
-        # so card payments work seamlessly for any amount across all currencies.
-        if flw_curr != 'NGN' and usd_price < Decimal('10.00'):
+        # Flutterwave enforces a minimum charge of $10.00 for direct USD charges.
+        if flw_curr == 'USD' and tool_usd < Decimal('10.00'):
             flw_curr = 'NGN'
             flw_amount = price_ngn
 
@@ -87,7 +87,7 @@ def initiate_gateway_payment(order, tool, price_ngn, local_amount, user_currency
             callback_url=flutterwave_callback,
             metadata={
                 'order_id': order.id,
-                'tool_name': tool.name,
+                'tool_name': tool.name if tool else 'Subscription',
                 'user_id': request.user.id,
             },
             customer_name=f"{request.user.first_name} {request.user.last_name}".strip() or request.user.email
@@ -105,20 +105,27 @@ def initiate_gateway_payment(order, tool, price_ngn, local_amount, user_currency
 
     gateway_sequence = []
 
-    if primary == 'paystack':
-        if is_paystack_active and (user_curr in PAYSTACK_CURRENCIES or user_curr == 'NGN'):
-            gateway_sequence.append(('Paystack', try_paystack))
+    # If the user currency is supported by Flutterwave but not Paystack (e.g. XAF, XOF, UGX, EUR, GBP),
+    # prioritize Flutterwave so the user pays directly in their local currency!
+    if user_curr in FLUTTERWAVE_CURRENCIES and user_curr not in PAYSTACK_CURRENCIES:
         if is_flutterwave_active:
             gateway_sequence.append(('Flutterwave', try_flutterwave))
-        if is_paystack_active and ('Paystack', try_paystack) not in gateway_sequence:
+        if is_paystack_active:
             gateway_sequence.append(('Paystack', try_paystack))
-    else:
+    elif primary == 'flutterwave':
         if is_flutterwave_active and user_curr in FLUTTERWAVE_CURRENCIES:
             gateway_sequence.append(('Flutterwave', try_flutterwave))
         if is_paystack_active:
             gateway_sequence.append(('Paystack', try_paystack))
         if is_flutterwave_active and ('Flutterwave', try_flutterwave) not in gateway_sequence:
             gateway_sequence.append(('Flutterwave', try_flutterwave))
+    else: # primary == 'paystack'
+        if is_paystack_active and (user_curr in PAYSTACK_CURRENCIES or user_curr == 'NGN'):
+            gateway_sequence.append(('Paystack', try_paystack))
+        if is_flutterwave_active:
+            gateway_sequence.append(('Flutterwave', try_flutterwave))
+        if is_paystack_active and ('Paystack', try_paystack) not in gateway_sequence:
+            gateway_sequence.append(('Paystack', try_paystack))
 
     if not gateway_sequence:
         raise ValueError("No active payment gateway is currently configured for this currency. Please contact support.")
