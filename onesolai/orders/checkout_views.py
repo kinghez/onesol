@@ -538,7 +538,7 @@ def manual_payment_page_view(request, order_id):
     user_currency = get_active_user_currency(request)
     
     from .models import ManualBankAccount, ManualPaymentProof
-    accounts = ManualBankAccount.objects.filter(is_active=True).order_by('display_order', 'country_name')
+    accounts = ManualBankAccount.objects.filter(is_active=True).order_by('display_order', 'payment_method_name')
     
     existing_proof = ManualPaymentProof.objects.filter(order=order).order_by('-created_at').first()
 

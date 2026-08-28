@@ -314,7 +314,7 @@ def wallet_manual_topup_view(request, reference):
     user_currency = get_active_user_currency(request)
     
     from orders.models import ManualBankAccount, ManualPaymentProof
-    accounts = ManualBankAccount.objects.filter(is_active=True).order_by('display_order', 'country_name')
+    accounts = ManualBankAccount.objects.filter(is_active=True).order_by('display_order', 'payment_method_name')
     existing_proof = ManualPaymentProof.objects.filter(wallet_transaction=w_tx).order_by('-created_at').first()
 
     context = {

@@ -49,7 +49,7 @@
                   stroke-dasharray="{{ item.progress_percent }}, 100"
                   d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" />
               </svg>
-              <div class="expiry-ring-text">{{ item.days_remaining }}d</div>
+              <div class="expiry-ring-text" style="font-size:10px; font-weight:700; line-height:1.1; text-align:center;">{{ item.order.created_at|date:"d M" }}</div>
             </div>
           </div>
           
@@ -281,6 +281,14 @@ function closeAccessModal() {
   document.getElementById('accessModal').style.display = 'none';
   document.body.style.overflow = '';
 }
+document.addEventListener('DOMContentLoaded', function() {
+  var urlParams = new URLSearchParams(window.location.search);
+  var orderId = urlParams.get('order_id');
+  if (orderId) {
+    viewAccess(orderId);
+  }
+});
+
 document.getElementById('accessModal').addEventListener('click', function(e) {
   if (e.target === this) closeAccessModal();
 });

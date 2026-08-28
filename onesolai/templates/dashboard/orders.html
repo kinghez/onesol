@@ -54,7 +54,7 @@
                   {% endif %}
                 </td>
                 <td class="col-action">
-                  <button class="btn-view" onclick="viewOrderDetails('{{ order.id }}')">Details</button>
+                  <a href="{% url 'dashboard:subscriptions' %}?order_id={{ order.id }}" class="btn-view" style="text-decoration:none; display:inline-block;">Details</a>
                 </td>
               </tr>
               {% endfor %}

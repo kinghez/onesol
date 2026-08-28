@@ -5,7 +5,7 @@
 {% block title %}Manual Bank / MoMo Transfer – OneSol AI Hub{% endblock %}
 
 {% block content %}
-<div class="container" style="max-width: 840px; margin: 0 auto 80px; padding: 120px 16px 40px; position: relative; z-index: 10;">
+<div class="container" style="max-width: 860px; margin: 0 auto 80px; padding: 120px 16px 40px; position: relative; z-index: 10;">
     
     <div class="glass-card" style="background: rgba(15, 21, 53, 0.95); border: 1px solid rgba(255, 255, 255, 0.15); border-radius: 20px; padding: 32px; backdrop-filter: blur(16px); box-shadow: 0 20px 50px rgba(0,0,0,0.6);">
         
@@ -39,7 +39,7 @@
                 <i class="fa-solid fa-clock-rotate-left"></i> Payment Approval Notice
             </div>
             <p style="font-size: 13px; color: #E2E8F0; margin: 0; line-height: 1.5;">
-                Select any payment account below to view details and transfer. Once you submit your proof of payment, your wallet balance will be credited <strong>typically within 15 minutes</strong>.
+                Make payment to any of our official payment accounts below. After transferring, upload your proof of payment. Payments are verified and approved <strong>typically within 15 minutes</strong>.
             </p>
         </div>
 
@@ -48,7 +48,7 @@
             <div style="background: rgba(245, 158, 11, 0.12); border: 1px solid rgba(245, 158, 11, 0.3); border-radius: 14px; padding: 20px; margin-bottom: 28px;">
                 <div style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12px;">
                     <div>
-                        <span style="font-size: 12px; color: #fcd34d; font-weight: 700; text-transform: uppercase; tracking-wider: 1px; display: block; margin-bottom: 4px;">Proof Status</span>
+                        <span style="font-size: 12px; color: #fcd34d; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; display: block; margin-bottom: 4px;">Proof Status</span>
                         <h4 style="font-size: 16px; font-weight: 700; color: #fff; margin: 0;">
                             {% if existing_proof.status == 'approved' %}
                                 <span style="color: #34d399;"><i class="fa-solid fa-circle-check"></i> Approved & Delivered</span>
@@ -67,52 +67,56 @@
             </div>
         {% endif %}
 
-        <!-- Payment Accounts Grid -->
-        <h3 style="font-size: 16px; font-weight: 700; color: #fff; margin-bottom: 16px; display: flex; align-items: center; gap: 8px;">
-            <i class="fa-solid fa-building-columns" style="color: #10B981;"></i> Select Payment Provider & Account Details
+        <!-- Visible Payment Accounts Grid -->
+        <h3 style="font-size: 17px; font-weight: 700; color: #fff; margin-bottom: 16px; display: flex; align-items: center; gap: 8px;">
+            <i class="fa-solid fa-building-columns" style="color: #10B981;"></i> Our Official Bank & Mobile Money Accounts
         </h3>
 
-        <div style="display: grid; gap: 16px; margin-bottom: 32px;">
-            {% for acc in accounts %}
-                <div class="account-card" onclick="selectAccount('{{ acc.payment_method_name|escapejs }}', 'accNumber_{{ acc.id }}')"
-                     style="background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.1); border-radius: 14px; padding: 20px; transition: all 0.2s cursor: pointer;">
-                    
-                    <div style="display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 12px;">
-                        <div>
-                            <span style="font-size: 11px; font-weight: 700; color: #38bdf8; background: rgba(56, 189, 248, 0.12); padding: 3px 10px; border-radius: 12px; text-transform: uppercase;">
-                                {{ acc.supported_regions }}
-                            </span>
-                            <h4 style="font-size: 16px; font-weight: 700; color: #fff; margin: 10px 0 4px;">
-                                {{ acc.payment_method_name }}
-                            </h4>
-                            <p style="font-size: 13px; color: #94A3B8; margin: 0;">
-                                Account Name: <strong style="color: #F8FAFC; font-weight: 700;">{{ acc.account_name }}</strong>
+        <div style="display: grid; gap: 16px; margin-bottom: 36px;">
+            {% if accounts %}
+                {% for acc in accounts %}
+                    <div style="background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.12); border-radius: 14px; padding: 20px; transition: border-color 0.2s;">
+                        <div style="display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 12px;">
+                            <div>
+                                <span style="font-size: 11px; font-weight: 700; color: #38bdf8; background: rgba(56, 189, 248, 0.15); padding: 4px 10px; border-radius: 12px; text-transform: uppercase;">
+                                    {{ acc.supported_regions }}
+                                </span>
+                                <h4 style="font-size: 17px; font-weight: 700; color: #fff; margin: 10px 0 4px;">
+                                    {{ acc.payment_method_name }}
+                                </h4>
+                                <p style="font-size: 14px; color: #CBD5E1; margin: 0;">
+                                    Account Name: <strong style="color: #4ade80; font-weight: 700;">{{ acc.account_name }}</strong>
+                                </p>
+                            </div>
+
+                            <div style="display: flex; align-items: center; gap: 10px;">
+                                <input type="text" id="accNumber_{{ acc.id }}" value="{{ acc.account_number }}" readonly
+                                       style="background: rgba(0,0,0,0.6); border: 1px solid rgba(255,255,255,0.2); color: #4ade80; font-family: monospace; font-size: 16px; font-weight: 800; padding: 10px 14px; border-radius: 10px; width: 170px; text-align: center;">
+                                <button type="button" onclick="copyAccountNo('accNumber_{{ acc.id }}', this)"
+                                        style="background: #10B981; border: none; color: #fff; padding: 11px 16px; border-radius: 10px; font-weight: 700; font-size: 13px; cursor: pointer; display: inline-flex; align-items: center; gap: 6px; box-shadow: 0 4px 12px rgba(16,185,129,0.3);">
+                                    <i class="fa-regular fa-copy"></i> Copy
+                                </button>
+                            </div>
+                        </div>
+
+                        {% if acc.additional_instructions %}
+                            <p style="font-size: 12px; color: #CBD5E1; margin: 12px 0 0; background: rgba(0,0,0,0.25); padding: 10px 14px; border-radius: 8px; line-height: 1.4;">
+                                <i class="fa-solid fa-circle-info" style="color: #10B981;"></i> {{ acc.additional_instructions }}
                             </p>
-                        </div>
-
-                        <div style="display: flex; align-items: center; gap: 8px;">
-                            <input type="text" id="accNumber_{{ acc.id }}" value="{{ acc.account_number }}" readonly
-                                   style="background: rgba(0,0,0,0.6); border: 1px solid rgba(255,255,255,0.2); color: #4ade80; font-family: monospace; font-size: 16px; font-weight: 800; padding: 10px 14px; border-radius: 10px; width: 170px; text-align: center;">
-                            <button type="button" onclick="copyAccountNo('accNumber_{{ acc.id }}', this); event.stopPropagation();"
-                                    style="background: #10B981; border: none; color: #fff; padding: 11px 16px; border-radius: 10px; font-weight: 700; font-size: 13px; cursor: pointer; display: inline-flex; align-items: center; gap: 6px; box-shadow: 0 4px 12px rgba(16,185,129,0.3);">
-                                <i class="fa-regular fa-copy"></i> Copy
-                            </button>
-                        </div>
+                        {% endif %}
                     </div>
-
-                    {% if acc.additional_instructions %}
-                        <p style="font-size: 12px; color: #CBD5E1; margin: 12px 0 0; background: rgba(0,0,0,0.25); padding: 10px 14px; border-radius: 8px; line-height: 1.4;">
-                            <i class="fa-solid fa-circle-info" style="color: #10B981;"></i> {{ acc.additional_instructions }}
-                        </p>
-                    {% endif %}
+                {% endfor %}
+            {% else %}
+                <div style="background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.1); border-radius: 14px; padding: 24px; text-align: center;">
+                    <p style="color: #AEB5CA; margin: 0;">No active bank accounts configured. Please contact support.</p>
                 </div>
-            {% endfor %}
+            {% endif %}
         </div>
 
         <!-- Proof Upload Section -->
         <div style="border-top: 1px solid rgba(255,255,255,0.1); pt: 28px; margin-top: 28px; padding-top: 28px;">
             <h3 style="font-size: 17px; font-weight: 700; color: #fff; margin-bottom: 16px; display: flex; align-items: center; gap: 8px;">
-                <i class="fa-solid fa-file-arrow-up" style="color: #38bdf8;"></i> Upload Proof of Payment
+                <i class="fa-solid fa-file-arrow-up" style="color: #38bdf8;"></i> Submit Payment Verification
             </h3>
 
             <form method="POST" action="{% url 'dashboard:submit_wallet_manual_proof' wallet_tx.reference %}" enctype="multipart/form-data">
@@ -120,14 +124,20 @@
                 
                 <div style="margin-bottom: 20px;">
                     <label style="display: block; font-size: 13px; font-weight: 600; color: #AEB5CA; margin-bottom: 8px;">
-                        Payment Provider / Channel Used <span style="color: #ef4444;">*</span>
+                        Payment Provider / Bank Paid To <span style="color: #ef4444;">*</span>
                     </label>
                     <select id="paymentChannelSelect" name="payment_channel_used" required
                             style="width: 100%; background: #0f1535; border: 1px solid rgba(255,255,255,0.2); color: #fff; font-size: 14px; padding: 12px 14px; border-radius: 10px; cursor: pointer;">
                         <option value="">-- Select Payment Provider --</option>
                         {% for acc in accounts %}
-                            <option value="{{ acc.payment_method_name }}">{{ acc.payment_method_name }} ({{ acc.account_number }})</option>
+                            <option value="{{ acc.payment_method_name }}">{{ acc.payment_method_name }} ({{ acc.account_number }}) - {{ acc.supported_regions }}</option>
                         {% endfor %}
+                        <option value="Providus Bank">Providus Bank (Nigeria)</option>
+                        <option value="MTN MOMO Cameroon">MTN MOMO (Cameroon)</option>
+                        <option value="MTN MoMo Ghana">MTN MoMo (Ghana)</option>
+                        <option value="Telecel Ghana">Telecel (Ghana)</option>
+                        <option value="Mpesa Kenya">Mpesa (Kenya)</option>
+                        <option value="Mpesa Uganda/Tanzania">Mpesa (Uganda/Tanzania)</option>
                         <option value="UBA Bank">UBA Bank</option>
                         <option value="Bank Transfer">Other Bank Transfer</option>
                         <option value="Other Mobile Money">Other Mobile Money</option>
@@ -144,7 +154,7 @@
 
                 <div style="margin-bottom: 24px;">
                     <label style="display: block; font-size: 13px; font-weight: 600; color: #AEB5CA; margin-bottom: 8px;">
-                        Upload Proof File (Photo Screenshot or PDF) <span style="color: #ef4444;">*</span>
+                        Upload Proof File (Screenshot or PDF Receipt) <span style="color: #ef4444;">*</span>
                     </label>
                     <input type="file" name="proof_file" accept="image/*,.pdf" required
                            style="width: 100%; background: rgba(255,255,255,0.05); border: 1px dashed rgba(255,255,255,0.3); color: #fff; font-size: 13px; padding: 14px; border-radius: 10px; cursor: pointer;">
@@ -173,18 +183,6 @@ function copyAccountNo(inputId, btn) {
         btn.innerHTML = origHTML;
         btn.style.background = '#10B981';
     }, 2000);
-}
-
-function selectAccount(providerName, inputId) {
-    var select = document.getElementById('paymentChannelSelect');
-    if (select) {
-        for (var i = 0; i < select.options.length; i++) {
-            if (select.options[i].value.toLowerCase().includes(providerName.toLowerCase())) {
-                select.selectedIndex = i;
-                break;
-            }
-        }
-    }
 }
 </script>
 {% endblock %}
