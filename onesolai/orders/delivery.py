@@ -65,7 +65,9 @@ def trigger_delivery(order):
                 notification_type='order',
                 action_url=f"/dashboard/orders/"
             )
-    except Exception:
+    except Exception as e:
+        import traceback
+        print(f"Error in trigger_delivery for Order #{order.id}: {e}\n{traceback.format_exc()}")
         order.delivery_status = 'failed'
 
     order.save(update_fields=['delivery_status'])

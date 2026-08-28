@@ -127,9 +127,9 @@ def wallet_topup_initialize(request):
             return auth_url
 
         sequence = []
-        PAYSTACK_CURRENCIES = {'NGN', 'GHS', 'KES', 'ZAR', 'USD'}
+        PAYSTACK_CURRENCIES = {'NGN'}
 
-        if user_currency not in PAYSTACK_CURRENCIES or primary == 'flutterwave':
+        if user_currency != 'NGN' or primary == 'flutterwave':
             if is_fw_active: sequence.append(('Flutterwave', try_flutterwave))
             if is_ps_active: sequence.append(('Paystack', try_paystack))
         else:

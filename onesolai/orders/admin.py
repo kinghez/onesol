@@ -68,7 +68,9 @@ class OrderAdmin(admin.ModelAdmin):
 
     @admin.display(description='User')
     def user_email(self, obj):
-        return obj.user.email
+        if obj.user:
+            return obj.user.email
+        return obj.delivery_email or "Unregistered User" 
 
     @admin.display(description='Status')
     def status_badge(self, obj):

@@ -15,7 +15,9 @@ from . import paystack as ps
 from . import flutterwave as flw
 from .delivery import trigger_delivery, credit_referral_commission
 
-PAYSTACK_CURRENCIES = {'NGN', 'GHS', 'KES', 'ZAR', 'USD'}
+# Paystack accounts registered in Nigeria can only reliably process NGN transactions.
+# All foreign currencies (GHS, USD, EUR, GBP, KES, XAF, XOF, ZAR, etc.) must route to Flutterwave.
+PAYSTACK_CURRENCIES = {'NGN'}
 FLUTTERWAVE_CURRENCIES = {'NGN', 'GHS', 'KES', 'ZAR', 'UGX', 'TZS', 'RWF', 'XOF', 'XAF', 'ZMW', 'MWK', 'MUR', 'EGP', 'USD', 'GBP', 'EUR', 'CAD', 'AUD'}
 
 
@@ -105,27 +107,23 @@ def initiate_gateway_payment(order, tool, price_ngn, local_amount, user_currency
 
     gateway_sequence = []
 
-    # If the user currency is supported by Flutterwave but not Paystack (e.g. XAF, XOF, UGX, EUR, GBP),
-    # prioritize Flutterwave so the user pays directly in their local currency!
-    if user_curr in FLUTTERWAVE_CURRENCIES and user_curr not in PAYSTACK_CURRENCIES:
+    # For any foreign currency (GHS, USD, EUR, GBP, KES, XAF, XOF, ZAR, etc.),
+    # prioritize Flutterwave so the user pays directly in their local currency/cards without Paystack international blocks.
+    if user_curr != 'NGN':
         if is_flutterwave_active:
             gateway_sequence.append(('Flutterwave', try_flutterwave))
         if is_paystack_active:
             gateway_sequence.append(('Paystack', try_paystack))
     elif primary == 'flutterwave':
-        if is_flutterwave_active and user_curr in FLUTTERWAVE_CURRENCIES:
+        if is_flutterwave_active:
             gateway_sequence.append(('Flutterwave', try_flutterwave))
         if is_paystack_active:
             gateway_sequence.append(('Paystack', try_paystack))
-        if is_flutterwave_active and ('Flutterwave', try_flutterwave) not in gateway_sequence:
-            gateway_sequence.append(('Flutterwave', try_flutterwave))
-    else: # primary == 'paystack'
-        if is_paystack_active and (user_curr in PAYSTACK_CURRENCIES or user_curr == 'NGN'):
+    else: # primary == 'paystack' and user_curr == 'NGN'
+        if is_paystack_active:
             gateway_sequence.append(('Paystack', try_paystack))
         if is_flutterwave_active:
             gateway_sequence.append(('Flutterwave', try_flutterwave))
-        if is_paystack_active and ('Paystack', try_paystack) not in gateway_sequence:
-            gateway_sequence.append(('Paystack', try_paystack))
 
     if not gateway_sequence:
         raise ValueError("No active payment gateway is currently configured for this currency. Please contact support.")
