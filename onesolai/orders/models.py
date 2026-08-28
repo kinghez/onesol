@@ -135,3 +135,54 @@ class OrderAPIRequest(models.Model):
         v_name = self.vendor.name if self.vendor else "Unknown Vendor"
         return f"Order #{self.order.id} API Request → {v_name} [{self.status}]"
 
+
+
+class ManualBankAccount(models.Model):
+    country_code = models.CharField(max_length=5, help_text="e.g. CM, GH, KE, NG, UG, TZ, ALL")
+    country_name = models.CharField(max_length=100, help_text="e.g. Cameroon, Ghana, Kenya, Nigeria, Uganda/Tanzania")
+    currency_code = models.CharField(max_length=10, help_text="e.g. XAF, GHS, KES, NGN, UGX, TZS")
+    payment_method_name = models.CharField(max_length=100, help_text="e.g. MTN MoMo, Telecel, Mpesa, Providus Bank")
+    account_number = models.CharField(max_length=100, help_text="Phone number or Bank account number")
+    account_name = models.CharField(max_length=150, help_text="Account holder name")
+    additional_instructions = models.TextField(blank=True, help_text="Specific instructions for this payment option")
+    is_active = models.BooleanField(default=True)
+    display_order = models.IntegerField(default=0)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ['display_order', 'country_name']
+        verbose_name = 'Manual Bank Account'
+        verbose_name_plural = 'Manual Bank Accounts'
+
+    def __str__(self):
+        return f"{self.country_name} ({self.currency_code}) – {self.payment_method_name}: {self.account_number} ({self.account_name})"
+
+
+class ManualPaymentProof(models.Model):
+    STATUS_CHOICES = [
+        ('pending', 'Pending Verification'),
+        ('approved', 'Approved'),
+        ('rejected', 'Rejected'),
+    ]
+    order = models.ForeignKey(Order, related_name='manual_proofs', on_delete=models.CASCADE, null=True, blank=True)
+    wallet_transaction = models.ForeignKey('accounts.WalletTransaction', related_name='manual_proofs', on_delete=models.CASCADE, null=True, blank=True)
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, related_name='manual_proofs', on_delete=models.CASCADE)
+    payment_channel_used = models.CharField(max_length=100, help_text="e.g. MTN MoMo, Telecel, Providus Bank, Mpesa")
+    sender_name_or_txid = models.CharField(max_length=200, help_text="Sender name or Transaction ID")
+    proof_file = models.FileField(upload_to='manual_proofs/', help_text="Uploaded payment screenshot or PDF receipt")
+    amount_local = models.DecimalField(max_digits=12, decimal_places=2, help_text="Amount in user local currency")
+    currency = models.CharField(max_length=10, default='NGN')
+    amount_ngn = models.DecimalField(max_digits=12, decimal_places=2, help_text="Converted base NGN amount")
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='pending')
+    admin_notes = models.TextField(blank=True, help_text="Reason for rejection or admin notes")
+    created_at = models.DateTimeField(auto_now_add=True)
+    processed_at = models.DateTimeField(null=True, blank=True)
+
+    class Meta:
+        ordering = ['-created_at']
+        verbose_name = 'Manual Payment Proof'
+        verbose_name_plural = 'Manual Payment Proofs'
+
+    def __str__(self):
+        type_str = f"Order #{self.order.order_number}" if self.order else f"Wallet Ref {self.wallet_transaction.reference if self.wallet_transaction else 'N/A'}"
+        return f"Proof for {type_str} | {self.currency} {self.amount_local} [{self.status.upper()}]"

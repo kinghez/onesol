@@ -63,7 +63,8 @@
                             {% if user.is_authenticated and user.profile.wallet_balance > 0 %}
                             <option value="wallet" style="background:#0f1535; color:#ffffff; font-weight:bold;">👛 Pay with Wallet (Bal: {{ user.profile.wallet_balance|convert_ngn:user_currency }})</option>
                             {% endif %}
-                            <option value="card" style="background:#0f1535; color:#ffffff;">💳 Card / Bank Transfer (Paystack / Flutterwave)</option>
+                            <option value="card" style="background:#0f1535; color:#ffffff;">💳 Card / Online Payment (Paystack / Flutterwave)</option>
+                            <option value="manual" style="background:#0f1535; color:#ffffff;">🏦 Manual Bank / MoMo Transfer (Africa)</option>
                             <option value="crypto" style="background:#0f1535; color:#ffffff;">🪙 Crypto (USDT TRC20 / BEP20)</option>
                         </select>
                     </div>

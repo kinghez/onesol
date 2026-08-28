@@ -1,3 +1,4 @@
+from django.views.decorators.http import require_POST
 from django.shortcuts import render, redirect
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
@@ -66,6 +67,18 @@ def wallet_topup_initialize(request):
                 usd_amount = Decimal(str(round(usd_val, 2)))
 
         cfg = SiteSettings.get()
+
+        if payment_method == 'manual':
+            reference = f"TOPUP_MANUAL_{uuid.uuid4().hex[:12].upper()}"
+            WalletTransaction.objects.create(
+                user=request.user,
+                transaction_type='deposit',
+                amount_ngn=amount_ngn,
+                reference=reference,
+                status='pending',
+                description=f"Wallet Top-up via Manual Bank Transfer ({user_currency} {amount:,.2f})"
+            )
+            return redirect('dashboard:wallet_manual_topup', reference=reference)
 
         if payment_method == 'crypto':
             if not cfg.is_crypto_enabled:
@@ -287,3 +300,75 @@ def wallet_topup_callback(request):
         messages.error(request, "Payment verification failed or payment was not successful.")
 
     return redirect('dashboard:wallet')
+
+
+
+# -------------------------------------------------------------
+# WALLET MANUAL TOP-UP VIEWS
+# -------------------------------------------------------------
+@login_required(login_url='/auth/login/')
+def wallet_manual_topup_view(request, reference):
+    w_tx = get_object_or_404(WalletTransaction, reference=reference, user=request.user)
+    
+    from accounts.utils import get_active_user_currency
+    user_currency = get_active_user_currency(request)
+    
+    from orders.models import ManualBankAccount, ManualPaymentProof
+    accounts = ManualBankAccount.objects.filter(is_active=True).order_by('display_order', 'country_name')
+    existing_proof = ManualPaymentProof.objects.filter(wallet_transaction=w_tx).order_by('-created_at').first()
+
+    context = {
+        'wallet_tx': w_tx,
+        'user_currency': user_currency,
+        'accounts': accounts,
+        'existing_proof': existing_proof,
+    }
+    return render(request, 'dashboard/wallet_manual_topup.html', context)
+
+
+@login_required(login_url='/auth/login/')
+@require_POST
+def submit_wallet_manual_proof_view(request, reference):
+    w_tx = get_object_or_404(WalletTransaction, reference=reference, user=request.user)
+    
+    payment_channel_used = request.POST.get('payment_channel_used', '').strip()
+    sender_name_or_txid = request.POST.get('sender_name_or_txid', '').strip()
+    proof_file = request.FILES.get('proof_file')
+
+    if not payment_channel_used or not sender_name_or_txid or not proof_file:
+        messages.error(request, "Please fill in all required fields and upload your proof of payment.")
+        return redirect('dashboard:wallet_manual_topup', reference=reference)
+
+    from accounts.utils import get_active_user_currency
+    from core.services import get_live_usd_rates
+    user_currency = get_active_user_currency(request)
+    rates = get_live_usd_rates() or {}
+    target_rate = float(rates.get(user_currency, 1.0) if user_currency != 'USD' else 1.0)
+    ngn_rate = float(rates.get('NGN', 1500.0) or 1500.0)
+
+    amount_local = Decimal(str(round(float(w_tx.amount_ngn) / ngn_rate * target_rate, 2))) if user_currency != 'NGN' else w_tx.amount_ngn
+
+    from orders.models import ManualPaymentProof
+    proof = ManualPaymentProof.objects.create(
+        wallet_transaction=w_tx,
+        user=request.user,
+        payment_channel_used=payment_channel_used,
+        sender_name_or_txid=sender_name_or_txid,
+        proof_file=proof_file,
+        amount_local=amount_local,
+        currency=user_currency,
+        amount_ngn=w_tx.amount_ngn,
+        status='pending'
+    )
+
+    from analytics.models import ActivityLog
+    ActivityLog.log(
+        action_type='manual_topup_submitted',
+        title=f"Manual Wallet Top-Up Proof Uploaded ({reference})",
+        details=f"Provider: {payment_channel_used} | Sender/TxID: {sender_name_or_txid} | Amount: {user_currency} {amount_local}",
+        user=request.user,
+        severity='info'
+    )
+
+    messages.success(request, "Your payment proof has been submitted! Payments are typically verified and approved by our team within 15 minutes.")
+    return redirect('dashboard:wallet_manual_topup', reference=reference)

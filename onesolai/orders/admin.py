@@ -267,3 +267,168 @@ class OrderAPIRequestAdmin(admin.ModelAdmin):
             color, obj.status.upper()
         )
 
+
+
+# ─────────────────────────────────────────────
+#  Manual Bank Account & Payment Proof Admin
+# ─────────────────────────────────────────────
+from .models import ManualBankAccount, ManualPaymentProof
+
+@admin.register(ManualBankAccount)
+class ManualBankAccountAdmin(admin.ModelAdmin):
+    list_display = ('country_name', 'currency_code', 'payment_method_name', 'account_number', 'account_name', 'is_active', 'display_order')
+    list_filter = ('country_code', 'currency_code', 'is_active')
+    search_fields = ('country_name', 'payment_method_name', 'account_number', 'account_name')
+    list_editable = ('is_active', 'display_order')
+
+
+@admin.register(ManualPaymentProof)
+class ManualPaymentProofAdmin(admin.ModelAdmin):
+    list_display = ('id', 'user_email', 'target_reference', 'payment_channel_used', 'sender_name_or_txid', 'amount_display', 'status_badge', 'proof_link', 'created_at')
+    list_filter = ('status', 'currency', 'created_at')
+    search_fields = ('user__email', 'sender_name_or_txid', 'order__id', 'wallet_transaction__reference')
+    readonly_fields = ('order', 'wallet_transaction', 'user', 'payment_channel_used', 'sender_name_or_txid', 'proof_file_preview', 'amount_local', 'currency', 'amount_ngn', 'created_at', 'processed_at')
+    actions = ['approve_manual_payments', 'reject_manual_payments']
+
+    @admin.display(description='User')
+    def user_email(self, obj):
+        return obj.user.email if obj.user else "N/A"
+
+    @admin.display(description='Target')
+    def target_reference(self, obj):
+        if obj.order:
+            url = f"/admin/orders/order/{obj.order.id}/change/"
+            return format_html('<a href="{}">Order #{}</a>', url, obj.order.order_number)
+        elif obj.wallet_transaction:
+            return f"Wallet ({obj.wallet_transaction.reference})"
+        return "N/A"
+
+    @admin.display(description='Amount')
+    def amount_display(self, obj):
+        return f"{obj.currency} {obj.amount_local:,.2f} (₦{obj.amount_ngn:,.2f})"
+
+    @admin.display(description='Proof File')
+    def proof_link(self, obj):
+        if obj.proof_file:
+            return format_html('<a href="{}" target="_blank" style="background:#4F46E5;color:#fff;padding:2px 8px;border-radius:4px;font-size:11px;font-weight:bold;">View Proof</a>', obj.proof_file.url)
+        return "No File"
+
+    @admin.display(description='Proof Preview')
+    def proof_file_preview(self, obj):
+        if obj.proof_file:
+            url = obj.proof_file.url
+            if url.lower().endswith(('.png', '.jpg', '.jpeg', '.webp')):
+                return format_html('<a href="{}" target="_blank"><img src="{}" style="max-width:400px;max-height:400px;border-radius:8px;border:1px solid #333;" /></a>', url, url)
+            return format_html('<a href="{}" target="_blank" style="font-weight:bold;color:#6366F1;">Download Proof Document ({})</a>', url, url.split('.')[-1].upper())
+        return "No File Uploaded"
+
+    @admin.display(description='Status')
+    def status_badge(self, obj):
+        colors = {'approved': '#10B981', 'pending': '#F59E0B', 'rejected': '#EF4444'}
+        return format_html('<span style="background:{};color:#fff;padding:2px 8px;border-radius:4px;font-size:11px;font-weight:bold;">{}</span>', colors.get(obj.status, '#6B7280'), obj.status.upper())
+
+    @admin.action(description='✅ Approve selected manual payments')
+    def approve_manual_payments(self, request, queryset):
+        from django.utils import timezone
+        from orders.delivery import trigger_delivery, credit_referral_commission
+        from notifications.models import Notification
+        from analytics.models import ActivityLog
+
+        approved_count = 0
+        for proof in queryset.filter(status='pending'):
+            proof.status = 'approved'
+            proof.processed_at = timezone.now()
+            proof.save()
+
+            if proof.order:
+                order = proof.order
+                order.status = 'paid'
+                order.save(update_fields=['status'])
+
+                trigger_delivery(order)
+                credit_referral_commission(order)
+
+                try:
+                    from vendors.tasks import fulfill_order_via_vendors
+                    fulfill_order_via_vendors(order.id)
+                except Exception as ve:
+                    print(f"Vendor fulfillment error on manual approval: {ve}")
+
+                ActivityLog.log(
+                    action_type='payment_success',
+                    title=f"Manual Payment Approved: Order #{order.order_number}",
+                    details=f"Amount: {proof.currency} {proof.amount_local:,.2f} | Sender: {proof.sender_name_or_txid} | Admin: {request.user.email}",
+                    user=order.user,
+                    performed_by=request.user,
+                    severity='success'
+                )
+
+                if order.user:
+                    Notification.objects.create(
+                        user=order.user,
+                        title="✅ Payment Approved!",
+                        message=f"Your manual payment for Order #{order.order_number} has been verified and approved!",
+                        notification_type='order',
+                        action_url="/dashboard/orders/"
+                    )
+
+            elif proof.wallet_transaction:
+                w_tx = proof.wallet_transaction
+                w_tx.status = 'success'
+                w_tx.save(update_fields=['status'])
+
+                user = proof.user
+                profile = user.profile
+                profile.wallet_balance += proof.amount_ngn
+                profile.save(update_fields=['wallet_balance'])
+
+                ActivityLog.log(
+                    action_type='wallet_funded',
+                    title=f"Manual Wallet Top-up Approved for {user.email}",
+                    details=f"Amount Credited: NGN {proof.amount_ngn:,.2f} ({proof.currency} {proof.amount_local:,.2f}) | Admin: {request.user.email}",
+                    user=user,
+                    performed_by=request.user,
+                    severity='success'
+                )
+
+                Notification.objects.create(
+                    user=user,
+                    title="💰 Wallet Top-Up Approved!",
+                    message=f"Your manual top-up of {proof.currency} {proof.amount_local:,.2f} (₦{proof.amount_ngn:,.2f}) has been verified and credited to your wallet balance!",
+                    notification_type='wallet',
+                    action_url="/dashboard/wallet/"
+                )
+
+            approved_count += 1
+
+        self.message_user(request, f"Successfully approved {approved_count} manual payment proof(s).")
+
+    @admin.action(description='❌ Reject selected manual payments')
+    def reject_manual_payments(self, request, queryset):
+        from django.utils import timezone
+        from notifications.models import Notification
+
+        rejected_count = 0
+        for proof in queryset.filter(status='pending'):
+            proof.status = 'rejected'
+            proof.processed_at = timezone.now()
+            proof.save()
+
+            if proof.order:
+                proof.order.status = 'failed'
+                proof.order.save(update_fields=['status'])
+
+            if proof.wallet_transaction:
+                proof.wallet_transaction.status = 'failed'
+                proof.wallet_transaction.save(update_fields=['status'])
+
+            Notification.objects.create(
+                user=proof.user,
+                title="❌ Manual Payment Unverified",
+                message=f"We could not verify your manual payment proof for {proof.currency} {proof.amount_local:,.2f}. Please contact support or try again.",
+                notification_type='order',
+                action_url="/dashboard/"
+            )
+            rejected_count += 1
+
+        self.message_user(request, f"Marked {rejected_count} manual payment proof(s) as REJECTED.")

@@ -194,6 +194,18 @@ def checkout_view(request):
     payment_method = request.POST.get('payment_method', '').strip().lower()
     pay_with_wallet = (request.POST.get('pay_with_wallet') == 'true') or (payment_method == 'wallet')
 
+    if payment_method == 'manual':
+        PaymentTransaction.objects.create(
+            order=order,
+            gateway='manual',
+            transaction_id=f"MANUAL_PENDING_{order.id}",
+            reference=f"MANUAL_REF_{order.id}",
+            status='pending',
+            amount_paid=local_amount,
+            currency_paid=user_currency,
+        )
+        return redirect('orders:manual_payment', order_id=order.id)
+
     if payment_method == 'crypto':
         from core.models import SiteSettings
         cfg = SiteSettings.get()
@@ -512,3 +524,67 @@ def submit_crypto_payment_view(request, order_id):
 
     messages.success(request, f"Your Crypto transaction hash (TxID) for Order #{order.id} has been submitted for verification!")
     return redirect('orders:confirmation', order_id=order.id)
+
+
+
+# -------------------------------------------------------------
+# MANUAL BANK & MOMO PAYMENT VIEWS (AFRICA)
+# -------------------------------------------------------------
+@login_required(login_url='/auth/login/')
+def manual_payment_page_view(request, order_id):
+    order = get_object_or_404(Order, id=order_id, user=request.user)
+    
+    from accounts.utils import get_active_user_currency
+    user_currency = get_active_user_currency(request)
+    
+    from .models import ManualBankAccount, ManualPaymentProof
+    accounts = ManualBankAccount.objects.filter(is_active=True).order_by('display_order', 'country_name')
+    
+    existing_proof = ManualPaymentProof.objects.filter(order=order).order_by('-created_at').first()
+
+    context = {
+        'order': order,
+        'user_currency': user_currency,
+        'accounts': accounts,
+        'existing_proof': existing_proof,
+    }
+    return render(request, 'orders/manual_payment.html', context)
+
+
+@login_required(login_url='/auth/login/')
+@require_POST
+def submit_manual_payment_proof(request, order_id):
+    order = get_object_or_404(Order, id=order_id, user=request.user)
+    
+    payment_channel_used = request.POST.get('payment_channel_used', '').strip()
+    sender_name_or_txid = request.POST.get('sender_name_or_txid', '').strip()
+    proof_file = request.FILES.get('proof_file')
+
+    if not payment_channel_used or not sender_name_or_txid or not proof_file:
+        messages.error(request, "Please fill in all required fields and upload your proof of payment.")
+        return redirect('orders:manual_payment', order_id=order.id)
+
+    from .models import ManualPaymentProof
+    proof = ManualPaymentProof.objects.create(
+        order=order,
+        user=request.user,
+        payment_channel_used=payment_channel_used,
+        sender_name_or_txid=sender_name_or_txid,
+        proof_file=proof_file,
+        amount_local=order.local_amount or order.total_amount_ngn,
+        currency=order.local_currency,
+        amount_ngn=order.total_amount_ngn,
+        status='pending'
+    )
+
+    from analytics.models import ActivityLog
+    ActivityLog.log(
+        action_type='manual_payment_submitted',
+        title=f"Manual Payment Proof Uploaded for Order #{order.order_number}",
+        details=f"Provider: {payment_channel_used} | Sender/TxID: {sender_name_or_txid} | Amount: {order.local_currency} {order.local_amount}",
+        user=request.user,
+        severity='info'
+    )
+
+    messages.success(request, "Your payment proof has been submitted! Payments are typically verified and approved by our team within 15 minutes.")
+    return redirect('orders:manual_payment', order_id=order.id)
