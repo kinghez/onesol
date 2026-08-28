@@ -32,6 +32,32 @@ from core.admin_utils import export_as_csv
 # ─────────────────────────────────────────────
 @admin.register(Order)
 class OrderAdmin(admin.ModelAdmin):
+    def save_model(self, request, obj, form, change):
+        if change and 'status' in form.changed_data:
+            old_obj = Order.objects.get(pk=obj.pk)
+            if old_obj.status != 'paid' and obj.status == 'paid':
+                from orders.delivery import trigger_delivery, credit_referral_commission
+                trigger_delivery(obj)
+                credit_referral_commission(obj)
+                try:
+                    from vendors.tasks import fulfill_order_via_vendors
+                    fulfill_order_via_vendors(obj.id)
+                except Exception as ve:
+                    print(f"Vendor fulfillment error on order save: {ve}")
+
+                if obj.user:
+                    try:
+                        from notifications.models import Notification
+                        Notification.objects.create(
+                            user=obj.user,
+                            title="🎉 Order Payment Approved!",
+                            message=f"Your payment for Order #{obj.order_number} has been approved and your access details are ready!",
+                            notification_type='order',
+                            action_url='/dashboard/orders/'
+                        )
+                    except Exception:
+                        pass
+        super().save_model(request, obj, form, change)
     list_display = (
         'order_tracking_id', 'user_email', 'status_badge', 'total_amount_ngn',
         'local_currency', 'delivery_status', 'vendor_order_id', 'created_at'
@@ -100,8 +126,21 @@ class OrderAdmin(admin.ModelAdmin):
 
     @admin.action(description='✅ Mark selected orders as PAID')
     def mark_as_paid(self, request, queryset):
-        count = queryset.update(status='paid')
-        self.message_user(request, f"{count} order(s) marked as PAID.")
+        from orders.delivery import trigger_delivery, credit_referral_commission
+        count = 0
+        for order in queryset:
+            if order.status != 'paid':
+                order.status = 'paid'
+                order.save(update_fields=['status'])
+                trigger_delivery(order)
+                credit_referral_commission(order)
+                try:
+                    from vendors.tasks import fulfill_order_via_vendors
+                    fulfill_order_via_vendors(order.id)
+                except Exception:
+                    pass
+                count += 1
+        self.message_user(request, f"{count} order(s) marked as PAID and fulfillment triggered.")
 
     @admin.action(description='❌ Mark selected orders as FAILED (Abandoned)')
     def mark_as_failed(self, request, queryset):
@@ -276,10 +315,11 @@ from .models import ManualBankAccount, ManualPaymentProof
 
 @admin.register(ManualBankAccount)
 class ManualBankAccountAdmin(admin.ModelAdmin):
-    list_display = ('country_name', 'currency_code', 'payment_method_name', 'account_number', 'account_name', 'is_active', 'display_order')
-    list_filter = ('country_code', 'currency_code', 'is_active')
-    search_fields = ('country_name', 'payment_method_name', 'account_number', 'account_name')
+    list_display = ('payment_method_name', 'account_number', 'account_name', 'supported_regions', 'currency_code', 'is_active', 'display_order')
+    list_filter = ('payment_method_name', 'currency_code', 'is_active')
+    search_fields = ('payment_method_name', 'account_number', 'account_name', 'supported_regions')
     list_editable = ('is_active', 'display_order')
+    fields = ('payment_method_name', 'account_number', 'account_name', 'supported_regions', 'currency_code', 'additional_instructions', 'is_active', 'display_order')
 
 
 @admin.register(ManualPaymentProof)

@@ -176,10 +176,10 @@ def wallet_crypto_topup_view(request, reference):
 
     from core.services import get_live_usd_rates
     rates = get_live_usd_rates() or {}
-    usd_rate = rates.get('USD') or (1 / float(cfg.usd_to_ngn_rate)) if cfg.usd_to_ngn_rate else 0.00067
+    ngn_rate = float(rates.get('NGN', 1500.0) or (float(cfg.usd_to_ngn_rate) if cfg.usd_to_ngn_rate else 1500.0))
 
     amount_ngn = tx.amount_ngn
-    usd_amount = round(float(amount_ngn) * float(usd_rate), 2) if usd_rate else round(float(amount_ngn) / 1500.0, 2)
+    usd_amount = round(float(amount_ngn) / ngn_rate, 2)
 
     context = {
         'tx': tx,

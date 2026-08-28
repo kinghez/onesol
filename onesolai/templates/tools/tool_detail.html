@@ -60,7 +60,7 @@
                     <div style="margin-bottom: 14px;">
                         <label style="font-size:12px; color:#AEB5CA; display:block; margin-bottom:4px; font-weight:600;">Payment Gateway</label>
                         <select name="payment_method" style="background:#0f1535; border:1px solid rgba(255,255,255,0.2); color:#fff; font-size:13px; padding:10px 12px; border-radius:8px; width:100%; cursor:pointer;">
-                            {% if user.is_authenticated and user.profile.wallet_balance > 0 %}
+                            {% if user.is_authenticated and user.profile.wallet_balance >= tool.get_ngn_price %}
                             <option value="wallet" style="background:#0f1535; color:#ffffff; font-weight:bold;">👛 Pay with Wallet (Bal: {{ user.profile.wallet_balance|convert_ngn:user_currency }})</option>
                             {% endif %}
                             <option value="card" style="background:#0f1535; color:#ffffff;">💳 Card / Online Payment (Paystack / Flutterwave)</option>

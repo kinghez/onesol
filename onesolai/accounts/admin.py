@@ -199,6 +199,40 @@ class WithdrawalRequestAdmin(admin.ModelAdmin):
 @admin.register(WalletTransaction)
 class WalletTransactionAdmin(admin.ModelAdmin):
     list_display = ('user', 'type_badge', 'amount_ngn_display', 'status_badge', 'reference', 'description', 'created_at')
+
+    def save_model(self, request, obj, form, change):
+        if change and 'status' in form.changed_data:
+            old_obj = WalletTransaction.objects.get(pk=obj.pk)
+            if old_obj.status != 'success' and obj.status == 'success' and obj.transaction_type == 'deposit':
+                profile = obj.user.profile
+                profile.wallet_balance += obj.amount_ngn
+                profile.save(update_fields=['wallet_balance'])
+
+                try:
+                    from notifications.models import Notification
+                    Notification.objects.create(
+                        user=obj.user,
+                        title="💰 Wallet Top-Up Approved",
+                        message=f"Your deposit of NGN {obj.amount_ngn:,.2f} (Ref: {obj.reference}) has been approved and added to your wallet.",
+                        notification_type='wallet',
+                        action_url='/dashboard/wallet/'
+                    )
+                except Exception:
+                    pass
+
+                try:
+                    from analytics.models import ActivityLog
+                    ActivityLog.log(
+                        action_type='wallet_funded',
+                        title=f"Wallet Top-Up Approved ({obj.reference})",
+                        details=f"Admin {request.user.email} marked transaction as success. Credited NGN {obj.amount_ngn:,.2f} to {obj.user.email}",
+                        user=obj.user,
+                        performed_by=request.user,
+                        severity='success'
+                    )
+                except Exception:
+                    pass
+        super().save_model(request, obj, form, change)
     list_filter = ('transaction_type', 'status', 'created_at')
     search_fields = ('user__email', 'reference', 'description')
     readonly_fields = ('created_at',)

@@ -138,24 +138,25 @@ class OrderAPIRequest(models.Model):
 
 
 class ManualBankAccount(models.Model):
-    country_code = models.CharField(max_length=5, help_text="e.g. CM, GH, KE, NG, UG, TZ, ALL")
-    country_name = models.CharField(max_length=100, help_text="e.g. Cameroon, Ghana, Kenya, Nigeria, Uganda/Tanzania")
-    currency_code = models.CharField(max_length=10, help_text="e.g. XAF, GHS, KES, NGN, UGX, TZS")
-    payment_method_name = models.CharField(max_length=100, help_text="e.g. MTN MoMo, Telecel, Mpesa, Providus Bank")
-    account_number = models.CharField(max_length=100, help_text="Phone number or Bank account number")
+    payment_method_name = models.CharField(max_length=100, verbose_name="Bank / Payment Provider Name", help_text="e.g. UBA Bank, MTN MoMo, Telecel, Mpesa, Providus Bank")
+    account_number = models.CharField(max_length=100, help_text="Bank account number or MoMo phone number")
     account_name = models.CharField(max_length=150, help_text="Account holder name")
-    additional_instructions = models.TextField(blank=True, help_text="Specific instructions for this payment option")
+    supported_regions = models.CharField(max_length=150, blank=True, default="All Regions / Africa", help_text="e.g. Nigeria & Africa, Cameroon (XAF), Ghana (GHS), Kenya (KES)")
+    currency_code = models.CharField(max_length=10, blank=True, default="ALL", help_text="e.g. XAF, GHS, KES, NGN, UGX, TZS or ALL")
+    additional_instructions = models.TextField(blank=True, help_text="Specific transfer notes (e.g. Include TxID & sender name)")
+    country_code = models.CharField(max_length=10, blank=True, null=True, default='')
+    country_name = models.CharField(max_length=100, blank=True, null=True, default='')
     is_active = models.BooleanField(default=True)
     display_order = models.IntegerField(default=0)
     created_at = models.DateTimeField(auto_now_add=True)
 
     class Meta:
-        ordering = ['display_order', 'country_name']
+        ordering = ['display_order', 'payment_method_name']
         verbose_name = 'Manual Bank Account'
         verbose_name_plural = 'Manual Bank Accounts'
 
     def __str__(self):
-        return f"{self.country_name} ({self.currency_code}) – {self.payment_method_name}: {self.account_number} ({self.account_name})"
+        return f"{self.payment_method_name}: {self.account_number} ({self.account_name}) – {self.supported_regions}" 
 
 
 class ManualPaymentProof(models.Model):
