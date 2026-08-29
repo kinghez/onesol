@@ -90,7 +90,8 @@ class ProfileAdmin(admin.ModelAdmin):
         from core.templatetags.currency_tags import convert_ngn
         converted = convert_ngn(obj.wallet_balance, curr)
         if curr != 'NGN':
-            return format_html('<strong>{}</strong><br><small style="color:#6c757d;">(Base ₦{:,.2f} NGN)</small>', converted, obj.wallet_balance)
+            bal_str = f"₦{obj.wallet_balance:,.2f} NGN"
+            return format_html('<strong>{}</strong><br><small style="color:#6c757d;">(Base {})</small>', converted, bal_str)
         return format_html('<strong>{}</strong>', converted)
     search_fields = ('user__email', 'referral_code')
     list_filter = ('currency_preference', 'country_preference')
