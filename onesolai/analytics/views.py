@@ -395,11 +395,13 @@ def activity_logs_view(request):
     return render(request, 'analytics/activity_logs.html', context)
 
 
-@staff_member_required
 def fund_user_wallet_api(request):
     """
     AJAX / Form endpoint for Admin to manually fund a user's wallet (Cash, POS, Bank Transfer).
     """
+    if not request.user.is_authenticated or not request.user.is_staff:
+        return JsonResponse({'success': False, 'error': 'Admin authentication required. Please refresh and log in.'}, status=403)
+
     if request.method == 'POST':
         import json
         import uuid
@@ -502,11 +504,13 @@ def fund_user_wallet_api(request):
     return JsonResponse({'success': False, 'error': 'Invalid request method.'}, status=405)
 
 
-@staff_member_required
 def refund_user_wallet_api(request):
     """
     AJAX / Form endpoint for Admin to issue a wallet refund to a user (e.g. for failed orders).
     """
+    if not request.user.is_authenticated or not request.user.is_staff:
+        return JsonResponse({'success': False, 'error': 'Admin authentication required. Please refresh and log in.'}, status=403)
+
     if request.method == 'POST':
         import json
         import uuid

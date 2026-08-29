@@ -681,17 +681,23 @@ function openFundWalletModal() {
                     notes: document.getElementById('fundNotes').value
                 })
             })
-            .then(res => res.json())
+            .then(async res => {
+                const data = await res.json().catch(() => ({}));
+                if (!res.ok) {
+                    throw new Error(data.error || 'Server HTTP error (' + res.status + ')');
+                }
+                return data;
+            })
             .then(data => {
                 if (data.success) {
                     closeFundWalletModal();
                     showAdminToast('success', 'Wallet Credited Successfully', data.message, null, true);
                 } else {
-                    showAdminToast('error', 'Funding Failed', data.error, null, false);
+                    showAdminToast('error', 'Funding Failed', data.error || 'Operation failed', null, false);
                 }
             })
             .catch(err => {
-                alert('❌ Connection error. Please try again.');
+                showAdminToast('error', 'Funding Error', err.message || 'Network connection issue. Please check network and try again.', null, false);
             })
             .finally(() => {
                 btn.disabled = false;
