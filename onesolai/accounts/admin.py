@@ -82,7 +82,16 @@ class UserAdmin(BaseUserAdmin):
 # ─────────────────────────────────────────────
 @admin.register(Profile)
 class ProfileAdmin(admin.ModelAdmin):
-    list_display = ('user', 'referral_code', 'earnings', 'wallet_balance', 'referrals_count', 'country_preference')
+    list_display = ('user', 'referral_code', 'earnings', 'wallet_balance_display', 'referrals_count', 'country_preference')
+
+    @admin.display(description='Wallet Balance')
+    def wallet_balance_display(self, obj):
+        curr = obj.currency_preference or 'NGN'
+        from core.templatetags.currency_tags import convert_ngn
+        converted = convert_ngn(obj.wallet_balance, curr)
+        if curr != 'NGN':
+            return format_html('<strong>{}</strong><br><small style="color:#6c757d;">(Base ₦{:,.2f} NGN)</small>', converted, obj.wallet_balance)
+        return format_html('<strong>{}</strong>', converted)
     search_fields = ('user__email', 'referral_code')
     list_filter = ('currency_preference', 'country_preference')
     readonly_fields = ('referral_code', 'referral_link_display')

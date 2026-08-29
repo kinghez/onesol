@@ -23,12 +23,12 @@
             <div>
                 <span style="font-size: 13px; color: #AEB5CA; display: block; margin-bottom: 4px;">Total Amount to Pay:</span>
                 <span style="font-size: 26px; font-weight: 800; color: #4ade80;">
-                    ₦{{ wallet_tx.amount_ngn|floatformat:2 }} NGN
+                    {{ wallet_tx.amount_ngn|convert_ngn:user_currency }}
                 </span>
             </div>
             <div style="text-align: right;">
                 <span style="font-size: 12px; color: #38bdf8; background: rgba(56, 189, 248, 0.12); padding: 6px 12px; border-radius: 20px; font-weight: 600;">
-                    {{ user_currency }} Equivalent
+                    Base ₦{{ wallet_tx.amount_ngn|floatformat:2 }} NGN
                 </span>
             </div>
         </div>
