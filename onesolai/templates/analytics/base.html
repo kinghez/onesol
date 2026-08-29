@@ -425,7 +425,22 @@
             return cookieValue;
         }
 
-        function openFundWalletModal() {
+        function updateFundAmountLabel() {
+    var curr = document.getElementById('fundCurrency') ? document.getElementById('fundCurrency').value : 'NGN';
+    var label = document.getElementById('fundAmountLabel');
+    if (label) {
+        label.innerText = 'Amount (' + curr + ') *';
+    }
+}
+function updateRefundAmountLabel() {
+    var curr = document.getElementById('refundCurrency') ? document.getElementById('refundCurrency').value : 'NGN';
+    var label = document.getElementById('refundAmountLabel');
+    if (label) {
+        label.innerText = 'Refund Amount (' + curr + ') *';
+    }
+}
+
+function openFundWalletModal() {
             document.getElementById('fundWalletModal').style.display = 'flex';
         }
         function closeFundWalletModal() {

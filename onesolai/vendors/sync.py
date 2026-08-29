@@ -39,7 +39,10 @@ def sync_all_vendor_products(triggered_by="manual"):
             updated = 0
             tools_synced = 0
 
+            live_product_ids = set()
             for p_data in products:
+                vp_id_str = str(p_data['vendor_product_id'])
+                live_product_ids.add(vp_id_str)
                 obj, is_new = VendorProduct.objects.update_or_create(
                     vendor=vendor,
                     vendor_product_id=p_data['vendor_product_id'],
@@ -58,17 +61,35 @@ def sync_all_vendor_products(triggered_by="manual"):
                 else:
                     updated += 1
 
-                # ── Sync price/stock back to linked Tool if it exists ──
+                # Sync price/stock and reactivate tool if restocked
                 try:
                     linked_tool = Tool.objects.filter(vendor_product=obj).first()
-                    if linked_tool and not linked_tool.is_manual_price:
-                        # Only update sell_price_usd if it is not manually overridden
-                        if p_data.get('price') is not None:
-                            linked_tool.save(update_fields=['updated_at'])  # trigger price recalc
-                        # If stock info has changed, mark it (no separate stock field on Tool)
+                    if linked_tool:
+                        if not linked_tool.is_active:
+                            linked_tool.is_active = True
+                        if not linked_tool.is_manual_price and p_data.get('price') is not None:
+                            linked_tool.save()
+                        else:
+                            linked_tool.save(update_fields=['is_active', 'updated_at'])
                         tools_synced += 1
                 except Exception as tool_err:
                     logger.warning(f"Could not sync Tool for VendorProduct '{obj.name}': {tool_err}")
+
+            # ── Soft-deactivate out-of-stock products for THIS vendor ──
+            delisted_vps = VendorProduct.objects.filter(vendor=vendor).exclude(vendor_product_id__in=live_product_ids)
+            for delisted_vp in delisted_vps:
+                delisted_vp.stock = '0'
+                delisted_vp.save(update_fields=['stock'])
+                linked_tool = Tool.objects.filter(vendor_product=delisted_vp).first()
+                if linked_tool and linked_tool.is_active:
+                    linked_tool.is_active = False
+                    linked_tool.save(update_fields=['is_active'])
+                    ActivityLog.log(
+                        action_type='vendor_sync',
+                        severity='warning',
+                        title=f"Tool Out of Stock ({linked_tool.name})",
+                        details=f"Tool '{linked_tool.name}' hidden from catalog because ID {delisted_vp.vendor_product_id} is out of stock on {vendor.name} API."
+                    )
 
             total_created += created
             total_updated += updated

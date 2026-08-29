@@ -9,6 +9,9 @@ DEFAULT_RATES = {
     'GHS': 15.4, 'KES': 129.5, 'ZAR': 18.2, 'CAD': 1.36,
     'AUD': 1.50, 'JPY': 155.0, 'INR': 83.5, 'ZMW': 26.5,
     'UGX': 3700.0, 'TZS': 2600.0, 'RWF': 1300.0, 'EGP': 48.0,
+    'XAF': 605.0, 'XOF': 605.0, 'DZD': 134.0, 'AOA': 850.0,
+    'ARS': 900.0, 'BRL': 5.5, 'ETB': 57.0, 'MWK': 1700.0,
+    'MAD': 9.8, 'MUR': 46.0, 'NAD': 18.2,
 }
 
 CURRENCY_SYMBOLS = {

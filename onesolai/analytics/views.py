@@ -433,15 +433,19 @@ def fund_user_wallet_api(request):
             return JsonResponse({'success': False, 'error': 'Invalid funding amount format.'}, status=400)
 
         from core.services import get_live_usd_rates
+        from core.templatetags.currency_tags import DEFAULT_RATES
         rates = get_live_usd_rates() or {}
-        ngn_rate = float(rates.get('NGN', 1500.0) or 1500.0)
-        target_rate = float(rates.get(currency, 1.0) if currency != 'USD' else 1.0)
+        merged_rates = DEFAULT_RATES.copy()
+        merged_rates.update(rates)
+        merged_rates['USD'] = 1.0
+
+        ngn_rate = float(merged_rates.get('NGN', 1500.0) or 1500.0)
+        target_rate = float(merged_rates.get(currency, 1.0) or 1.0)
 
         if currency == 'NGN':
             amount_ngn = Decimal(str(round(float(amount), 2)))
         else:
-            usd_val = float(amount) / target_rate
-            amount_ngn = Decimal(str(round(usd_val * ngn_rate, 2)))
+            amount_ngn = Decimal(str(round(float(amount) * (ngn_rate / target_rate), 2)))
 
         profile = user.profile
         profile.wallet_balance += amount_ngn
@@ -550,8 +554,24 @@ def refund_user_wallet_api(request):
         except Exception:
             return JsonResponse({'success': False, 'error': 'Invalid refund amount format.'}, status=400)
 
+        currency = data.get('currency', 'NGN').strip().upper()
+        from core.services import get_live_usd_rates
+        from core.templatetags.currency_tags import DEFAULT_RATES
+        rates = get_live_usd_rates() or {}
+        merged_rates = DEFAULT_RATES.copy()
+        merged_rates.update(rates)
+        merged_rates['USD'] = 1.0
+
+        ngn_rate = float(merged_rates.get('NGN', 1500.0) or 1500.0)
+        target_rate = float(merged_rates.get(currency, 1.0) or 1.0)
+
+        if currency == 'NGN':
+            amount_ngn = Decimal(str(round(float(amount), 2)))
+        else:
+            amount_ngn = Decimal(str(round(float(amount) * (ngn_rate / target_rate), 2)))
+
         profile = user.profile
-        profile.wallet_balance += amount
+        profile.wallet_balance += amount_ngn
         profile.save(update_fields=['wallet_balance'])
 
         if order:

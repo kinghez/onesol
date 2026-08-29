@@ -94,6 +94,7 @@ def _fulfill_order_logic(order_id):
                         user=order.user,
                         severity='error'
                     )
+                    send_support_vendor_error_alert(order, tool.name, vendor.name, err_msg)
 
             except Exception as ve:
                 logger.error(f"Error processing vendor purchase for Order #{order.id}: {ve}")
@@ -111,6 +112,7 @@ def _fulfill_order_logic(order_id):
                     user=order.user,
                     severity='error'
                 )
+                send_support_vendor_error_alert(order, tool.name, vendor.name, str(ve))
 
         # Update order access details if codes were received
         if delivered_codes:
@@ -140,3 +142,48 @@ def fulfill_order_via_vendors(order_id):
     credentials, and errors are immediately captured and saved to the order before response.
     """
     _fulfill_order_logic(order_id)
+
+
+def send_support_vendor_error_alert(order, tool_name, vendor_name, error_details):
+    """
+    Sends an email notification to support@onesolai.com when vendor API fails or doesn't return credentials.
+    """
+    try:
+        from django.core.mail import send_mail
+        from core.models import SiteSettings
+        cfg = SiteSettings.get()
+        support_email = cfg.support_email or 'support@onesolai.com'
+    except Exception:
+        support_email = 'support@onesolai.com'
+
+    subject = f"⚠️ [VENDOR API ISSUE] Manual Fulfillment Needed for Order #{order.order_number} ({tool_name})"
+    cust_email = order.delivery_email or (order.user.email if order.user else 'Unregistered User')
+
+    body = f"""Hello Support Team,
+
+A customer paid for Order #{order.order_number} ({tool_name}), but the Vendor API ({vendor_name}) did NOT return immediate access credentials.
+
+--- ORDER & VENDOR FAILURE DETAILS ---
+Order Number: #{order.order_number}
+Tool Purchased: {tool_name}
+Vendor Name: {vendor_name}
+Customer Email: {cust_email}
+Amount Paid: ₦{order.total_amount_ngn:,.2f} NGN ({order.local_currency} {order.local_amount:,.2f})
+Vendor Response / Error: {error_details}
+
+ACTION REQUIRED:
+Please check vendor dashboard or manually deliver credentials to the customer, and update the order in Django Admin.
+
+OneSol AI System Notification
+"""
+    try:
+        from django.core.mail import send_mail
+        send_mail(
+            subject=subject,
+            message=body,
+            from_email=f"OneSol System <{support_email}>",
+            recipient_list=['support@onesolai.com', support_email],
+            fail_silently=True,
+        )
+    except Exception as e:
+        logger.error(f"Error sending vendor error alert: {e}")

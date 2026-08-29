@@ -72,6 +72,11 @@ def trigger_delivery(order):
 
     order.save(update_fields=['delivery_status'])
 
+    # Check if this order contains a manual tool (no vendor product attached)
+    has_manual_tool = any(not item.tool or not item.tool.vendor_product for item in items)
+    if has_manual_tool:
+        send_support_manual_order_alert(order, tool_name)
+
     # Dispatch Developer Webhook if user configured one
     dispatch_developer_webhook(order)
 
@@ -186,3 +191,46 @@ def credit_referral_commission(order):
     except Exception as e:
         print(f"Error in credit_referral_commission: {e}")
         pass  # Never crash the payment confirmation flow
+
+
+def send_support_manual_order_alert(order, tool_name):
+    """
+    Sends an email notification to support@onesolai.com when a customer purchases a manual tool.
+    """
+    try:
+        from core.models import SiteSettings
+        cfg = SiteSettings.get()
+        support_email = cfg.support_email or 'support@onesolai.com'
+    except Exception:
+        support_email = 'support@onesolai.com'
+
+    subject = f"🔔 [MANUAL TOOL ORDER] Action Required for Order #{order.order_number} ({tool_name})"
+    cust_email = order.delivery_email or (order.user.email if order.user else 'Unregistered User')
+    
+    body = f"""Hello Support Team,
+
+A customer has just purchased a MANUAL TOOL on OneSol AI Hub. Please prepare and deliver the credentials to the customer as soon as possible.
+
+--- ORDER DETAILS ---
+Order Number: #{order.order_number}
+Tool Purchased: {tool_name}
+Customer Email: {cust_email}
+Amount Charged: ₦{order.total_amount_ngn:,.2f} NGN ({order.local_currency} {order.local_amount:,.2f})
+Payment Status: PAID
+Delivery Status: Manual Action Required
+
+Please process this delivery and update the order details in Django Admin.
+
+OneSol AI System Notification
+"""
+    try:
+        send_mail(
+            subject=subject,
+            message=body,
+            from_email=f"OneSol System <{support_email}>",
+            recipient_list=['support@onesolai.com', support_email],
+            fail_silently=True,
+        )
+    except Exception as e:
+        print(f"Error sending support manual order alert: {e}")
+
