@@ -240,34 +240,33 @@ def send_support_manual_proof_alert(proof):
     """
     Sends an instant formatted email alert to support@onesolai.com
     when a user submits a manual bank/MoMo payment proof.
+    Uses send_async_email with DEFAULT_FROM_EMAIL to ensure Resend API compatibility.
     """
     try:
-        from django.core.mail import send_mail
+        from core.email_utils import send_async_email
         from core.models import SiteSettings
         cfg = SiteSettings.get()
         support_email = cfg.support_email or 'support@onesolai.com'
-    except Exception:
-        support_email = 'support@onesolai.com'
 
-    user = proof.user
-    cust_email = user.email if user else 'Unregistered User'
+        user = proof.user
+        cust_email = user.email if user else 'Unregistered User'
 
-    if proof.order:
-        tx_type = "Tool Purchase"
-        ref_id = f"Order #{proof.order.order_number}"
-        admin_url = f"https://onesolai.com/admin/orders/manualpaymentproof/{proof.id}/change/"
-    else:
-        tx_type = "Wallet Top-Up"
-        ref_id = f"Ref: {proof.wallet_transaction.reference}" if proof.wallet_transaction else "Wallet Top-Up"
-        admin_url = f"https://onesolai.com/admin/orders/manualpaymentproof/{proof.id}/change/"
+        if proof.order:
+            tx_type = "Tool Purchase"
+            ref_id = f"Order #{proof.order.order_number}"
+            admin_url = f"https://onesolai.com/admin/orders/manualpaymentproof/{proof.id}/change/"
+        else:
+            tx_type = "Wallet Top-Up"
+            ref_id = f"Ref: {proof.wallet_transaction.reference}" if proof.wallet_transaction else "Wallet Top-Up"
+            admin_url = f"https://onesolai.com/admin/orders/manualpaymentproof/{proof.id}/change/"
 
-    proof_file_url = proof.proof_file.url if proof.proof_file else "No File Uploaded"
-    if proof_file_url.startswith('/'):
-        proof_file_url = f"https://onesolai.com{proof_file_url}"
+        proof_file_url = proof.proof_file.url if proof.proof_file else "No File Uploaded"
+        if proof_file_url.startswith('/'):
+            proof_file_url = f"https://onesolai.com{proof_file_url}"
 
-    subject = f"🔔 [ACTION REQUIRED] Manual Payment Verification ({tx_type}): {ref_id}"
+        subject = f"🔔 [ACTION REQUIRED] Manual Payment Verification ({tx_type}): {ref_id}"
 
-    body = f"""Hello Support Team,
+        body = f"""Hello Support Team,
 
 A customer has submitted a MANUAL BANK / MOMO PAYMENT PROOF that requires admin verification and approval.
 
@@ -288,13 +287,16 @@ Verify the transfer in your bank/MoMo account statement, then click below to app
 
 OneSol AI Hub Notification System
 """
-    try:
-        send_mail(
-            subject=subject,
-            message=body,
-            from_email=f"OneSol Alerts <{support_email}>",
-            recipient_list=['support@onesolai.com', support_email],
-            fail_silently=True,
+        recipients = list(set(['support@onesolai.com', support_email]))
+        send_async_email(subject, body, recipients)
+
+        from analytics.models import ActivityLog
+        ActivityLog.log(
+            action_type='manual_payment_submitted',
+            title=f"Support Email Dispatched for {ref_id}",
+            details=f"Alert sent to {recipients} for provider {proof.payment_channel_used}",
+            user=user,
+            severity='info'
         )
     except Exception as e:
         print(f"Error sending support manual proof alert: {e}")
@@ -304,38 +306,37 @@ def send_support_crypto_tx_alert(user, tx_hash, order=None, wallet_tx=None):
     """
     Sends an instant formatted email alert to support@onesolai.com
     when a user submits a Crypto USDT TxID.
+    Uses send_async_email with DEFAULT_FROM_EMAIL to ensure Resend API compatibility.
     """
     try:
-        from django.core.mail import send_mail
+        from core.email_utils import send_async_email
         from core.models import SiteSettings
         cfg = SiteSettings.get()
         support_email = cfg.support_email or 'support@onesolai.com'
-    except Exception:
-        support_email = 'support@onesolai.com'
 
-    cust_email = user.email if user else 'Unregistered User'
+        cust_email = user.email if user else 'Unregistered User'
 
-    if order:
-        tx_type = "Crypto Tool Purchase"
-        ref_id = f"Order #{order.order_number}"
-        amount_str = f"₦{order.total_amount_ngn:,.2f} NGN"
-        admin_url = f"https://onesolai.com/admin/orders/order/{order.id}/change/"
-    elif wallet_tx:
-        tx_type = "Crypto Wallet Top-Up"
-        ref_id = f"Ref: {wallet_tx.reference}"
-        amount_str = f"₦{wallet_tx.amount_ngn:,.2f} NGN"
-        admin_url = f"https://onesolai.com/admin/accounts/wallettransaction/{wallet_tx.id}/change/"
-    else:
-        tx_type = "Crypto Transaction"
-        ref_id = "Crypto Payment"
-        amount_str = "N/A"
-        admin_url = "https://onesolai.com/admin/"
+        if order:
+            tx_type = "Crypto Tool Purchase"
+            ref_id = f"Order #{order.order_number}"
+            amount_str = f"₦{order.total_amount_ngn:,.2f} NGN"
+            admin_url = f"https://onesolai.com/admin/orders/order/{order.id}/change/"
+        elif wallet_tx:
+            tx_type = "Crypto Wallet Top-Up"
+            ref_id = f"Ref: {wallet_tx.reference}"
+            amount_str = f"₦{wallet_tx.amount_ngn:,.2f} NGN"
+            admin_url = f"https://onesolai.com/admin/accounts/wallettransaction/{wallet_tx.id}/change/"
+        else:
+            tx_type = "Crypto Transaction"
+            ref_id = "Crypto Payment"
+            amount_str = "N/A"
+            admin_url = "https://onesolai.com/admin/"
 
-    explorer_url = f"https://tronscan.org/#/transaction/{tx_hash}"
+        explorer_url = f"https://tronscan.org/#/transaction/{tx_hash}"
 
-    subject = f"🪙 [ACTION REQUIRED] Crypto Payment Verification ({tx_type}): {ref_id}"
+        subject = f"🪙 [ACTION REQUIRED] Crypto Payment Verification ({tx_type}): {ref_id}"
 
-    body = f"""Hello Support Team,
+        body = f"""Hello Support Team,
 
 A customer has submitted a CRYPTO USDT TRANSACTION HASH (TxID) for verification.
 
@@ -356,13 +357,16 @@ Check transaction on TronScan, then click below to approve or reject:
 
 OneSol AI Hub Notification System
 """
-    try:
-        send_mail(
-            subject=subject,
-            message=body,
-            from_email=f"OneSol Alerts <{support_email}>",
-            recipient_list=['support@onesolai.com', support_email],
-            fail_silently=True,
+        recipients = list(set(['support@onesolai.com', support_email]))
+        send_async_email(subject, body, recipients)
+
+        from analytics.models import ActivityLog
+        ActivityLog.log(
+            action_type='order_created',
+            title=f"Support Crypto Email Dispatched for {ref_id}",
+            details=f"Alert sent to {recipients} for TxID {tx_hash[:12]}...",
+            user=user,
+            severity='info'
         )
     except Exception as e:
         print(f"Error sending support crypto tx alert: {e}")

@@ -1,4 +1,5 @@
 {% load static %}
+{% load currency_tags %}
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -73,7 +74,10 @@
                     <p class="admin-topbar-subtitle">{% block page_subtitle %}Let's check your platform's update today{% endblock %}</p>
                 </div>
             </div>
-            <div class="admin-topbar-right">
+                        <div class="admin-topbar-right">
+                <button onclick="openCurrencyConverterModal()" style="background: rgba(99, 102, 241, 0.15); border: 1px solid rgba(99, 102, 241, 0.4); color: #818cf8; border-radius: 8px; padding: 6px 14px; font-size: 13px; font-weight: 600; cursor: pointer; display: inline-flex; align-items: center; gap: 6px; margin-right: 8px;">
+                    <i class="fa-solid fa-calculator"></i> Currency Converter
+                </button>
                 {% block topbar_actions %}{% endblock %}
                 <span style="font-size: 14px; font-weight: 600; margin-left: 16px;">{{ request.user.get_full_name|default:request.user.username }}</span>
                 <div style="width: 32px; height: 32px; background: var(--admin-accent-purple); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: bold; margin-left: 10px;">
@@ -87,6 +91,101 @@
             {% block content %}{% endblock %}
         </div>
     </main>
+
+    
+    <!-- CURRENCY CONVERTER CALCULATOR MODAL -->
+    <div id="currencyConverterModal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.75); z-index:99999; align-items:center; justify-content:center;">
+        <div style="background:#0F1535; border:1px solid rgba(255,255,255,0.2); border-radius:18px; padding:28px; width:92%; max-width:520px; color:#fff; box-shadow: 0 20px 50px rgba(0,0,0,0.5);">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 14px;">
+                <h3 style="margin:0; font-size:18px; display:flex; align-items:center; gap:8px;">
+                    <i class="fa-solid fa-calculator" style="color:#6366F1;"></i> Multi-Currency Calculator
+                </h3>
+                <button onclick="closeCurrencyConverterModal()" style="background:transparent; border:none; color:#aaa; font-size:22px; cursor:pointer;">&times;</button>
+            </div>
+
+            <div style="display: flex; flex-direction: column; gap: 16px;">
+                <div>
+                    <label style="display:block; font-size:12px; color:#AEB5CA; margin-bottom:6px; font-weight:600;">Amount to Convert</label>
+                    <input type="number" id="calcAmount" value="1000" step="any" oninput="calculateCurrencyConversion()" style="width:100%; background:#161B40; border:1px solid rgba(255,255,255,0.2); color:#fff; padding:12px 14px; border-radius:10px; font-size:16px; font-weight:700;">
+                </div>
+
+                <div style="display: flex; align-items: center; gap: 10px;">
+                    <div style="flex: 1;">
+                        <label style="display:block; font-size:12px; color:#AEB5CA; margin-bottom:6px; font-weight:600;">From</label>
+                        <select id="calcFrom" onchange="calculateCurrencyConversion()" style="width:100%; background:#161B40; border:1px solid rgba(255,255,255,0.2); color:#fff; padding:10px 12px; border-radius:10px; font-size:13px;">
+                            <option value="XAF" selected>🇨🇲 Cameroon (XAF)</option>
+                            <option value="NGN">🇳🇬 Nigeria (NGN)</option>
+                            <option value="USD">🇺🇸 US Dollar (USD)</option>
+                            <option value="GHS">🇬🇭 Ghana (GHS)</option>
+                            <option value="KES">🇰🇪 Kenya (KES)</option>
+                            <option value="XOF">🇧🇯 West Africa (XOF)</option>
+                            <option value="UGX">🇺🇬 Uganda (UGX)</option>
+                            <option value="TZS">🇹🇿 Tanzania (TZS)</option>
+                            <option value="RWF">🇷🇼 Rwanda (RWF)</option>
+                            <option value="EGP">🇪🇬 Egypt (EGP)</option>
+                            <option value="DZD">🇩🇿 Algeria (DZD)</option>
+                            <option value="MAD">🇲🇦 Morocco (MAD)</option>
+                            <option value="ZAR">🇿🇦 South Africa (ZAR)</option>
+                            <option value="CAD">🇨🇦 Canada (CAD)</option>
+                            <option value="AUD">🇦🇺 Australia (AUD)</option>
+                            <option value="SGD">🇸🇬 Singapore (SGD)</option>
+                            <option value="INR">🇮🇳 India (INR)</option>
+                            <option value="GBP">🇬🇧 UK Pound (GBP)</option>
+                            <option value="EUR">🇪🇺 Euro (EUR)</option>
+                            <option value="ZMW">🇿🇲 Zambia (ZMW)</option>
+                        </select>
+                    </div>
+
+                    <button type="button" onclick="swapCalcCurrencies()" style="margin-top: 18px; background: rgba(99,102,241,0.2); border: 1px solid rgba(99,102,241,0.5); color: #818cf8; width: 40px; height: 40px; border-radius: 50%; cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 16px;">
+                        <i class="fa-solid fa-right-left"></i>
+                    </button>
+
+                    <div style="flex: 1;">
+                        <label style="display:block; font-size:12px; color:#AEB5CA; margin-bottom:6px; font-weight:600;">To</label>
+                        <select id="calcTo" onchange="calculateCurrencyConversion()" style="width:100%; background:#161B40; border:1px solid rgba(255,255,255,0.2); color:#fff; padding:10px 12px; border-radius:10px; font-size:13px;">
+                            <option value="NGN" selected>🇳🇬 Nigeria (NGN)</option>
+                            <option value="XAF">🇨🇲 Cameroon (XAF)</option>
+                            <option value="USD">🇺🇸 US Dollar (USD)</option>
+                            <option value="GHS">🇬🇭 Ghana (GHS)</option>
+                            <option value="KES">🇰🇪 Kenya (KES)</option>
+                            <option value="XOF">🇧🇯 West Africa (XOF)</option>
+                            <option value="UGX">🇺🇬 Uganda (UGX)</option>
+                            <option value="TZS">🇹🇿 Tanzania (TZS)</option>
+                            <option value="RWF">🇷🇼 Rwanda (RWF)</option>
+                            <option value="EGP">🇪🇬 Egypt (EGP)</option>
+                            <option value="DZD">🇩🇿 Algeria (DZD)</option>
+                            <option value="MAD">🇲🇦 Morocco (MAD)</option>
+                            <option value="ZAR">🇿🇦 South Africa (ZAR)</option>
+                            <option value="CAD">🇨🇦 Canada (CAD)</option>
+                            <option value="AUD">🇦🇺 Australia (AUD)</option>
+                            <option value="SGD">🇸🇬 Singapore (SGD)</option>
+                            <option value="INR">🇮🇳 India (INR)</option>
+                            <option value="GBP">🇬🇧 UK Pound (GBP)</option>
+                            <option value="EUR">🇪🇺 Euro (EUR)</option>
+                            <option value="ZMW">🇿🇲 Zambia (ZMW)</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div style="background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.12); border-radius: 12px; padding: 18px; margin-top: 6px;">
+                    <div style="font-size: 13px; color: #AEB5CA; margin-bottom: 4px;">Converted Result</div>
+                    <div id="calcResultMain" style="font-size: 22px; font-weight: 800; color: #4ade80;">
+                        FCFA 1,000.00 XAF = ₦2,479.34 NGN
+                    </div>
+                    <div id="calcResultUsd" style="font-size: 13px; color: #38bdf8; margin-top: 4px;">
+                        USD Equivalent: $1.65 USD
+                    </div>
+                    <div id="calcRateDetails" style="font-size: 11px; color: #94a3b8; margin-top: 10px; border-top: 1px solid rgba(255,255,255,0.08); padding-top: 8px;">
+                        1 XAF = 2.4793 NGN | 1 USD = 605.00 XAF | 1 USD = 1,500.00 NGN
+                    </div>
+                </div>
+            </div>
+
+            <div style="margin-top: 20px; text-align: right;">
+                <button type="button" onclick="closeCurrencyConverterModal()" style="background: rgba(255,255,255,0.1); border: none; color: #fff; padding: 10px 20px; border-radius: 8px; font-size: 13px; cursor: pointer;">Close</button>
+            </div>
+        </div>
+    </div>
 
     <!-- FUND WALLET MODAL -->
     <div id="fundWalletModal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.7); z-index:9999; align-items:center; justify-content:center;">
@@ -410,6 +509,69 @@
 
     <!-- Helper functions -->
     <script>
+
+        {% get_live_rates_json as rates_json %}
+        const CALC_RATES = JSON.parse('{{ rates_json|escapejs }}');
+
+        const CALC_SYMBOLS = {
+            'USD': '$', 'NGN': '₦', 'XAF': 'FCFA', 'XOF': 'CFA',
+            'GHS': 'GH₵', 'KES': 'KSh', 'UGX': 'USh', 'TZS': 'TSh',
+            'RWF': 'FRw', 'EGP': 'E£', 'GBP': '£', 'EUR': '€',
+            'ZAR': 'R', 'CAD': 'CA$', 'AUD': 'A$', 'SGD': 'S$',
+            'INR': '₹', 'ZMW': 'ZK', 'DZD': 'DA', 'MAD': 'MAD'
+        };
+
+        function openCurrencyConverterModal() {
+            document.getElementById('currencyConverterModal').style.display = 'flex';
+            calculateCurrencyConversion();
+        }
+
+        function closeCurrencyConverterModal() {
+            document.getElementById('currencyConverterModal').style.display = 'none';
+        }
+
+        function swapCalcCurrencies() {
+            var fromSelect = document.getElementById('calcFrom');
+            var toSelect = document.getElementById('calcTo');
+            var temp = fromSelect.value;
+            fromSelect.value = toSelect.value;
+            toSelect.value = temp;
+            calculateCurrencyConversion();
+        }
+
+        function calculateCurrencyConversion() {
+            var amtInput = document.getElementById('calcAmount');
+            var amt = parseFloat(amtInput ? amtInput.value : 0) || 0;
+            var from = document.getElementById('calcFrom').value;
+            var to = document.getElementById('calcTo').value;
+
+            var fromRate = CALC_RATES[from] || 1.0;
+            var toRate = CALC_RATES[to] || 1.0;
+
+            var usdVal = (from === 'USD') ? amt : (amt / fromRate);
+            var convertedVal = (to === 'USD') ? usdVal : (usdVal * toRate);
+
+            var fromSym = CALC_SYMBOLS[from] || from;
+            var toSym = CALC_SYMBOLS[to] || to;
+
+            var resultMain = document.getElementById('calcResultMain');
+            var resultUsd = document.getElementById('calcResultUsd');
+            var rateDetails = document.getElementById('calcRateDetails');
+
+            if (resultMain) {
+                resultMain.innerText = fromSym + ' ' + amt.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2}) + ' ' + from + ' = ' + toSym + ' ' + convertedVal.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2}) + ' ' + to;
+            }
+
+            if (resultUsd) {
+                resultUsd.innerText = 'USD Equivalent: $' + usdVal.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2}) + ' USD';
+            }
+
+            if (rateDetails) {
+                var unitRate = (fromRate > 0) ? (toRate / fromRate) : 0;
+                rateDetails.innerText = '1 ' + from + ' = ' + unitRate.toFixed(4) + ' ' + to + '  |  1 USD = ' + fromRate.toFixed(2) + ' ' + from + '  |  1 USD = ' + toRate.toFixed(2) + ' ' + to;
+            }
+        }
+
         function getCookie(name) {
             let cookieValue = null;
             if (document.cookie && document.cookie !== '') {
@@ -604,6 +766,69 @@ function openFundWalletModal() {
     {% block extra_js %}{% endblock %}
 
     <script>
+
+        {% get_live_rates_json as rates_json %}
+        const CALC_RATES = JSON.parse('{{ rates_json|escapejs }}');
+
+        const CALC_SYMBOLS = {
+            'USD': '$', 'NGN': '₦', 'XAF': 'FCFA', 'XOF': 'CFA',
+            'GHS': 'GH₵', 'KES': 'KSh', 'UGX': 'USh', 'TZS': 'TSh',
+            'RWF': 'FRw', 'EGP': 'E£', 'GBP': '£', 'EUR': '€',
+            'ZAR': 'R', 'CAD': 'CA$', 'AUD': 'A$', 'SGD': 'S$',
+            'INR': '₹', 'ZMW': 'ZK', 'DZD': 'DA', 'MAD': 'MAD'
+        };
+
+        function openCurrencyConverterModal() {
+            document.getElementById('currencyConverterModal').style.display = 'flex';
+            calculateCurrencyConversion();
+        }
+
+        function closeCurrencyConverterModal() {
+            document.getElementById('currencyConverterModal').style.display = 'none';
+        }
+
+        function swapCalcCurrencies() {
+            var fromSelect = document.getElementById('calcFrom');
+            var toSelect = document.getElementById('calcTo');
+            var temp = fromSelect.value;
+            fromSelect.value = toSelect.value;
+            toSelect.value = temp;
+            calculateCurrencyConversion();
+        }
+
+        function calculateCurrencyConversion() {
+            var amtInput = document.getElementById('calcAmount');
+            var amt = parseFloat(amtInput ? amtInput.value : 0) || 0;
+            var from = document.getElementById('calcFrom').value;
+            var to = document.getElementById('calcTo').value;
+
+            var fromRate = CALC_RATES[from] || 1.0;
+            var toRate = CALC_RATES[to] || 1.0;
+
+            var usdVal = (from === 'USD') ? amt : (amt / fromRate);
+            var convertedVal = (to === 'USD') ? usdVal : (usdVal * toRate);
+
+            var fromSym = CALC_SYMBOLS[from] || from;
+            var toSym = CALC_SYMBOLS[to] || to;
+
+            var resultMain = document.getElementById('calcResultMain');
+            var resultUsd = document.getElementById('calcResultUsd');
+            var rateDetails = document.getElementById('calcRateDetails');
+
+            if (resultMain) {
+                resultMain.innerText = fromSym + ' ' + amt.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2}) + ' ' + from + ' = ' + toSym + ' ' + convertedVal.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2}) + ' ' + to;
+            }
+
+            if (resultUsd) {
+                resultUsd.innerText = 'USD Equivalent: $' + usdVal.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2}) + ' USD';
+            }
+
+            if (rateDetails) {
+                var unitRate = (fromRate > 0) ? (toRate / fromRate) : 0;
+                rateDetails.innerText = '1 ' + from + ' = ' + unitRate.toFixed(4) + ' ' + to + '  |  1 USD = ' + fromRate.toFixed(2) + ' ' + from + '  |  1 USD = ' + toRate.toFixed(2) + ' ' + to;
+            }
+        }
+
         
         var toastShouldReload = false;
         function showAdminToast(type, title, message, copyUrl = null, shouldReload = false) {

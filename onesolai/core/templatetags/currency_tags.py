@@ -1,8 +1,17 @@
+import json
 from django import template
 from django.conf import settings
 from core.services import get_live_usd_rates
 
 register = template.Library()
+
+@register.simple_tag(name='get_live_rates_json')
+def get_live_rates_json():
+    merged_rates = DEFAULT_RATES.copy()
+    live = get_live_usd_rates() or {}
+    merged_rates.update(live)
+    merged_rates['USD'] = 1.0
+    return json.dumps(merged_rates)
 
 DEFAULT_RATES = {
     'USD': 1.0, 'NGN': 1500.0, 'GBP': 0.78, 'EUR': 0.92,
