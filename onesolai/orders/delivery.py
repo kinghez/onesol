@@ -234,3 +234,136 @@ OneSol AI System Notification
     except Exception as e:
         print(f"Error sending support manual order alert: {e}")
 
+
+
+def send_support_manual_proof_alert(proof):
+    """
+    Sends an instant formatted email alert to support@onesolai.com
+    when a user submits a manual bank/MoMo payment proof.
+    """
+    try:
+        from django.core.mail import send_mail
+        from core.models import SiteSettings
+        cfg = SiteSettings.get()
+        support_email = cfg.support_email or 'support@onesolai.com'
+    except Exception:
+        support_email = 'support@onesolai.com'
+
+    user = proof.user
+    cust_email = user.email if user else 'Unregistered User'
+
+    if proof.order:
+        tx_type = "Tool Purchase"
+        ref_id = f"Order #{proof.order.order_number}"
+        admin_url = f"https://onesolai.com/admin/orders/manualpaymentproof/{proof.id}/change/"
+    else:
+        tx_type = "Wallet Top-Up"
+        ref_id = f"Ref: {proof.wallet_transaction.reference}" if proof.wallet_transaction else "Wallet Top-Up"
+        admin_url = f"https://onesolai.com/admin/orders/manualpaymentproof/{proof.id}/change/"
+
+    proof_file_url = proof.proof_file.url if proof.proof_file else "No File Uploaded"
+    if proof_file_url.startswith('/'):
+        proof_file_url = f"https://onesolai.com{proof_file_url}"
+
+    subject = f"🔔 [ACTION REQUIRED] Manual Payment Verification ({tx_type}): {ref_id}"
+
+    body = f"""Hello Support Team,
+
+A customer has submitted a MANUAL BANK / MOMO PAYMENT PROOF that requires admin verification and approval.
+
+--- TRANSACTION DETAILS ---
+Transaction Type: {tx_type}
+Reference: {ref_id}
+Customer Email: {cust_email}
+Payment Provider Used: {proof.payment_channel_used}
+Sender Name / TxID / Phone: {proof.sender_name_or_txid}
+Amount Paid: {proof.currency} {proof.amount_local:,.2f} (Base ₦{proof.amount_ngn:,.2f} NGN)
+
+--- PROOF FILE LINK ---
+{proof_file_url}
+
+--- ACTION REQUIRED ---
+Verify the transfer in your bank/MoMo account statement, then click below to approve or reject:
+{admin_url}
+
+OneSol AI Hub Notification System
+"""
+    try:
+        send_mail(
+            subject=subject,
+            message=body,
+            from_email=f"OneSol Alerts <{support_email}>",
+            recipient_list=['support@onesolai.com', support_email],
+            fail_silently=True,
+        )
+    except Exception as e:
+        print(f"Error sending support manual proof alert: {e}")
+
+
+def send_support_crypto_tx_alert(user, tx_hash, order=None, wallet_tx=None):
+    """
+    Sends an instant formatted email alert to support@onesolai.com
+    when a user submits a Crypto USDT TxID.
+    """
+    try:
+        from django.core.mail import send_mail
+        from core.models import SiteSettings
+        cfg = SiteSettings.get()
+        support_email = cfg.support_email or 'support@onesolai.com'
+    except Exception:
+        support_email = 'support@onesolai.com'
+
+    cust_email = user.email if user else 'Unregistered User'
+
+    if order:
+        tx_type = "Crypto Tool Purchase"
+        ref_id = f"Order #{order.order_number}"
+        amount_str = f"₦{order.total_amount_ngn:,.2f} NGN"
+        admin_url = f"https://onesolai.com/admin/orders/order/{order.id}/change/"
+    elif wallet_tx:
+        tx_type = "Crypto Wallet Top-Up"
+        ref_id = f"Ref: {wallet_tx.reference}"
+        amount_str = f"₦{wallet_tx.amount_ngn:,.2f} NGN"
+        admin_url = f"https://onesolai.com/admin/accounts/wallettransaction/{wallet_tx.id}/change/"
+    else:
+        tx_type = "Crypto Transaction"
+        ref_id = "Crypto Payment"
+        amount_str = "N/A"
+        admin_url = "https://onesolai.com/admin/"
+
+    explorer_url = f"https://tronscan.org/#/transaction/{tx_hash}"
+
+    subject = f"🪙 [ACTION REQUIRED] Crypto Payment Verification ({tx_type}): {ref_id}"
+
+    body = f"""Hello Support Team,
+
+A customer has submitted a CRYPTO USDT TRANSACTION HASH (TxID) for verification.
+
+--- TRANSACTION DETAILS ---
+Transaction Type: {tx_type}
+Reference: {ref_id}
+Customer Email: {cust_email}
+TxID / Hash: {tx_hash}
+Amount: {amount_str}
+
+--- BLOCKCHAIN EXPLORER ---
+Verify transaction status on TronScan:
+{explorer_url}
+
+--- ACTION REQUIRED ---
+Check transaction on TronScan, then click below to approve or reject:
+{admin_url}
+
+OneSol AI Hub Notification System
+"""
+    try:
+        send_mail(
+            subject=subject,
+            message=body,
+            from_email=f"OneSol Alerts <{support_email}>",
+            recipient_list=['support@onesolai.com', support_email],
+            fail_silently=True,
+        )
+    except Exception as e:
+        print(f"Error sending support crypto tx alert: {e}")
+

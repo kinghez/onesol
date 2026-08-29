@@ -220,6 +220,12 @@ def wallet_crypto_submit_view(request, reference):
             except Exception:
                 pass
 
+            try:
+                from orders.delivery import send_support_crypto_tx_alert
+                send_support_crypto_tx_alert(request.user, tx_hash, wallet_tx=tx)
+            except Exception as ce:
+                print(f"Error sending wallet crypto alert: {ce}")
+
             messages.success(request, f"Your TxID for NGN {tx.amount_ngn:,.0f} wallet top-up has been submitted for admin verification!")
         else:
             messages.error(request, "Transaction reference not found.")

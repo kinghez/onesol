@@ -586,5 +586,11 @@ def submit_manual_payment_proof(request, order_id):
         severity='info'
     )
 
+    try:
+        from .delivery import send_support_manual_proof_alert
+        send_support_manual_proof_alert(proof)
+    except Exception as me:
+        print(f"Error sending support manual proof alert: {me}")
+
     messages.success(request, "Your payment proof has been submitted! Payments are typically verified and approved by our team within 15 minutes.")
     return redirect('orders:manual_payment', order_id=order.id)
