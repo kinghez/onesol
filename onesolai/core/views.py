@@ -10,8 +10,8 @@ def home(request):
     """Render the home page."""
     from products.models import Category, Tool
     hero_slides = HeroSlide.objects.filter(is_active=True).order_by('order')
-    categories = Category.objects.filter(tools__is_active=True).distinct()
-    total_tools_count = Tool.objects.filter(is_active=True).count()
+    categories = Category.objects.filter(tools__is_active=True, tools__id__in=Tool.objects.in_stock().values_list('id', flat=True)).distinct()
+    total_tools_count = Tool.objects.in_stock().count()
     testimonials = Testimonial.objects.filter(is_active=True).order_by('order', '-id')
     faqs = FAQ.objects.filter(is_active=True).order_by('order', 'id')
     return render(request, 'home/index.html', {

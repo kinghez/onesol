@@ -29,7 +29,7 @@ def tools_list(request):
 
     # ── 2. Base queryset ─────────────────────────────────────────────────────
     try:
-        qs = Tool.objects.filter(is_active=True).select_related('category', 'vendor_product')
+        qs = Tool.objects.in_stock().select_related('category', 'vendor_product')
         total_all = qs.count()
         logger.info("Active tools in DB (total): %d", total_all)
     except Exception as exc:
@@ -206,7 +206,7 @@ def get_popular_tools(limit=10, category_name=None):
     If recently purchased items < limit, complete list with recently added in-stock tools.
     """
     from orders.models import OrderItem
-    base_qs = Tool.objects.filter(is_active=True).select_related('category', 'vendor_product')
+    base_qs = Tool.objects.in_stock().select_related('category', 'vendor_product')
     if category_name and category_name != 'all':
         base_qs = base_qs.filter(category__name__iexact=category_name.strip())
 
@@ -243,7 +243,7 @@ def get_cheapest_tools(limit=10, category_name=None):
     Automated Top & Best Selling Tools selection:
     Top 10 cheapest tools in the tool table that are currently in stock.
     """
-    base_qs = Tool.objects.filter(is_active=True).select_related('category', 'vendor_product')
+    base_qs = Tool.objects.in_stock().select_related('category', 'vendor_product')
     if category_name and category_name != 'all':
         base_qs = base_qs.filter(category__name__iexact=category_name.strip())
 
@@ -262,7 +262,7 @@ def api_tools_json(request):
     elif filter_type == 'featured':
         tools = get_cheapest_tools(limit=10, category_name=category_filter)
     else:
-        tools_qs = Tool.objects.filter(is_active=True).select_related('category', 'vendor_product')
+        tools_qs = Tool.objects.in_stock().select_related('category', 'vendor_product')
         if category_filter and category_filter != 'all':
             tools_qs = tools_qs.filter(category__name__iexact=category_filter.strip())
         tools = [t for t in tools_qs if t.is_in_stock]

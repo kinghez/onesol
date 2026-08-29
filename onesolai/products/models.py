@@ -29,7 +29,22 @@ class Category(models.Model):
         super().save(*args, **kwargs)
 
 
+
+class ToolQuerySet(models.QuerySet):
+    def in_stock(self):
+        return self.filter(is_active=True).exclude(
+            models.Q(vendor_product__isnull=False) & models.Q(vendor_product__stock__in=['0', '0.0', 0, 'out_of_stock'])
+        )
+
+class ToolManager(models.Manager):
+    def get_queryset(self):
+        return ToolQuerySet(self.model, using=self._db)
+
+    def in_stock(self):
+        return self.get_queryset().in_stock()
+
 class Tool(models.Model):
+    objects = ToolManager()
     name = models.CharField(max_length=200)
     slug = models.SlugField(unique=True)
     vendor_product = models.OneToOneField('vendors.VendorProduct', null=True, blank=True, on_delete=models.SET_NULL, help_text="Link this tool directly to a Vendor Product")

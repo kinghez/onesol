@@ -376,5 +376,11 @@ def submit_wallet_manual_proof_view(request, reference):
         severity='info'
     )
 
+    try:
+        from orders.delivery import send_support_manual_proof_alert
+        send_support_manual_proof_alert(proof)
+    except Exception as me:
+        print(f"Error sending wallet manual proof alert: {me}")
+
     messages.success(request, "Your payment proof has been submitted! Payments are typically verified and approved by our team within 15 minutes.")
     return redirect('dashboard:wallet_manual_topup', reference=reference)
