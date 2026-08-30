@@ -75,12 +75,12 @@
                 </div>
             </div>
                         <div class="admin-topbar-right">
-                <button onclick="openCurrencyConverterModal()" style="background: rgba(99, 102, 241, 0.15); border: 1px solid rgba(99, 102, 241, 0.4); color: #818cf8; border-radius: 8px; padding: 6px 14px; font-size: 13px; font-weight: 600; cursor: pointer; display: inline-flex; align-items: center; gap: 6px; margin-right: 8px;">
-                    <i class="fa-solid fa-calculator"></i> Currency Converter
+                <button onclick="openCurrencyConverterModal()" title="Currency Converter" style="background: rgba(99, 102, 241, 0.15); border: 1px solid rgba(99, 102, 241, 0.4); color: #818cf8; border-radius: 8px; padding: 7px 12px; font-size: 13px; font-weight: 600; cursor: pointer; display: inline-flex; align-items: center; gap: 5px; white-space: nowrap; flex-shrink: 0;">
+                    <i class="fa-solid fa-calculator"></i><span class="converter-btn-label"> Currency Converter</span>
                 </button>
                 {% block topbar_actions %}{% endblock %}
-                <span style="font-size: 14px; font-weight: 600; margin-left: 16px;">{{ request.user.get_full_name|default:request.user.username }}</span>
-                <div style="width: 32px; height: 32px; background: var(--admin-accent-purple); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: bold; margin-left: 10px;">
+                <span class="topbar-username">{{ request.user.get_full_name|default:request.user.username }}</span>
+                <div style="width: 30px; height: 30px; background: var(--admin-accent-purple); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 13px; flex-shrink: 0;">
                     {{ request.user.username|make_list|first|upper }}
                 </div>
             </div>
