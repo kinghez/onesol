@@ -34,6 +34,72 @@ class BaseVendorService:
         """
         raise NotImplementedError
 
+    def _request_with_retry(self, method, url, max_retries=4, retry_delay=15, **kwargs):
+        """
+        Executes an HTTP request with automatic retry for 503 (Render.com cold start / service waking up).
+        Render free-tier services spin down after inactivity and return 503 for ~30-60s on the first request.
+        """
+        import time
+        last_exc = None
+        for attempt in range(1, max_retries + 1):
+            try:
+                if method == "get":
+                    resp = requests.get(url, timeout=60, **kwargs)
+                else:
+                    resp = requests.post(url, timeout=60, **kwargs)
+
+                if resp.status_code == 503:
+                    # Check if service is SUSPENDED (not just sleeping)
+                    body_text = ""
+                    try:
+                        body_text = resp.text.lower()
+                    except Exception:
+                        pass
+                    if "suspended" in body_text:
+                        logger.error(
+                            f"Vendor server is SUSPENDED. URL: {url}. "
+                            f"Please contact vendor to reinstate service."
+                        )
+                        raise VendorException(
+                            f"Vendor server is SUSPENDED on Render.com. "
+                            f"Please contact vendor to restore service at: {url}"
+                        )
+                    logger.warning(
+                        f"Vendor API 503 on attempt {attempt}/{max_retries} for {url}. "
+                        f"Waiting {retry_delay}s before retry..."
+                    )
+                    if attempt < max_retries:
+                        time.sleep(retry_delay)
+                    else:
+                        resp.raise_for_status()
+                    continue
+
+                resp.raise_for_status()
+                return resp
+
+            except requests.exceptions.Timeout as e:
+                last_exc = e
+                logger.warning(f"Vendor API timeout on attempt {attempt}/{max_retries} for {url}. Retrying...")
+                if attempt < max_retries:
+                    time.sleep(retry_delay)
+            except requests.HTTPError as e:
+                if e.response is not None and e.response.status_code == 503 and attempt < max_retries:
+                    logger.warning(f"Vendor API 503 HTTPError attempt {attempt}/{max_retries}. Waiting {retry_delay}s...")
+                    time.sleep(retry_delay)
+                    last_exc = e
+                else:
+                    raise
+            except requests.RequestException as e:
+                last_exc = e
+                if attempt < max_retries:
+                    logger.warning(f"Vendor API request error attempt {attempt}/{max_retries}: {e}. Retrying...")
+                    time.sleep(retry_delay)
+                else:
+                    raise
+
+        if last_exc:
+            raise last_exc
+
 
 class AkundingService(BaseVendorService):
     def _headers(self):
@@ -77,7 +143,9 @@ class AkundingService(BaseVendorService):
             "quantity": quantity
         }
         headers = self._headers()
-        headers["X-Idempotency-Key"] = str(uuid.uuid4())
+        ik = str(uuid.uuid4())
+        headers["Idempotency-Key"] = ik
+        headers["X-Idempotency-Key"] = ik
         try:
             response = self._request_with_retry("post", url, json=payload, headers=headers, max_retries=3, retry_delay=15)
             data = response.json()
@@ -131,73 +199,6 @@ class ShopBotService(BaseVendorService):
         response = self._request_with_retry("get", f"{self.api_url}/balance", headers=self._headers())
         data = response.json()
         return float(data.get('balance', 0))
-
-    def _request_with_retry(self, method, url, max_retries=4, retry_delay=15, **kwargs):
-        """
-        Executes an HTTP request with automatic retry for 503 (Render.com cold start / service waking up).
-        Render free-tier services spin down after inactivity and return 503 for ~30-60s on the first request.
-        """
-        import time
-        last_exc = None
-        for attempt in range(1, max_retries + 1):
-            try:
-                if method == "get":
-                    resp = requests.get(url, timeout=60, **kwargs)
-                else:
-                    resp = requests.post(url, timeout=60, **kwargs)
-
-                if resp.status_code == 503:
-                    # Check if service is SUSPENDED (not just sleeping)
-                    body_text = ""
-                    try:
-                        body_text = resp.text.lower()
-                    except Exception:
-                        pass
-                    if "suspended" in body_text:
-                        # Service permanently suspended - no point retrying
-                        logger.error(
-                            f"ShopBot vendor server is SUSPENDED (not just a cold-start). URL: {url}. "
-                            f"Please contact the ShopBot vendor to reinstate their Render.com service."
-                        )
-                        raise VendorException(
-                            f"ShopBot vendor server is SUSPENDED on Render.com. "
-                            f"Please contact the vendor to restore their service at: {url.split('/products')[0].split('/balance')[0]}"
-                        )
-                    logger.warning(
-                        f"ShopBot 503 on attempt {attempt}/{max_retries} for {url}. "
-                        f"Render cold-start detected. Waiting {retry_delay}s before retry..."
-                    )
-                    if attempt < max_retries:
-                        time.sleep(retry_delay)
-                    else:
-                        resp.raise_for_status()  # Final attempt - let it propagate
-                    continue
-
-                resp.raise_for_status()
-                return resp
-
-            except requests.exceptions.Timeout as e:
-                last_exc = e
-                logger.warning(f"ShopBot timeout on attempt {attempt}/{max_retries} for {url}. Retrying...")
-                if attempt < max_retries:
-                    time.sleep(retry_delay)
-            except requests.HTTPError as e:
-                if e.response is not None and e.response.status_code == 503 and attempt < max_retries:
-                    logger.warning(f"ShopBot 503 HTTPError attempt {attempt}/{max_retries}. Waiting {retry_delay}s...")
-                    time.sleep(retry_delay)
-                    last_exc = e
-                else:
-                    raise
-            except requests.RequestException as e:
-                last_exc = e
-                if attempt < max_retries:
-                    logger.warning(f"ShopBot request error attempt {attempt}/{max_retries}: {e}. Retrying...")
-                    time.sleep(retry_delay)
-                else:
-                    raise
-
-        if last_exc:
-            raise last_exc
 
     def fetch_products(self) -> list:
         response = self._request_with_retry("get", f"{self.api_url}/products", headers=self._headers())
@@ -314,7 +315,9 @@ class CanbosoService(BaseVendorService):
             "quantity": quantity
         }
         headers = self._headers()
-        headers["X-Idempotency-Key"] = str(uuid.uuid4())
+        ik = str(uuid.uuid4())
+        headers["Idempotency-Key"] = ik
+        headers["X-Idempotency-Key"] = ik
         try:
             response = requests.post(url, json=payload, headers=headers)
             if response.status_code != 200:

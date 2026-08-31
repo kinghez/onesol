@@ -639,9 +639,10 @@ function openFundWalletModal() {
                     payment_method: document.getElementById('buyPaymentMethod').value
                 })
             })
-            .then(res => res.json())
-            .then(data => {
-                if (data.success) {
+            .then(res => res.json().then(data => ({ ok: res.ok, data: data })))
+            .then(result => {
+                const data = result.data;
+                if (result.ok && data.success) {
                     closeBuyToolModal();
                     if (data.claim_url) {
                         // Dedicated full-screen claim link popup for unregistered users
@@ -654,7 +655,7 @@ function openFundWalletModal() {
                 }
             })
             .catch(err => {
-                alert('❌ Connection error. Please try again.');
+                showAdminToast('error', 'Purchase Failed', err.message || 'Unable to complete request. Please check your network.', null, false);
             })
             .finally(() => {
                 btn.disabled = false;
@@ -728,9 +729,10 @@ function openFundWalletModal() {
                     reason: document.getElementById('refundReason').value
                 })
             })
-            .then(res => res.json())
-            .then(data => {
-                if (data.success) {
+            .then(res => res.json().then(data => ({ ok: res.ok, data: data })))
+            .then(result => {
+                const data = result.data;
+                if (result.ok && data.success) {
                     alert('✅ ' + data.message);
                     closeRefundWalletModal();
                     location.reload();
@@ -739,7 +741,7 @@ function openFundWalletModal() {
                 }
             })
             .catch(err => {
-                alert('❌ Connection error. Please try again.');
+                showAdminToast('error', 'Purchase Failed', err.message || 'Unable to complete request. Please check your network.', null, false);
             })
             .finally(() => {
                 btn.disabled = false;
