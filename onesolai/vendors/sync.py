@@ -99,14 +99,31 @@ def sync_all_vendor_products(triggered_by="manual"):
             logger.info(f"Synced {vendor.name}: {created} created, {updated} updated.")
 
         except Exception as e:
-            error_msg = f"Failed to sync products for vendor {vendor.name}: {e}"
+            raw_err = str(e)
+            # Distinguish between suspended server vs cold-start vs other errors
+            if 'SUSPENDED' in raw_err or 'suspended' in raw_err.lower():
+                error_msg = (
+                    f"{vendor.name}: ⛔ Vendor server is SUSPENDED. "
+                    f"The ShopBot API server on Render.com has been shut down. "
+                    f"Please contact the vendor to restore their service. ({raw_err[:300]})"
+                )
+                severity = 'error'
+            elif '503' in raw_err and ('render.com' in raw_err.lower() or 'Service Unavailable' in raw_err):
+                error_msg = (
+                    f"{vendor.name}: ⚠️ Vendor API server is temporarily unavailable (503). "
+                    f"If this is a Render.com cold-start, try again in 1 minute. ({raw_err[:200]})"
+                )
+                severity = 'warning'
+            else:
+                error_msg = f"Failed to sync products for vendor {vendor.name}: {raw_err}"
+                severity = 'error'
             logger.error(error_msg)
             errors.append(error_msg)
             try:
                 ActivityLog.log(
                     action_type='vendor_sync',
-                    severity='error',
-                    title=f"Vendor Product Sync Failed ({vendor.name})",
+                    severity=severity,
+                    title=f"Vendor Sync Issue: {vendor.name}",
                     details=error_msg
                 )
             except Exception:

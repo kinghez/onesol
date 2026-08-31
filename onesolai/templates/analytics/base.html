@@ -644,7 +644,8 @@ function openFundWalletModal() {
                 if (data.success) {
                     closeBuyToolModal();
                     if (data.claim_url) {
-                        showAdminToast('success', 'Purchase Successful', 'Order completed for unregistered user! Share the claim link below to let them register and access their purchase.', data.claim_url, true);
+                        // Dedicated full-screen claim link popup for unregistered users
+                        showClaimLinkModal(data);
                     } else {
                         showAdminToast('success', 'Purchase Successful', data.message, null, true);
                     }
@@ -880,6 +881,44 @@ function openFundWalletModal() {
             }
         }
 
+        // ── Dedicated Claim Link Modal for unregistered user purchases ──
+        function showClaimLinkModal(data) {
+            document.getElementById('claimModalOrderNum').textContent   = '#' + (data.order_number || '');
+            document.getElementById('claimModalToolName').textContent   = data.tool_name || 'Tool';
+            document.getElementById('claimModalEmail').textContent      = data.customer_email || '';
+            document.getElementById('claimModalLinkInput').value        = data.claim_url || '';
+            document.getElementById('claimLinkModal').style.display     = 'flex';
+        }
+
+        function closeClaimLinkModal() {
+            document.getElementById('claimLinkModal').style.display = 'none';
+            location.reload();
+        }
+
+        function copyClaimLink() {
+            const input   = document.getElementById('claimModalLinkInput');
+            const btn     = document.getElementById('claimCopyBtn');
+            if (!input || !input.value) return;
+            navigator.clipboard.writeText(input.value).then(function() {
+                btn.innerHTML = '<i class="fa-solid fa-check"></i> Copied!';
+                btn.style.background = 'linear-gradient(135deg,#10B981,#059669)';
+                setTimeout(function() {
+                    btn.innerHTML = '<i class="fa-regular fa-copy"></i> Copy Registration Link';
+                    btn.style.background = 'rgba(91,99,246,0.15)';
+                }, 3000);
+            }).catch(function() {
+                input.select();
+                document.execCommand('copy');
+                btn.innerHTML = '<i class="fa-solid fa-check"></i> Copied!';
+                setTimeout(function() { btn.innerHTML = '<i class="fa-regular fa-copy"></i> Copy Registration Link'; }, 3000);
+            });
+        }
+
+        function openClaimLinkInTab() {
+            const url = document.getElementById('claimModalLinkInput').value;
+            if (url) window.open(url, '_blank');
+        }
+
         function copyToastLink() {
             var copyInput = document.getElementById('adminToastCopyInput');
             var btnText = document.getElementById('toastCopyBtnText');
@@ -953,6 +992,78 @@ function openFundWalletModal() {
             }
         }
     </script>
+
+    <!-- CLAIM LINK MODAL — shown after admin buys a tool for an unregistered user -->
+    <div id="claimLinkModal" style="display:none; position:fixed; top:0; left:0; width:100vw; height:100vh; background:rgba(5,8,22,0.92); backdrop-filter:blur(12px); z-index:9999999; align-items:center; justify-content:center; padding:16px;">
+        <div style="background:linear-gradient(160deg,#0f1535 0%,#0b1025 100%); border:1px solid rgba(91,99,246,0.3); border-radius:24px; padding:36px 32px; width:100%; max-width:560px; text-align:center; color:#fff; box-shadow:0 30px 80px rgba(0,0,0,0.7),0 0 0 1px rgba(91,99,246,0.15); position:relative;">
+
+            <!-- Close -->
+            <button onclick="closeClaimLinkModal()" style="position:absolute;top:16px;right:18px;background:transparent;border:none;color:#636A8A;font-size:22px;cursor:pointer;line-height:1;" title="Close">&times;</button>
+
+            <!-- Header Icon -->
+            <div style="width:72px;height:72px;border-radius:50%;background:linear-gradient(135deg,rgba(91,99,246,0.2),rgba(139,61,255,0.2));border:2px solid rgba(91,99,246,0.4);display:inline-flex;align-items:center;justify-content:center;font-size:32px;margin:0 auto 20px;">
+                🔗
+            </div>
+
+            <!-- Title -->
+            <h3 style="font-size:22px;font-weight:800;color:#fff;margin:0 0 6px;letter-spacing:-0.3px;">Purchase Confirmed!</h3>
+            <p style="font-size:13px;color:#7C83FA;margin:0 0 24px;font-weight:600;letter-spacing:0.5px;text-transform:uppercase;">Unregistered User — Registration Link Generated</p>
+
+            <!-- Order Summary -->
+            <div style="background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.08);border-radius:14px;padding:16px 20px;margin-bottom:24px;text-align:left;">
+                <div style="display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid rgba(255,255,255,0.06);font-size:13px;">
+                    <span style="color:#AEB5CA;">Order</span>
+                    <span id="claimModalOrderNum" style="color:#fff;font-weight:700;"></span>
+                </div>
+                <div style="display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid rgba(255,255,255,0.06);font-size:13px;">
+                    <span style="color:#AEB5CA;">Tool</span>
+                    <span id="claimModalToolName" style="color:#A78BFA;font-weight:700;"></span>
+                </div>
+                <div style="display:flex;justify-content:space-between;padding:6px 0;font-size:13px;">
+                    <span style="color:#AEB5CA;">Customer Email</span>
+                    <span id="claimModalEmail" style="color:#67E8F9;font-weight:600;word-break:break-all;text-align:right;max-width:60%;"></span>
+                </div>
+            </div>
+
+            <!-- Instruction -->
+            <div style="background:rgba(251,191,36,0.07);border:1px solid rgba(251,191,36,0.2);border-radius:12px;padding:12px 16px;margin-bottom:20px;display:flex;align-items:flex-start;gap:10px;text-align:left;">
+                <span style="font-size:16px;margin-top:1px;">📋</span>
+                <p style="margin:0;font-size:13px;color:#FDE68A;line-height:1.6;">
+                    This link was <strong>automatically emailed</strong> to the customer. Copy it below as a backup and share it if needed. The customer must register using this exact link to claim their purchase.
+                </p>
+            </div>
+
+            <!-- Link input -->
+            <div style="background:rgba(0,0,0,0.35);border:1px solid rgba(91,99,246,0.35);border-radius:12px;padding:14px 16px;margin-bottom:14px;text-align:left;">
+                <p style="margin:0 0 8px;font-size:11px;font-weight:700;letter-spacing:1px;color:#7C83FA;text-transform:uppercase;">Registration & Claim Link</p>
+                <input type="text" id="claimModalLinkInput" readonly
+                    style="width:100%;background:transparent;border:none;outline:none;color:#A5F3FC;font-family:monospace;font-size:12px;word-break:break-all;resize:none;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;"
+                    onclick="this.select();">
+            </div>
+
+            <!-- Action Buttons -->
+            <div style="display:flex;gap:10px;margin-bottom:16px;">
+                <button id="claimCopyBtn" onclick="copyClaimLink()"
+                    style="flex:1;background:rgba(91,99,246,0.15);border:1px solid rgba(91,99,246,0.4);color:#7C83FA;padding:12px 16px;border-radius:12px;font-weight:700;cursor:pointer;font-size:14px;transition:all 0.2s;">
+                    <i class="fa-regular fa-copy"></i> Copy Registration Link
+                </button>
+                <button onclick="openClaimLinkInTab()"
+                    style="flex:0 0 auto;background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.12);color:#AEB5CA;padding:12px 16px;border-radius:12px;font-weight:600;cursor:pointer;font-size:14px;" title="Open link in new tab">
+                    <i class="fa-solid fa-arrow-up-right-from-square"></i>
+                </button>
+            </div>
+
+            <!-- Done button -->
+            <button onclick="closeClaimLinkModal()"
+                style="width:100%;background:linear-gradient(135deg,#5B63F6,#8B3DFF);border:none;color:#fff;font-weight:700;padding:13px 32px;border-radius:14px;cursor:pointer;font-size:15px;box-shadow:0 8px 24px rgba(91,99,246,0.35);letter-spacing:0.3px;">
+                ✓ Done — Close & Refresh
+            </button>
+
+            <p style="margin:14px 0 0;font-size:12px;color:#4B5280;">
+                An in-app notification with this link has also been saved to your admin account.
+            </p>
+        </div>
+    </div>
 
     <!-- MODERN ADMIN ALERT / TOAST MODAL -->
     <div id="adminToastModal" style="display:none; position:fixed; top:0; left:0; width:100vw; height:100vh; background:rgba(10,14,35,0.85); backdrop-filter:blur(8px); z-index:999999; align-items:center; justify-content:center; padding:20px;">

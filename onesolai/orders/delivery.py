@@ -10,36 +10,55 @@ from django.utils.html import strip_tags
 def trigger_delivery(order):
     """
     Trigger access delivery for a paid order:
-    1. Send confirmation email to user
+    1. Send confirmation email to user/delivery_email
     2. Mark delivery_status = 'sent' on order
+    Handles both registered users and unregistered (order.user=None) gracefully.
     """
+    import traceback as tb_module
     try:
         from core.models import SiteSettings
         cfg = SiteSettings.get()
-        support_email = cfg.support_email
-        site_name = cfg.site_name
+        support_email = cfg.support_email or 'support@onesolai.com'
+        site_name = cfg.site_name or 'OneSol AI Hub'
+        site_url = (cfg.site_url or 'https://onesolai.com').rstrip('/')
     except Exception:
         support_email = 'support@onesolai.com'
         site_name = 'OneSol AI Hub'
+        site_url = 'https://onesolai.com'
 
     # Build context for email
     items = order.items.select_related('tool').all()
     tool_name = items.first().tool.name if (items.exists() and items.first().tool) else 'Your Tool'
+
+    # Safely resolve recipient email — works for both registered and unregistered orders
+    recipient = order.delivery_email or (order.user.email if order.user else None)
+    if not recipient:
+        print(f"trigger_delivery: No recipient email for Order #{order.id}. Skipping.")
+        order.delivery_status = 'failed'
+        order.save(update_fields=['delivery_status'])
+        return
+
+    # Build a safe display name that works even when order.user is None
+    if order.user:
+        display_name = order.user.first_name or order.user.email
+    else:
+        display_name = recipient  # Use email as greeting name for unregistered
 
     context = {
         'order': order,
         'items': items,
         'tool_name': tool_name,
         'user': order.user,
+        'display_name': display_name,
         'site_name': site_name,
         'support_email': support_email,
+        'site_url': site_url,
     }
 
     # Send HTML email
     try:
         html_message = render_to_string('emails/order_confirmation.html', context)
         plain_message = strip_tags(html_message)
-        recipient = order.delivery_email or order.user.email
 
         send_mail(
             subject=f'\u2705 Your {tool_name} access is ready \u2013 {site_name}',
@@ -50,14 +69,13 @@ def trigger_delivery(order):
             fail_silently=True,
         )
         order.delivery_status = 'sent'
-        
-        # In-App Notification with Full Activation Details
-        from notifications.models import Notification
-        notif_msg = f"Your order #{order.order_number} for {tool_name} is ready!"
-        if order.access_details:
-            notif_msg += f"\n\nActivation Details:\n{order.access_details}"
 
+        # In-App Notification (only for registered users who have an account)
         if order.user:
+            from notifications.models import Notification
+            notif_msg = f"Your order #{order.order_number} for {tool_name} is ready!"
+            if order.access_details:
+                notif_msg += f"\n\nActivation Details:\n{order.access_details}"
             Notification.objects.create(
                 user=order.user,
                 title=f"🎉 {tool_name} Access Delivered!",
@@ -65,9 +83,11 @@ def trigger_delivery(order):
                 notification_type='order',
                 action_url=f"/dashboard/orders/"
             )
+        else:
+            print(f"trigger_delivery: Order #{order.id} has no registered user — email sent to {recipient}, skipping in-app notification.")
+
     except Exception as e:
-        import traceback
-        print(f"Error in trigger_delivery for Order #{order.id}: {e}\n{traceback.format_exc()}")
+        print(f"Error in trigger_delivery for Order #{order.id}: {e}\n{tb_module.format_exc()}")
         order.delivery_status = 'failed'
 
     order.save(update_fields=['delivery_status'])

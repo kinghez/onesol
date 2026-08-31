@@ -129,8 +129,14 @@ def _fulfill_order_logic(order_id):
             trigger_delivery(order)
 
         elif is_manual_delivery_needed:
-            order.delivery_notes = f"{order.delivery_notes}\n[Vendor Auto-Order] Purchase requested from vendor API. Pending vendor manual delivery."
-            order.save(update_fields=['delivery_notes'])
+            # Vendor accepted order but will deliver credentials manually (e.g. ShopBot pending_manual)
+            # Still send the confirmation email so customer knows their order is processing
+            existing_notes = order.delivery_notes or ''
+            order.delivery_notes = f"{existing_notes}\n[Vendor Auto-Order] Purchase requested from vendor API. Pending vendor manual delivery.".strip()
+            order.delivery_status = 'pending'
+            order.save(update_fields=['delivery_notes', 'delivery_status'])
+            # Send confirmation email now (access_details will be empty, shows "being prepared" message)
+            trigger_delivery(order)
 
     except Exception as e:
         logger.error(f"Failed to fulfill order #{order_id} via vendors: {e}")

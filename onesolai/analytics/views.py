@@ -786,10 +786,38 @@ def buy_tool_for_user_api(request):
             except Exception as em_err:
                 logger.error(f"Failed to send claim email to {email}: {em_err}")
 
+        # ── Admin In-App Notification ──
+        # Notify the admin who performed this purchase with the order details and claim link
+        try:
+            from notifications.models import Notification
+            notif_title = f"✅ Tool Purchased: {tool.name} for {email}"
+            if claim_url:
+                notif_body = (
+                    f"Order #{order.order_number} has been successfully processed for {email} (unregistered user).\n\n"
+                    f"Registration & Claim Link (share with customer):\n{claim_url}\n\n"
+                    f"This link was also emailed to the customer automatically."
+                )
+            else:
+                notif_body = (
+                    f"Order #{order.order_number} has been successfully processed for {email}.\n"
+                    f"Tool: {tool.name} | Amount: NGN {price_ngn:,.2f} | Payment: {payment_method.title()}"
+                )
+            Notification.objects.create(
+                user=request.user,
+                title=notif_title,
+                message=notif_body,
+                notification_type='order',
+                action_url=f"/admin/orders/order/{order.id}/change/"
+            )
+        except Exception as notif_err:
+            logger.error(f"Failed to create admin notification for Order #{order.id}: {notif_err}")
+
         return JsonResponse({
             'success': True,
             'order_id': order.id,
             'order_number': order.order_number,
+            'tool_name': tool.name,
+            'customer_email': email,
             'is_new_user': not bool(user),
             'claim_url': claim_url,
             'message': f"Successfully purchased {tool.name} for {email}! Order #{order.order_number} processed." + (f" Registration link generated." if claim_url else "")

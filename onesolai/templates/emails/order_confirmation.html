@@ -54,7 +54,7 @@
   </div>
 
   <div class="body">
-    <p class="greeting">Hi <strong>{{ user.first_name|default:user.email }}</strong>,</p>
+    <p class="greeting">Hi <strong>{{ display_name|default:order.delivery_email }}</strong>,</p>
     <p style="color:#AEB5CA;font-size:14px;margin-bottom:24px;">
       Great news — your payment has been confirmed and your tool access is ready. Here's a summary of your order:
     </p>
