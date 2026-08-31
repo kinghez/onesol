@@ -119,7 +119,8 @@ class ShopBotService(BaseVendorService):
             try:
                 data = json.loads(base64.b64decode(self.api_key.replace("conn_", "")))
                 self.api_key = data["k"]
-                self.api_url = data["u"].rstrip('/')
+                if not self.api_url:
+                    self.api_url = data["u"].rstrip('/')
             except Exception as e:
                 logger.error(f"Failed to decode connection code: {e}")
 
