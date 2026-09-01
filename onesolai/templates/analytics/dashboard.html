@@ -457,7 +457,19 @@
         const countryCodes = {
             "Nigeria": "NG", "United States": "US", "United Kingdom": "GB", 
             "Canada": "CA", "India": "IN", "Australia": "AU", "Ghana": "GH", "South Africa": "ZA",
-            "Kenya": "KE"
+            "Kenya": "KE", "Cameroon": "CM", "Singapore": "SG", "Benin": "BJ", "Senegal": "SN",
+            "Cote d'Ivoire": "CI", "Ivory Coast": "CI", "Togo": "TG", "Uganda": "UG", "Tanzania": "TZ",
+            "Rwanda": "RW", "Egypt": "EG", "Ethiopia": "ET", "Morocco": "MA", "Algeria": "DZ",
+            "Angola": "AO", "Botswana": "BW", "Zimbabwe": "ZW", "Zambia": "ZM", "Malawi": "MW",
+            "Mauritius": "MU", "Mozambique": "MZ", "Namibia": "NA", "Gabon": "GA", "Congo": "CG",
+            "DR Congo": "CD", "France": "FR", "Germany": "DE", "Spain": "ES", "Italy": "IT",
+            "Netherlands": "NL", "Switzerland": "CH", "Sweden": "SE", "Norway": "NO", "Denmark": "DK",
+            "Finland": "FI", "Poland": "PL", "Portugal": "PT", "Belgium": "BE", "Austria": "AT",
+            "Ireland": "IE", "Brazil": "BR", "Argentina": "AR", "Chile": "CL", "Colombia": "CO",
+            "Mexico": "MX", "China": "CN", "Japan": "JP", "South Korea": "KR", "Indonesia": "ID",
+            "Malaysia": "MY", "Philippines": "PH", "Thailand": "TH", "Vietnam": "VN", "Pakistan": "PK",
+            "Bangladesh": "BD", "United Arab Emirates": "AE", "Saudi Arabia": "SA", "Qatar": "QA",
+            "Kuwait": "KW", "Turkey": "TR"
         };
         
         // Custom Date Range Toggler
@@ -476,8 +488,8 @@
         
         let formattedMapData = {};
         for (let [key, val] of Object.entries(mapData)) {
-            let code = countryCodes[key] || key;
-            formattedMapData[code] = val;
+            let code = countryCodes[key] || (key && key.length === 2 ? key.toUpperCase() : key);
+            formattedMapData[code] = (formattedMapData[code] || 0) + val;
         }
 
         new jsVectorMap({

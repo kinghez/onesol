@@ -74,7 +74,9 @@ def admin_analytics_dashboard(request):
     # 2. Payment Metrics
     total_processed = orders_qs.filter(status='paid').aggregate(total=Sum('total_amount_ngn'))['total'] or 0.0
     successful_orders = orders_qs.filter(status='paid').count()
-    failed_orders = orders_qs.filter(status='failed').count()
+    failed_orders = orders_qs.filter(
+        Q(status='failed') | Q(delivery_status='failed') | Q(api_requests__status='failed')
+    ).distinct().count()
     total_payment_attempts = successful_orders + failed_orders
     success_rate = (successful_orders / total_payment_attempts * 100) if total_payment_attempts > 0 else 0
     fail_rate = 100 - success_rate if total_payment_attempts > 0 else 0

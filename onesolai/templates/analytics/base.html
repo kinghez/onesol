@@ -946,6 +946,15 @@ function openFundWalletModal() {
             }
         }
 
+        window.liveUsdRates = {{ live_rates_json|safe|default:"null" }} || {
+            'USD': 1.0, 'NGN': 1500.0, 'GBP': 0.78, 'EUR': 0.92, 'GHS': 15.4, 'KES': 129.5,
+            'ZAR': 18.2, 'XAF': 600.0, 'XOF': 600.0, 'SGD': 1.35, 'CAD': 1.36, 'AUD': 1.50, 'INR': 83.5
+        };
+        window.currencySymbols = {{ currency_symbols_json|safe|default:"null" }} || {
+            'USD': '$', 'NGN': '₦', 'GBP': '£', 'EUR': '€', 'GHS': 'GH₵', 'KES': 'KSh',
+            'ZAR': 'R', 'XAF': 'FCFA', 'XOF': 'CFA', 'SGD': 'S$', 'CAD': 'CA$', 'AUD': 'A$', 'INR': '₹'
+        };
+
         window.adminToolsData = [
             {% for tool in admin_active_tools %}
                 { id: {{ tool.id }}, name: "{{ tool.name|escapejs }}", price_ngn: {{ tool.price_ngn|default:0 }}, price_usd: {{ tool.price_usd|default:0 }} }{% if not forloop.last %},{% endif %}
@@ -959,19 +968,19 @@ function openFundWalletModal() {
             if (!select) return;
             var selectedValue = select.value;
 
-            var rates = window.liveUsdRates || { 'USD': 1, 'NGN': 1500, 'GBP': 0.78, 'EUR': 0.92, 'GHS': 15.4, 'KES': 129.5 };
-            var symbols = window.currencySymbols || { 'USD': '$', 'NGN': '₦', 'GBP': '£', 'EUR': '€', 'GHS': 'GH₵', 'KES': 'KSh' };
+            var rates = window.liveUsdRates || {};
+            var symbols = window.currencySymbols || {};
 
-            var rate = (rates[curr] !== undefined && rates[curr] > 0) ? rates[curr] : (curr === 'NGN' ? 1500 : 1.0);
-            var symbol = symbols[curr] || curr;
+            var usdRateForNgn = (rates['NGN'] && rates['NGN'] > 0) ? rates['NGN'] : 1500.0;
+            var targetRateFromUsd = (rates[curr] && rates[curr] > 0) ? rates[curr] : (curr === 'NGN' ? usdRateForNgn : 1.0);
+            var symbol = symbols[curr] || (curr + ' ');
 
             select.innerHTML = '<option value="">-- Choose a Tool --</option>';
 
             if (window.adminToolsData) {
                 window.adminToolsData.forEach(function(t) {
-                    var ngnRate = rates['NGN'] || 1500;
-                    var usdPrice = t.price_usd || (t.price_ngn / ngnRate);
-                    var convertedAmount = (curr === 'NGN') ? t.price_ngn : (usdPrice * rate);
+                    var usdPrice = (t.price_usd && t.price_usd > 0) ? t.price_usd : (t.price_ngn / usdRateForNgn);
+                    var convertedAmount = (curr === 'NGN') ? t.price_ngn : (curr === 'USD' ? usdPrice : (usdPrice * targetRateFromUsd));
                     var formattedPrice = symbol + ' ' + convertedAmount.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2}) + ' ' + curr;
 
                     var opt = document.createElement('option');
