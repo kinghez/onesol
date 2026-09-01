@@ -488,7 +488,7 @@
                     <select id="buyToolId" required style="width:100%; background:#161B40; border:1px solid rgba(255,255,255,0.2); color:#fff; padding:10px 12px; border-radius:8px; font-size:13px; max-height:200px;">
                         <option value="">-- Choose a Tool --</option>
                         {% for tool in admin_active_tools %}
-                            <option value="{{ tool.id }}">{{ tool.name }} (₦{{ tool.price_ngn|floatformat:2 }} NGN)</option>
+                            <option value="{{ tool.id }}" data-name="{{ tool.name|escape }}" data-price-ngn="{{ tool.price_ngn|default:0 }}" data-price-usd="{{ tool.price_usd|default:0 }}">{{ tool.name }} (₦{{ tool.price_ngn|floatformat:2 }} NGN)</option>
                         {% endfor %}
                     </select>
                 </div>
@@ -969,7 +969,6 @@ function openFundWalletModal() {
             var curr = currSelect ? (currSelect.value || 'NGN').toUpperCase() : 'NGN';
             var select = document.getElementById('buyToolId');
             if (!select) return;
-            var selectedValue = select.value;
 
             var rates = window.liveUsdRates || {};
             var symbols = window.currencySymbols || {};
@@ -978,34 +977,43 @@ function openFundWalletModal() {
             var targetRateFromUsd = (rates[curr] && rates[curr] > 0) ? rates[curr] : (curr === 'NGN' ? usdRateForNgn : 1.0);
             var symbol = symbols[curr] || (curr + ' ');
 
-            select.innerHTML = '<option value="">-- Choose a Tool --</option>';
+            for (var i = 0; i < select.options.length; i++) {
+                var opt = select.options[i];
+                if (!opt.value) continue;
 
-            if (window.adminToolsData && window.adminToolsData.length > 0) {
-                window.adminToolsData.forEach(function(t) {
-                    var ngnVal = parseFloat(t.price_ngn) || 0;
-                    var usdVal = parseFloat(t.price_usd) || 0;
-                    var usdPrice = (usdVal > 0) ? usdVal : (ngnVal / usdRateForNgn);
-                    
-                    var convertedAmount = 0;
-                    if (curr === 'NGN') {
-                        convertedAmount = ngnVal;
-                    } else if (curr === 'USD') {
-                        convertedAmount = usdPrice;
+                var name = opt.getAttribute('data-name');
+                if (!name) {
+                    name = opt.textContent.split(' (')[0].trim();
+                    opt.setAttribute('data-name', name);
+                }
+
+                var ngnVal = parseFloat(opt.getAttribute('data-price-ngn'));
+                if (isNaN(ngnVal) || ngnVal === 0) {
+                    var match = opt.textContent.match(/₦([\d,.]+)/);
+                    if (match) {
+                        ngnVal = parseFloat(match[1].replace(/,/g, '')) || 0;
+                        opt.setAttribute('data-price-ngn', ngnVal);
                     } else {
-                        convertedAmount = usdPrice * targetRateFromUsd;
+                        ngnVal = 0;
                     }
+                }
 
-                    var formattedNum = convertedAmount.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2});
-                    var formattedPrice = symbol + (symbol.length <= 2 ? '' : ' ') + formattedNum + ' ' + curr;
+                var usdVal = parseFloat(opt.getAttribute('data-price-usd')) || 0;
+                var usdPrice = (usdVal > 0) ? usdVal : (ngnVal / usdRateForNgn);
+                
+                var convertedAmount = 0;
+                if (curr === 'NGN') {
+                    convertedAmount = ngnVal;
+                } else if (curr === 'USD') {
+                    convertedAmount = usdPrice;
+                } else {
+                    convertedAmount = usdPrice * targetRateFromUsd;
+                }
 
-                    var opt = document.createElement('option');
-                    opt.value = t.id;
-                    opt.textContent = t.name + ' (' + formattedPrice + ')';
-                    if (String(t.id) === String(selectedValue)) {
-                        opt.selected = true;
-                    }
-                    select.appendChild(opt);
-                });
+                var formattedNum = convertedAmount.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2});
+                var formattedPrice = symbol + (symbol.length <= 2 ? '' : ' ') + formattedNum + ' ' + curr;
+
+                opt.textContent = name + ' (' + formattedPrice + ')';
             }
         }
 

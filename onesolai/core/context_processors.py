@@ -9,11 +9,19 @@ def unread_notifications(request):
             from products.models import Tool
             admin_tools = []
             for t in Tool.objects.filter(is_active=True):
+                try:
+                    price_ngn = float(t.get_ngn_price())
+                except Exception:
+                    price_ngn = 0.0
+                try:
+                    price_usd = float(t.get_usd_price())
+                except Exception:
+                    price_usd = 0.0
                 admin_tools.append({
                     'id': t.id,
                     'name': t.name,
-                    'price_ngn': float(t.get_ngn_price()),
-                    'price_usd': float(t.get_usd_price()),
+                    'price_ngn': price_ngn,
+                    'price_usd': price_usd,
                 })
         return {
             'unread_notifications_count': notif_count,
