@@ -951,11 +951,11 @@ function openFundWalletModal() {
 
         window.liveUsdRates = {{ live_rates_json|safe|default:"null" }} || {
             'USD': 1.0, 'NGN': 1500.0, 'GBP': 0.78, 'EUR': 0.92, 'GHS': 15.4, 'KES': 129.5,
-            'ZAR': 18.2, 'XAF': 600.0, 'XOF': 600.0, 'SGD': 1.35, 'CAD': 1.36, 'AUD': 1.50, 'INR': 83.5
+            'ZAR': 18.2, 'XAF': 600.0, 'XOF': 600.0, 'SGD': 1.35, 'CAD': 1.36, 'AUD': 1.50, 'INR': 83.5, 'JPY': 159.8
         };
         window.currencySymbols = {{ currency_symbols_json|safe|default:"null" }} || {
             'USD': '$', 'NGN': '₦', 'GBP': '£', 'EUR': '€', 'GHS': 'GH₵', 'KES': 'KSh',
-            'ZAR': 'R', 'XAF': 'FCFA', 'XOF': 'CFA', 'SGD': 'S$', 'CAD': 'CA$', 'AUD': 'A$', 'INR': '₹'
+            'ZAR': 'R', 'XAF': 'FCFA', 'XOF': 'CFA', 'SGD': 'S$', 'CAD': 'CA$', 'AUD': 'A$', 'INR': '₹', 'JPY': '¥'
         };
 
         window.adminToolsData = [
@@ -980,11 +980,23 @@ function openFundWalletModal() {
 
             select.innerHTML = '<option value="">-- Choose a Tool --</option>';
 
-            if (window.adminToolsData) {
+            if (window.adminToolsData && window.adminToolsData.length > 0) {
                 window.adminToolsData.forEach(function(t) {
-                    var usdPrice = (t.price_usd && t.price_usd > 0) ? t.price_usd : (t.price_ngn / usdRateForNgn);
-                    var convertedAmount = (curr === 'NGN') ? t.price_ngn : (curr === 'USD' ? usdPrice : (usdPrice * targetRateFromUsd));
-                    var formattedPrice = symbol + ' ' + convertedAmount.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2}) + ' ' + curr;
+                    var ngnVal = parseFloat(t.price_ngn) || 0;
+                    var usdVal = parseFloat(t.price_usd) || 0;
+                    var usdPrice = (usdVal > 0) ? usdVal : (ngnVal / usdRateForNgn);
+                    
+                    var convertedAmount = 0;
+                    if (curr === 'NGN') {
+                        convertedAmount = ngnVal;
+                    } else if (curr === 'USD') {
+                        convertedAmount = usdPrice;
+                    } else {
+                        convertedAmount = usdPrice * targetRateFromUsd;
+                    }
+
+                    var formattedNum = convertedAmount.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2});
+                    var formattedPrice = symbol + (symbol.length <= 2 ? '' : ' ') + formattedNum + ' ' + curr;
 
                     var opt = document.createElement('option');
                     opt.value = t.id;
@@ -996,6 +1008,14 @@ function openFundWalletModal() {
                 });
             }
         }
+
+        document.addEventListener('DOMContentLoaded', function() {
+            updateBuyToolPrices();
+            var currSelect = document.getElementById('buyToolCurrency');
+            if (currSelect) {
+                currSelect.addEventListener('change', updateBuyToolPrices);
+            }
+        });
 
         function updateFundAmountLabel() {
             var currSelect = document.getElementById('fundCurrency');
