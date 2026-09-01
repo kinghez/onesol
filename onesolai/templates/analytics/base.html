@@ -616,6 +616,9 @@ function openFundWalletModal() {
         }
         function openBuyToolModal() {
             document.getElementById('buyToolModal').style.display = 'flex';
+            if (typeof updateBuyToolPrices === 'function') {
+                updateBuyToolPrices();
+            }
         }
         function closeBuyToolModal() {
             document.getElementById('buyToolModal').style.display = 'none';
