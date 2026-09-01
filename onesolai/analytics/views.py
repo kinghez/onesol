@@ -117,9 +117,26 @@ def admin_analytics_dashboard(request):
     growth_data = [g['daily_count'] for g in user_growth]
 
     # 8. User Distribution Map Data (Country counts resolved dynamically to ISO Alpha-2 codes)
-    import pycountry
     country_distribution = Profile.objects.exclude(country_preference__isnull=True).exclude(country_preference='').values('country_preference').annotate(count=Count('id'))
     map_data = {}
+    
+    country_name_map = {
+        "Nigeria": "NG", "United States": "US", "United Kingdom": "GB", "Canada": "CA",
+        "India": "IN", "Australia": "AU", "Ghana": "GH", "South Africa": "ZA", "Kenya": "KE",
+        "Cameroon": "CM", "Singapore": "SG", "Benin": "BJ", "Senegal": "SN", "Cote d'Ivoire": "CI",
+        "Ivory Coast": "CI", "Togo": "TG", "Uganda": "UG", "Tanzania": "TZ", "Rwanda": "RW",
+        "Egypt": "EG", "Ethiopia": "ET", "Morocco": "MA", "Algeria": "DZ", "Angola": "AO",
+        "Botswana": "BW", "Zimbabwe": "ZW", "Zambia": "ZM", "Malawi": "MW", "Mauritius": "MU",
+        "Mozambique": "MZ", "Namibia": "NA", "Gabon": "GA", "Congo": "CG", "DR Congo": "CD",
+        "France": "FR", "Germany": "DE", "Spain": "ES", "Italy": "IT", "Netherlands": "NL",
+        "Switzerland": "CH", "Sweden": "SE", "Norway": "NO", "Denmark": "DK", "Finland": "FI",
+        "Poland": "PL", "Portugal": "PT", "Belgium": "BE", "Austria": "AT", "Ireland": "IE",
+        "Brazil": "BR", "Argentina": "AR", "Chile": "CL", "Colombia": "CO", "Mexico": "MX",
+        "China": "CN", "Japan": "JP", "South Korea": "KR", "Indonesia": "ID", "Malaysia": "MY",
+        "Philippines": "PH", "Thailand": "TH", "Vietnam": "VN", "Pakistan": "PK", "Bangladesh": "BD",
+        "United Arab Emirates": "AE", "Saudi Arabia": "SA", "Qatar": "QA", "Kuwait": "KW", "Turkey": "TR"
+    }
+
     for item in country_distribution:
         raw_c = (item['country_preference'] or '').strip()
         cnt = item['count']
@@ -129,12 +146,15 @@ def admin_analytics_dashboard(request):
         if len(raw_c) == 2:
             iso_code = raw_c.upper()
         else:
-            try:
-                matches = pycountry.countries.search_fuzzy(raw_c)
-                if matches:
-                    iso_code = matches[0].alpha_2
-            except Exception:
-                pass
+            iso_code = country_name_map.get(raw_c)
+            if not iso_code:
+                try:
+                    import pycountry
+                    matches = pycountry.countries.search_fuzzy(raw_c)
+                    if matches:
+                        iso_code = matches[0].alpha_2
+                except Exception:
+                    pass
         if iso_code:
             map_data[iso_code] = map_data.get(iso_code, 0) + cnt
 

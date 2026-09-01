@@ -39,3 +39,5 @@ pypaystack2==2.0.3
 
 # ── Notifications & Misc ──────────────────────────────────────────────────────
 sweetify==2.3.1
+
+pycountry>=24.6.1
