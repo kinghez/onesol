@@ -116,9 +116,27 @@ def admin_analytics_dashboard(request):
     growth_labels = [g['date'].strftime('%b %d') for g in user_growth]
     growth_data = [g['daily_count'] for g in user_growth]
 
-    # 8. User Distribution Map Data (Country counts)
+    # 8. User Distribution Map Data (Country counts resolved dynamically to ISO Alpha-2 codes)
+    import pycountry
     country_distribution = Profile.objects.exclude(country_preference__isnull=True).exclude(country_preference='').values('country_preference').annotate(count=Count('id'))
-    map_data = {item['country_preference']: item['count'] for item in country_distribution}
+    map_data = {}
+    for item in country_distribution:
+        raw_c = (item['country_preference'] or '').strip()
+        cnt = item['count']
+        if not raw_c:
+            continue
+        iso_code = None
+        if len(raw_c) == 2:
+            iso_code = raw_c.upper()
+        else:
+            try:
+                matches = pycountry.countries.search_fuzzy(raw_c)
+                if matches:
+                    iso_code = matches[0].alpha_2
+            except Exception:
+                pass
+        if iso_code:
+            map_data[iso_code] = map_data.get(iso_code, 0) + cnt
 
     # Filter Options for the UI
     all_countries = Profile.objects.exclude(country_preference__isnull=True).exclude(country_preference='').values_list('country_preference', flat=True).distinct()

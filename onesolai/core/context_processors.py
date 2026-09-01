@@ -7,12 +7,14 @@ def unread_notifications(request):
         admin_tools = []
         if request.user.is_staff:
             from products.models import Tool
-            admin_tools = list(Tool.objects.filter(is_active=True).values('id', 'name'))
+            admin_tools = []
             for t in Tool.objects.filter(is_active=True):
-                for at in admin_tools:
-                    if at['id'] == t.id:
-                        at['price_ngn'] = float(t.get_ngn_price())
-                        at['price_usd'] = float(t.get_usd_price())
+                admin_tools.append({
+                    'id': t.id,
+                    'name': t.name,
+                    'price_ngn': float(t.get_ngn_price()),
+                    'price_usd': float(t.get_usd_price()),
+                })
         return {
             'unread_notifications_count': notif_count,
             'wishlist_count': wl_count,

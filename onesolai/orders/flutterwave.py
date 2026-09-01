@@ -156,20 +156,29 @@ def verify_transaction(transaction_id: str = None, reference: str = None):
     if not secret_key:
         raise ValueError("Flutterwave secret key is not configured.")
 
+    if transaction_id and str(transaction_id).strip().lower() in ['null', 'undefined', 'none', '']:
+        transaction_id = None
+    if reference and str(reference).strip().lower() in ['null', 'undefined', 'none', '']:
+        reference = None
+
     try:
+        data = None
         if transaction_id:
-            url = f'https://api.flutterwave.com/v3/transactions/{transaction_id}/verify'
-        elif reference:
+            try:
+                url = f'https://api.flutterwave.com/v3/transactions/{transaction_id}/verify'
+                resp = requests.get(url, headers=get_headers(), timeout=30)
+                data = resp.json()
+            except Exception:
+                data = None
+
+        if (not data or data.get('status') != 'success') and reference:
             url = f'https://api.flutterwave.com/v3/transactions/verify_by_address?tx_ref={reference}'
-        else:
+            resp = requests.get(url, headers=get_headers(), timeout=30)
+            data = resp.json()
+
+        if not data:
             raise ValueError("Transaction ID or reference is required for verification.")
 
-        resp = requests.get(
-            url,
-            headers=get_headers(),
-            timeout=30,
-        )
-        data = resp.json()
     except requests.RequestException as e:
         raise ValueError(f'Flutterwave verification network error: {e}')
 
