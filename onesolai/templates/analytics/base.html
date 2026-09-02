@@ -487,6 +487,9 @@
                     <label style="display:block; font-size:12px; color:#AEB5CA; margin-bottom:4px; font-weight:600;">Select Tool to Purchase *</label>
                     <select id="buyToolId" required style="width:100%; background:#161B40; border:1px solid rgba(255,255,255,0.2); color:#fff; padding:10px 12px; border-radius:8px; font-size:13px; max-height:200px;">
                         <option value="">-- Choose a Tool --</option>
+                        {% for tool in admin_active_tools %}
+                            <option value="{{ tool.id }}" data-name="{{ tool.name|escapejs }}" data-price-ngn="{{ tool.price_ngn|default:0 }}" data-price-usd="{{ tool.price_usd|default:0 }}">{{ tool.name }} (&#8358;{{ tool.price_ngn|floatformat:2 }} NGN)</option>
+                        {% endfor %}
                     </select>
                 </div>
                 <div style="margin-bottom:20px;">
@@ -974,15 +977,15 @@ function openFundWalletModal() {
             var targetRateFromUsd = (rates[curr] && rates[curr] > 0) ? rates[curr] : (curr === 'NGN' ? usdRateForNgn : 1.0);
             var symbol = symbols[curr] || curr;
 
-            // Rebuild the options list clean every time from the source data
-            var currentVal = select.value;
-            select.innerHTML = '<option value="">-- Choose a Tool --</option>';
+            // Update each server-rendered option in-place using its data-* attributes
+            for (var i = 0; i < select.options.length; i++) {
+                var opt = select.options[i];
+                if (!opt.value) continue;  // skip the placeholder
 
-            if (!window.adminToolsData || window.adminToolsData.length === 0) return;
-
-            window.adminToolsData.forEach(function(t) {
-                var ngnVal = parseFloat(t.price_ngn) || 0;
-                var usdVal = parseFloat(t.price_usd) || 0;
+                // Get the clean name from data-name attribute (never changes)
+                var toolName = opt.getAttribute('data-name') || opt.textContent.split(' (')[0];
+                var ngnVal = parseFloat(opt.getAttribute('data-price-ngn')) || 0;
+                var usdVal = parseFloat(opt.getAttribute('data-price-usd')) || 0;
                 var usdPrice = (usdVal > 0) ? usdVal : (usdRateForNgn > 0 ? ngnVal / usdRateForNgn : 0);
 
                 var amount;
@@ -994,13 +997,9 @@ function openFundWalletModal() {
                     amount = usdPrice * targetRateFromUsd;
                 }
 
-                var priceStr = symbol + amount.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ',') + ' ' + curr;
-                var opt = document.createElement('option');
-                opt.value = t.id;
-                opt.textContent = t.name + ' (' + priceStr + ')';
-                if (String(t.id) === String(currentVal)) opt.selected = true;
-                select.appendChild(opt);
-            });
+                var formattedAmt = amount.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2});
+                opt.textContent = toolName + ' (' + symbol + formattedAmt + ' ' + curr + ')';
+            }
         }
 
         document.addEventListener('DOMContentLoaded', function() {
