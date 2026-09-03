@@ -779,68 +779,6 @@ function openFundWalletModal() {
 
     <script>
 
-        {% get_live_rates_json as rates_json %}
-        const CALC_RATES = JSON.parse('{{ rates_json|escapejs }}');
-
-        const CALC_SYMBOLS = {
-            'USD': '$', 'NGN': '₦', 'XAF': 'FCFA', 'XOF': 'CFA',
-            'GHS': 'GH₵', 'KES': 'KSh', 'UGX': 'USh', 'TZS': 'TSh',
-            'RWF': 'FRw', 'EGP': 'E£', 'GBP': '£', 'EUR': '€',
-            'ZAR': 'R', 'CAD': 'CA$', 'AUD': 'A$', 'SGD': 'S$',
-            'INR': '₹', 'ZMW': 'ZK', 'DZD': 'DA', 'MAD': 'MAD'
-        };
-
-        function openCurrencyConverterModal() {
-            document.getElementById('currencyConverterModal').style.display = 'flex';
-            calculateCurrencyConversion();
-        }
-
-        function closeCurrencyConverterModal() {
-            document.getElementById('currencyConverterModal').style.display = 'none';
-        }
-
-        function swapCalcCurrencies() {
-            var fromSelect = document.getElementById('calcFrom');
-            var toSelect = document.getElementById('calcTo');
-            var temp = fromSelect.value;
-            fromSelect.value = toSelect.value;
-            toSelect.value = temp;
-            calculateCurrencyConversion();
-        }
-
-        function calculateCurrencyConversion() {
-            var amtInput = document.getElementById('calcAmount');
-            var amt = parseFloat(amtInput ? amtInput.value : 0) || 0;
-            var from = document.getElementById('calcFrom').value;
-            var to = document.getElementById('calcTo').value;
-
-            var fromRate = CALC_RATES[from] || 1.0;
-            var toRate = CALC_RATES[to] || 1.0;
-
-            var usdVal = (from === 'USD') ? amt : (amt / fromRate);
-            var convertedVal = (to === 'USD') ? usdVal : (usdVal * toRate);
-
-            var fromSym = CALC_SYMBOLS[from] || from;
-            var toSym = CALC_SYMBOLS[to] || to;
-
-            var resultMain = document.getElementById('calcResultMain');
-            var resultUsd = document.getElementById('calcResultUsd');
-            var rateDetails = document.getElementById('calcRateDetails');
-
-            if (resultMain) {
-                resultMain.innerText = fromSym + ' ' + amt.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2}) + ' ' + from + ' = ' + toSym + ' ' + convertedVal.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2}) + ' ' + to;
-            }
-
-            if (resultUsd) {
-                resultUsd.innerText = 'USD Equivalent: $' + usdVal.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2}) + ' USD';
-            }
-
-            if (rateDetails) {
-                var unitRate = (fromRate > 0) ? (toRate / fromRate) : 0;
-                rateDetails.innerText = '1 ' + from + ' = ' + unitRate.toFixed(4) + ' ' + to + '  |  1 USD = ' + fromRate.toFixed(2) + ' ' + from + '  |  1 USD = ' + toRate.toFixed(2) + ' ' + to;
-            }
-        }
-
         
         var toastShouldReload = false;
         function showAdminToast(type, title, message, copyUrl = null, shouldReload = false) {
@@ -970,20 +908,33 @@ function openFundWalletModal() {
             var select = document.getElementById('buyToolId');
             if (!select) return;
 
-            var rates = window.liveUsdRates || {};
-            var symbols = window.currencySymbols || {};
+            var rates = window.liveUsdRates || CALC_RATES || {};
+            var defaultSymbols = {
+                'USD': '$', 'NGN': '₦', 'MYR': 'RM', 'GBP': '£', 'EUR': '€',
+                'GHS': 'GH₵', 'KES': 'KSh', 'ZAR': 'R', 'XAF': 'FCFA', 'XOF': 'CFA',
+                'SGD': 'S$', 'CAD': 'CA$', 'AUD': 'A$', 'INR': '₹', 'JPY': '¥',
+                'UGX': 'USh', 'TZS': 'TSh', 'RWF': 'FRw', 'EGP': 'E£', 'ZMW': 'ZK',
+                'DZD': 'DA', 'MAD': 'MAD', 'AED': 'AED', 'SAR': 'SAR', 'BRL': 'R$'
+            };
+            var symbols = Object.assign({}, defaultSymbols, window.currencySymbols || {}, typeof CALC_SYMBOLS !== 'undefined' ? CALC_SYMBOLS : {});
 
             var usdRateForNgn = (rates['NGN'] && rates['NGN'] > 0) ? rates['NGN'] : 1500.0;
             var targetRateFromUsd = (rates[curr] && rates[curr] > 0) ? rates[curr] : (curr === 'NGN' ? usdRateForNgn : 1.0);
-            var symbol = symbols[curr] || curr;
+            var rawSym = symbols[curr] || curr;
+            var symbol = (rawSym.length > 1) ? (rawSym + ' ') : rawSym;
 
             // Update each server-rendered option in-place using its data-* attributes
             for (var i = 0; i < select.options.length; i++) {
                 var opt = select.options[i];
-                if (!opt.value) continue;  // skip the placeholder
+                if (!opt.value) continue;  // skip placeholder
 
-                // Get the clean name from data-name attribute (never changes)
-                var toolName = opt.getAttribute('data-name') || opt.textContent.split(' (')[0];
+                // Get clean tool name from data-name attribute (never changes)
+                var toolName = opt.getAttribute('data-name');
+                if (!toolName) {
+                    toolName = opt.textContent.split(' (')[0].trim();
+                    opt.setAttribute('data-name', toolName);
+                }
+
                 var ngnVal = parseFloat(opt.getAttribute('data-price-ngn')) || 0;
                 var usdVal = parseFloat(opt.getAttribute('data-price-usd')) || 0;
                 var usdPrice = (usdVal > 0) ? usdVal : (usdRateForNgn > 0 ? ngnVal / usdRateForNgn : 0);
