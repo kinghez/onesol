@@ -34,7 +34,7 @@ Go to your Web Service → **Environment tab** → Add each row below:
 | `DEBUG` | `False` |
 | `ALLOWED_HOSTS` | `onesolai.onrender.com,onesolai.com,www.onesolai.com` |
 | `CSRF_TRUSTED_ORIGINS` | `https://onesolai.onrender.com,https://onesolai.com,https://www.onesolai.com` |
-| `DATABASE_URL` | `postgresql://postgres.qwrtyzzmrduybtfpfzmk:191Kinghez***@aws-0-eu-central-1.pooler.supabase.com:6543/postgres` |
+| `DATABASE_URL` | `postgresql://neondb_owner:npg_9dcbKaLrAiq6@ep-raspy-block-b1oc2vs8-pooler.c-5.eu-central-1.aws.neon.tech/neondb?sslmode=require` |
 | `CLOUDINARY_URL` | `cloudinary://127128733577438:v0mJx8v2FIPRwqsvTTjI_hcrxkM@obgie1pr` |
 | `RESEND_API_KEY` | `re_xxxxxxxxxxxxxxxxxxxxxxxx` |
 | `DEFAULT_FROM_EMAIL` | `OneSol AI Hub <noreply@onesolai.com>` |
@@ -117,14 +117,14 @@ These are set inside your **payment provider dashboards** (not in code):
 
 ## Step 7 — Keep-Alive Cron (Prevent Free Tier Sleeping)
 
-Render sleeps after 15 min of inactivity. Supabase pauses after 7 days of no activity.
+Render sleeps after 15 min of inactivity. Neon scales seamlessly without aggressive egress bandwidth limits.
 
 1. Sign up at [cron-job.org](https://cron-job.org) (free)
 2. Create 2 cron jobs:
 
 | Job | URL | Schedule |
 |---|---|---|
-| Render keep-alive | `https://onesolai.com/` | Every 10 minutes |
+| Render keep-alive | `https://onesolai.com/health/` | Every 10 minutes (Zero DB Egress) |
 | Supabase keep-alive | `https://onesolai.com/` | Every 3 days |
 
 ---
@@ -143,7 +143,7 @@ cd /home/kinghez/onesol/onesolai
   -o content_backup.json
 
 # 2. Set DATABASE_URL temporarily in your local terminal session
-export DATABASE_URL="postgresql://postgres.qwrtyzzmrduybtfpfzmk:191Kinghez***@aws-0-eu-central-1.pooler.supabase.com:6543/postgres"
+export DATABASE_URL="postgresql://neondb_owner:npg_9dcbKaLrAiq6@ep-raspy-block-b1oc2vs8-pooler.c-5.eu-central-1.aws.neon.tech/neondb?sslmode=require"
 # (replace 191Kinghez*** with your real Supabase password)
 
 # 3. Run migrations on Supabase
@@ -171,6 +171,6 @@ Render Free Tier (Frankfurt)    ← Django + Gunicorn
    │
    ├── Static files  → WhiteNoise (bundled in app, no extra service)
    ├── Media files   → Cloudinary (obgie1pr)
-   ├── Database      → Supabase PostgreSQL (Frankfurt eu-central-1)
+   ├── Database      → Neon PostgreSQL Serverless (Frankfurt eu-central-1)
    └── Email         → Resend API
 ```

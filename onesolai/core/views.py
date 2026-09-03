@@ -239,3 +239,9 @@ def automatesocial_docs_view(request):
     })
 
 
+
+
+def health_check(request):
+    """Ultra-lightweight ping endpoint for Render keep-alive (0 DB egress)."""
+    from django.http import JsonResponse
+    return JsonResponse({"status": "ok"})
