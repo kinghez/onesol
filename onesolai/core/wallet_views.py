@@ -43,6 +43,10 @@ def wallet_topup_initialize(request):
         rates = get_live_usd_rates() or {}
         ngn_rate = float(rates.get('NGN', 1500.0) or 1500.0)
         target_rate = float(rates.get(user_currency, 1.0) if user_currency != 'USD' else 1.0)
+        if target_rate <= 0:
+            target_rate = 1.0
+        if ngn_rate <= 0:
+            ngn_rate = 1500.0
 
         if payment_method == 'crypto':
             if amount < 1.0:
@@ -181,12 +185,16 @@ def wallet_crypto_topup_view(request, reference):
     amount_ngn = tx.amount_ngn
     usd_amount = round(float(amount_ngn) / ngn_rate, 2)
 
+    from accounts.utils import get_active_user_currency
+    user_currency = get_active_user_currency(request)
+
     context = {
         'tx': tx,
         'cfg': cfg,
         'reference': reference,
         'amount_ngn': amount_ngn,
         'usd_amount': usd_amount,
+        'user_currency': user_currency,
         'instructions': cfg.crypto_instructions,
         'usdt_network': cfg.crypto_usdt_network,
         'usdt_address': cfg.crypto_usdt_address,

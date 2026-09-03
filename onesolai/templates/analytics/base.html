@@ -639,7 +639,8 @@ function openFundWalletModal() {
                 body: JSON.stringify({
                     user_email: document.getElementById('buyUserEmail').value,
                     tool_id: document.getElementById('buyToolId').value,
-                    payment_method: document.getElementById('buyPaymentMethod').value
+                    payment_method: document.getElementById('buyPaymentMethod').value,
+                    display_currency: document.getElementById('buyToolCurrency') ? document.getElementById('buyToolCurrency').value : 'NGN'
                 })
             })
             .then(res => res.json().then(data => ({ ok: res.ok, data: data })))

@@ -697,6 +697,7 @@ def buy_tool_for_user_api(request):
         email = data.get('user_email', '').strip()
         tool_id = data.get('tool_id')
         payment_method = data.get('payment_method', 'wallet').strip()
+        display_currency = data.get('display_currency')
 
         if not email:
             return JsonResponse({'success': False, 'error': 'User email is required.'}, status=400)
@@ -710,6 +711,36 @@ def buy_tool_for_user_api(request):
             return JsonResponse({'success': False, 'error': 'Selected tool is invalid or inactive.'}, status=404)
 
         price_ngn = Decimal(str(round(tool.get_ngn_price(), 2)))
+
+        # Determine customer's preferred/display currency
+        customer_curr = 'NGN'
+        if user and hasattr(user, 'profile') and user.profile.currency_preference:
+            customer_curr = user.profile.currency_preference.upper()
+        elif display_currency:
+            customer_curr = display_currency.strip().upper()
+
+        from core.services import get_live_usd_rates
+        from core.templatetags.currency_tags import CURRENCY_SYMBOLS
+        rates = get_live_usd_rates() or {}
+        ngn_rate = float(rates.get('NGN', 1500.0) or 1500.0)
+        target_rate = float(rates.get(customer_curr, 1.0) if customer_curr != 'USD' else 1.0)
+        if target_rate <= 0:
+            target_rate = 1.0
+        if ngn_rate <= 0:
+            ngn_rate = 1500.0
+
+        raw_sym = CURRENCY_SYMBOLS.get(customer_curr, customer_curr)
+        sym = (raw_sym + ' ') if len(raw_sym) > 1 else raw_sym
+
+        if customer_curr == 'NGN':
+            price_disp = f"₦{price_ngn:,.2f} NGN"
+            local_amount = price_ngn
+        else:
+            price_conv = (float(price_ngn) / ngn_rate) * target_rate
+            price_disp = f"{sym}{price_conv:,.2f} {customer_curr}"
+            local_amount = Decimal(str(round(price_conv, 2)))
+
+        exchange_rate = Decimal(str(round(target_rate, 4)))
 
         import uuid
         claim_token = None
@@ -726,19 +757,25 @@ def buy_tool_for_user_api(request):
                 user=None,
                 claim_token=claim_token,
                 total_amount_ngn=price_ngn,
-                local_currency='NGN',
-                local_amount=price_ngn,
-                exchange_rate=Decimal('1500.00'),
+                local_currency=customer_curr,
+                local_amount=local_amount,
+                exchange_rate=exchange_rate,
                 delivery_email=email,
                 status='paid',
             )
         else:
             profile = user.profile
             if payment_method == 'wallet':
+                if customer_curr == 'NGN':
+                    bal_disp = f"₦{profile.wallet_balance:,.2f} NGN"
+                else:
+                    bal_conv = (float(profile.wallet_balance) / ngn_rate) * target_rate
+                    bal_disp = f"{sym}{bal_conv:,.2f} {customer_curr}"
+
                 if profile.wallet_balance < price_ngn:
                     return JsonResponse({
                         'success': False,
-                        'error': f"User has insufficient wallet balance (Bal: NGN {profile.wallet_balance:,.2f}, Tool Price: NGN {price_ngn:,.2f}). Please fund user's wallet first or select Complimentary Admin Gift."
+                        'error': f"User has insufficient wallet balance (Bal: {bal_disp}, Tool Price: {price_disp}). Please fund user's wallet first or select Complimentary Admin Gift."
                     }, status=400)
 
                 profile.wallet_balance -= price_ngn
@@ -756,9 +793,9 @@ def buy_tool_for_user_api(request):
             order = Order.objects.create(
                 user=user,
                 total_amount_ngn=price_ngn,
-                local_currency='NGN',
-                local_amount=price_ngn,
-                exchange_rate=Decimal('1500.00'),
+                local_currency=customer_curr,
+                local_amount=local_amount,
+                exchange_rate=exchange_rate,
                 delivery_email=user.email,
                 status='paid',
             )
@@ -775,8 +812,8 @@ def buy_tool_for_user_api(request):
             transaction_id=f"ADMIN_PAY_{order.id}",
             reference=f"ADMIN_PAY_{order.id}",
             status='success',
-            amount_paid=price_ngn,
-            currency_paid='NGN',
+            amount_paid=local_amount,
+            currency_paid=customer_curr,
         )
 
         ActivityLog.log(
