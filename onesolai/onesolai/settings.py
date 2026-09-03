@@ -51,6 +51,7 @@ AUTH_USER_MODEL = "accounts.User"
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
     "whitenoise.middleware.WhiteNoiseMiddleware",  # ← Serve static files efficiently
+    "django.middleware.gzip.GZipMiddleware",       # ← Gzip compress HTML/JSON responses (cuts bandwidth by 75%+)
     "django.contrib.sessions.middleware.SessionMiddleware",
     "django.middleware.common.CommonMiddleware",
     "django.middleware.csrf.CsrfViewMiddleware",
@@ -58,6 +59,16 @@ MIDDLEWARE = [
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
 ]
+
+
+# In-Memory Cache (reduces repeated database lookups for SiteSettings & rates)
+CACHES = {
+    'default': {
+        'BACKEND': 'django.core.cache.backends.locmem.LocMemCache',
+        'LOCATION': 'onesolai-cache',
+        'TIMEOUT': 600,
+    }
+}
 
 ROOT_URLCONF = "onesolai.urls"
 
@@ -150,6 +161,7 @@ cloudinary.config(
 DEFAULT_FILE_STORAGE = "cloudinary_storage.storage.MediaCloudinaryStorage"
 STATICFILES_STORAGE = "whitenoise.storage.CompressedStaticFilesStorage"
 WHITENOISE_MANIFEST_STRICT = False
+WHITENOISE_MAX_AGE = 31536000  # 1 Year Cache-Control (Allows Cloudflare & browsers to cache CSS/JS at edge)
 
 STORAGES = {
     "default": {
@@ -274,7 +286,7 @@ if not DEBUG:
 # Session Security & Inactivity Timeout (3 Hours)
 # ─────────────────────────────────────────────────────────────────────────────
 SESSION_COOKIE_AGE = 3 * 60 * 60  # 3 hours of inactivity (10,800 seconds)
-SESSION_SAVE_EVERY_REQUEST = True  # Resets the 3-hour session timer on active requests
+SESSION_SAVE_EVERY_REQUEST = False # Only save sessions when modified (prevents DB writes on bot/ping requests)
 
 
 # ─────────────────────────────────────────────────────────────────────────────

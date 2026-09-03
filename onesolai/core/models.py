@@ -389,7 +389,12 @@ class SiteSettings(models.Model):
 
     @classmethod
     def get(cls):
-        """Always returns the singleton instance, populating legal contents if missing."""
+        """Always returns the singleton instance, cached in-memory for 5 minutes to avoid DB queries."""
+        from django.core.cache import cache
+        cached = cache.get('site_settings_singleton')
+        if cached is not None:
+            return cached
+
         obj, created = cls.objects.get_or_create(pk=1)
         needs_save = False
         if not obj.privacy_policy_content:
@@ -404,7 +409,14 @@ class SiteSettings(models.Model):
 
         if needs_save:
             obj.save()
+
+        cache.set('site_settings_singleton', obj, 300)
         return obj
+
+    def save(self, *args, **kwargs):
+        from django.core.cache import cache
+        cache.delete('site_settings_singleton')
+        super().save(*args, **kwargs)
 
 
 class NewsletterSubscriber(models.Model):
