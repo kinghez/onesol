@@ -91,27 +91,37 @@ def currency_settings(request):
 
     # 2. User active currency & country: profile settings take strict priority if logged in!
     show_location_switch_modal = False
+    location_modal_mode = None  # 'unset' or 'mismatch'
     profile_country = None
     profile_currency = None
 
-    if request.user.is_authenticated and hasattr(request.user, 'profile'):
+    if hasattr(request, 'user') and request.user.is_authenticated and hasattr(request.user, 'profile'):
         profile = request.user.profile
-        profile_country = profile.country_preference or ''
-        profile_currency = (profile.currency_preference or 'NGN').upper()
+        profile_country = (profile.country_preference or '').strip()
+        profile_currency = (profile.currency_preference or '').strip().upper()
 
-        # Active currency is strictly profile's currency
-        user_currency = profile_currency
-
-        # Check for location mismatch: detected IP country vs profile country preference
         location_switch_dismissed = request.session.get('location_switch_dismissed', False)
-        if (
-            detected_country
-            and profile_country
-            and profile_country != '-'
-            and detected_country.lower() != profile_country.lower()
-            and not location_switch_dismissed
-        ):
-            show_location_switch_modal = True
+
+        if not profile_country:
+            # User has no confirmed country preference (migrated account, Google OAuth without location, etc.)
+            # Never assume USA/USD. Use the system detected currency & country!
+            user_currency = request.session.get('user_selected_currency') or detected_currency or 'NGN'
+            if not location_switch_dismissed:
+                show_location_switch_modal = True
+                location_modal_mode = 'unset'
+        else:
+            # User has an established profile country preference
+            user_currency = profile_currency or detected_currency or 'NGN'
+
+            # Check for location mismatch: detected IP country vs profile country preference
+            if (
+                detected_country
+                and profile_country != '-'
+                and detected_country.lower() != profile_country.lower()
+                and not location_switch_dismissed
+            ):
+                show_location_switch_modal = True
+                location_modal_mode = 'mismatch'
     else:
         # For guests, check manual session currency override or detected IP currency
         user_currency = request.session.get('user_selected_currency') or detected_currency or 'NGN'
@@ -119,7 +129,7 @@ def currency_settings(request):
     user_currency = user_currency.upper()
 
     # 3. Flag Alignment: Flag is strictly matched to the active currency!
-    country_flag_code = CURRENCY_TO_FLAG.get(user_currency, 'us').lower()
+    country_flag_code = CURRENCY_TO_FLAG.get(user_currency, 'ng' if user_currency == 'NGN' else 'us').lower()
     user_flag_url = f"https://flagcdn.com/w20/{country_flag_code}.png"
 
     return {
@@ -129,6 +139,7 @@ def currency_settings(request):
         'user_country_code': country_flag_code,
         'user_flag_url': user_flag_url,
         'show_location_switch_modal': show_location_switch_modal,
+        'location_modal_mode': location_modal_mode,
         'detected_country': detected_country,
         'detected_currency': detected_currency,
         'profile_country': profile_country,

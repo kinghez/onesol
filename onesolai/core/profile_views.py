@@ -146,9 +146,12 @@ def update_location_preference_view(request):
             if new_currency:
                 profile.currency_preference = new_currency.upper()
             else:
-                profile.currency_preference = COUNTRY_TO_CURRENCY.get(new_country, 'USD')
+                profile.currency_preference = COUNTRY_TO_CURRENCY.get(new_country, 'NGN' if new_country == 'Nigeria' else 'USD')
             profile.save()
             request.session['location_switch_dismissed'] = True
+            request.session['detected_country'] = profile.country_preference
+            request.session['detected_currency'] = profile.currency_preference
+            request.session['user_selected_currency'] = profile.currency_preference
             return JsonResponse({
                 'status': 'success',
                 'country': profile.country_preference,

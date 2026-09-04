@@ -59,7 +59,6 @@ def get_location_data_from_ip(ip):
     is_local = (not ip or ip in ['127.0.0.1', 'localhost', '::1'] or ip.startswith('192.168.') or ip.startswith('10.'))
 
     if is_local:
-        # Try getting public IP if running locally behind dev server
         try:
             res = requests.get('https://api.ipify.org?format=json', timeout=2)
             if res.status_code == 200:
@@ -75,10 +74,17 @@ def get_location_data_from_ip(ip):
         if response.status_code == 200:
             data = response.json()
             if data.get('status') == 'success':
-                curr = data.get('currency') or 'USD'
-                cc = data.get('countryCode') or CURRENCY_TO_FLAG.get(curr, 'US').upper()
+                country = data.get('country')
+                cc = data.get('countryCode')
+                curr = data.get('currency')
+                if not curr and country in COUNTRY_TO_CURRENCY:
+                    curr = COUNTRY_TO_CURRENCY[country]
+                if not curr:
+                    curr = 'NGN' if cc == 'NG' else 'USD'
+                if not cc:
+                    cc = CURRENCY_TO_FLAG.get(curr, 'NG' if curr == 'NGN' else 'US').upper()
                 return {
-                    'country': data.get('country', 'United States'),
+                    'country': country or ('Nigeria' if curr == 'NGN' else None),
                     'country_code': cc,
                     'currency': curr
                 }
@@ -91,8 +97,14 @@ def get_location_data_from_ip(ip):
 def get_active_user_currency(request):
     """
     Returns active user currency code (e.g. 'USD', 'NGN', 'GBP').
-    Strict precedence: profile settings > session manual > IP detected > 'NGN'.
+    Strict precedence:
+    1. If user is logged in AND has an explicit country preference set,
+       their profile currency_preference takes strict priority.
+    2. Otherwise (guest or user without a configured country preference),
+       fall back to session manual override, then IP detected currency, then 'NGN'.
     """
-    if hasattr(request, 'user') and request.user.is_authenticated and hasattr(request.user, 'profile') and request.user.profile.currency_preference:
-        return request.user.profile.currency_preference.upper()
+    if hasattr(request, 'user') and request.user.is_authenticated and hasattr(request.user, 'profile'):
+        profile = request.user.profile
+        if profile.country_preference and profile.currency_preference:
+            return profile.currency_preference.upper()
     return (request.session.get('user_selected_currency') or request.session.get('detected_currency') or 'NGN').upper()

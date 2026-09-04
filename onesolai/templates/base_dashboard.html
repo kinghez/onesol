@@ -425,6 +425,24 @@
             <div style="width:64px; height:64px; background:rgba(142,108,255,0.15); border:1px solid rgba(142,108,255,0.3); border-radius:50%; display:inline-flex; align-items:center; justify-content:center; font-size:28px; margin-bottom:18px;">
                 📍
             </div>
+            {% if location_modal_mode == 'unset' %}
+            <h2 style="color:#FFFFFF; font-size:22px; font-weight:800; margin-bottom:10px; line-height:1.3;">Set Your Account Location</h2>
+            <p style="color:#CBD5E1; font-size:14px; line-height:1.6; margin-bottom:16px;">
+                Your account does not have a country preference configured yet.<br>
+                The system detected you are visiting from <strong style="color:#FBBF24;">{{ detected_country }} ({{ detected_currency }})</strong>.
+            </p>
+            <p style="color:#94A3B8; font-size:13px; margin-bottom:28px;">
+                Would you like to assign your account location to <strong>{{ detected_country }}</strong>, or set your preferred country in Profile Settings?
+            </p>
+            <div style="display:flex; flex-direction:column; gap:12px;">
+                <button id="btnDashAcceptLocationSwitch" class="btn" style="background:linear-gradient(135deg, #5B63F6, #8E6CFF); color:#FFFFFF; border:none; padding:14px 20px; border-radius:12px; font-weight:700; font-size:14px; cursor:pointer; width:100%;">
+                    Use Detected Location: {{ detected_country }} ({{ detected_currency }})
+                </button>
+                <a href="{% url 'dashboard:profile' %}" id="btnDashProfileLocationSettings" class="btn" style="background:rgba(255,255,255,0.06); color:#CBD5E1; border:1px solid rgba(255,255,255,0.12); padding:12px 20px; border-radius:12px; font-weight:600; font-size:13px; cursor:pointer; width:100%; text-decoration:none; display:inline-block; text-align:center; box-sizing:border-box;">
+                    Choose in Profile Settings
+                </a>
+            </div>
+            {% else %}
             <h2 style="color:#FFFFFF; font-size:22px; font-weight:800; margin-bottom:10px; line-height:1.3;">Location Change Detected</h2>
             <p style="color:#CBD5E1; font-size:14px; line-height:1.6; margin-bottom:16px;">
                 We noticed you are currently visiting from <strong style="color:#FBBF24;">{{ detected_country }} ({{ detected_currency }})</strong>.<br>
@@ -441,6 +459,7 @@
                     No, Keep {{ profile_country }} ({{ profile_currency }})
                 </button>
             </div>
+            {% endif %}
         </div>
     </div>
     <script>
@@ -448,8 +467,9 @@
             var modal = document.getElementById('dashLocationSwitchModal');
             var btnAccept = document.getElementById('btnDashAcceptLocationSwitch');
             var btnDecline = document.getElementById('btnDashDeclineLocationSwitch');
+            var btnProfile = document.getElementById('btnDashProfileLocationSettings');
 
-            function sendLocationPreference(action) {
+            function sendLocationPreference(action, callback) {
                 var formData = new FormData();
                 formData.append('action', action);
                 formData.append('country', "{{ detected_country }}");
@@ -463,16 +483,28 @@
                 }).then(function(res) { return res.json(); })
                 .then(function(data) {
                     if (modal) modal.style.display = 'none';
-                    if (action === 'accept') {
+                    if (callback) {
+                        callback();
+                    } else if (action === 'accept') {
                         window.location.reload();
                     }
                 }).catch(function() {
                     if (modal) modal.style.display = 'none';
+                    if (callback) callback();
                 });
             }
 
             if (btnAccept) btnAccept.addEventListener('click', function() { sendLocationPreference('accept'); });
             if (btnDecline) btnDecline.addEventListener('click', function() { sendLocationPreference('decline'); });
+            if (btnProfile) {
+                btnProfile.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    var targetHref = this.getAttribute('href');
+                    sendLocationPreference('decline', function() {
+                        window.location.href = targetHref;
+                    });
+                });
+            }
         });
     </script>
     {% endif %}

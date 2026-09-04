@@ -17,6 +17,7 @@ def login_view(request):
         user = authenticate(request, username=email, password=password)
         if user is not None:
             login(request, user)
+            request.session.pop('location_switch_dismissed', None)
             next_url = request.GET.get('next', '')
             return redirect(next_url if next_url else 'dashboard:home')
         else:
@@ -364,6 +365,7 @@ def google_callback_view(request):
 
         # Log in the user
         login(request, user, backend='django.contrib.auth.backends.ModelBackend')
+        request.session.pop('location_switch_dismissed', None)
         messages.success(request, f'Welcome back, {user.first_name or user.email}!')
         return redirect('dashboard:home')
 
