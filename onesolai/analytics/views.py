@@ -82,7 +82,7 @@ def admin_analytics_dashboard(request):
     fail_rate = 100 - success_rate if total_payment_attempts > 0 else 0
 
     # 3. Product Metrics
-    all_active_tools = Tool.objects.filter(is_active=True)
+    all_active_tools = Tool.objects.filter(is_active=True).select_related('vendor_product').defer('vendor_product__raw_data')
     total_tools = all_active_tools.count()
     out_of_stock_tools = sum(1 for t in all_active_tools if not t.is_in_stock)
 

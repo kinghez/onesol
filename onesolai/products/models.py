@@ -106,10 +106,17 @@ class Tool(models.Model):
         if not self.short_description and self.description:
             self.short_description = self.description[:297] + '...' if len(self.description) > 300 else self.description
         super().save(*args, **kwargs)
+        from django.core.cache import cache
+        cache.delete('admin_active_tools_list')
+
+    def delete(self, *args, **kwargs):
+        from django.core.cache import cache
+        cache.delete('admin_active_tools_list')
+        super().delete(*args, **kwargs)
 
     def get_usd_price(self):
         from core.models import SiteSettings
-        settings = SiteSettings.objects.first()
+        settings = SiteSettings.get()
         markup_type = getattr(settings, 'markup_type', 'percent') if settings else 'percent'
         global_markup_percent = float(settings.global_markup_percent) if settings else 20.00
         global_markup_fixed = float(settings.global_markup_fixed_usd) if settings else 0.00
@@ -141,7 +148,7 @@ class Tool(models.Model):
             rate = float(live_rates['NGN'])
         else:
             # Fallback to manual settings
-            settings = SiteSettings.objects.first()
+            settings = SiteSettings.get()
             rate = settings.usd_to_ngn_rate if settings else 1500.00
             
         return round(usd_price * float(rate), 2)

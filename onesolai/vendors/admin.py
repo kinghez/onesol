@@ -183,6 +183,13 @@ class VendorProductAdmin(admin.ModelAdmin):
                 for vp in selected_for_vendor:
                     fresh = fetched_map.get(vp.vendor_product_id)
                     if not fresh:
+                        norm_name = vp.name.strip().lower()
+                        for f_item in fetched:
+                            if f_item['name'].strip().lower() == norm_name:
+                                fresh = f_item
+                                vp.vendor_product_id = f_item['vendor_product_id']
+                                break
+                    if not fresh:
                         continue
 
                     # Update VendorProduct fields
@@ -190,13 +197,14 @@ class VendorProductAdmin(admin.ModelAdmin):
                     vp.stock = fresh['stock']
                     vp.is_manual = fresh['is_manual']
                     vp.raw_data = fresh['raw_data']
-                    vp.save(update_fields=['price', 'stock', 'is_manual', 'raw_data', 'last_synced_at'])
+                    vp.save(update_fields=['vendor_product_id', 'price', 'stock', 'is_manual', 'raw_data', 'last_synced_at'])
                     total_updated += 1
 
-                    # Sync to linked Tool if exists and not manually priced
+                    # Sync to linked Tool if exists
                     linked_tool = Tool.objects.filter(vendor_product=vp).first()
-                    if linked_tool and not linked_tool.is_manual_price:
-                        linked_tool.save(update_fields=['updated_at'])
+                    if linked_tool:
+                        linked_tool.is_active = (vp.stock != '0')
+                        linked_tool.save(update_fields=['is_active', 'updated_at'])
                         tools_updated += 1
 
             except Exception as e:

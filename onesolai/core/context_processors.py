@@ -1,28 +1,34 @@
 def unread_notifications(request):
-    if request.user.is_authenticated:
+    if hasattr(request, 'user') and request.user.is_authenticated:
         from notifications.models import Notification
         from products.models import Wishlist
         notif_count = Notification.objects.filter(user=request.user, is_read=False).count()
         wl_count = Wishlist.objects.filter(user=request.user).count()
         admin_tools = []
         if request.user.is_staff:
-            from products.models import Tool
-            admin_tools = []
-            for t in Tool.objects.filter(is_active=True):
-                try:
-                    price_ngn = float(t.get_ngn_price())
-                except Exception:
-                    price_ngn = 0.0
-                try:
-                    price_usd = float(t.get_usd_price())
-                except Exception:
-                    price_usd = 0.0
-                admin_tools.append({
-                    'id': t.id,
-                    'name': t.name,
-                    'price_ngn': price_ngn,
-                    'price_usd': price_usd,
-                })
+            from django.core.cache import cache
+            cached_tools = cache.get('admin_active_tools_list')
+            if cached_tools is None:
+                from products.models import Tool
+                cached_tools = []
+                tools_qs = Tool.objects.filter(is_active=True).select_related('vendor_product').defer('vendor_product__raw_data')
+                for t in tools_qs:
+                    try:
+                        price_ngn = float(t.get_ngn_price())
+                    except Exception:
+                        price_ngn = 0.0
+                    try:
+                        price_usd = float(t.get_usd_price())
+                    except Exception:
+                        price_usd = 0.0
+                    cached_tools.append({
+                        'id': t.id,
+                        'name': t.name,
+                        'price_ngn': price_ngn,
+                        'price_usd': price_usd,
+                    })
+                cache.set('admin_active_tools_list', cached_tools, 600)
+            admin_tools = cached_tools
         return {
             'unread_notifications_count': notif_count,
             'wishlist_count': wl_count,

@@ -264,7 +264,7 @@ class CanbosoService(BaseVendorService):
     def get_balance(self) -> float:
         try:
             url = f"{self._get_base_url()}/telegram-buyer/balance"
-            response = requests.get(url, headers=self._headers(), params={"key": self.vendor.api_key})
+            response = self._request_with_retry("get", url, headers=self._headers(), params={"key": self.vendor.api_key}, max_retries=3, retry_delay=5)
             if response.status_code == 200:
                 data = response.json()
                 return float(data.get('balanceUsd', data.get('balance', 0)))
@@ -274,7 +274,7 @@ class CanbosoService(BaseVendorService):
 
     def fetch_products(self) -> list:
         url = f"{self._get_base_url()}/telegram-buyer/products"
-        response = requests.get(url, headers=self._headers(), params={"key": self.vendor.api_key})
+        response = self._request_with_retry("get", url, headers=self._headers(), params={"key": self.vendor.api_key}, max_retries=3, retry_delay=5)
         response.raise_for_status()
         data = response.json()
         
@@ -319,7 +319,7 @@ class CanbosoService(BaseVendorService):
         headers["Idempotency-Key"] = ik
         headers["X-Idempotency-Key"] = ik
         try:
-            response = requests.post(url, json=payload, headers=headers)
+            response = self._request_with_retry("post", url, json=payload, headers=headers, max_retries=3, retry_delay=5)
             if response.status_code != 200:
                 err_data = response.json() if response.content else {}
                 err_msg = err_data.get('message') or err_data.get('error', response.text)

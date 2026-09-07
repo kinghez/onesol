@@ -22,7 +22,7 @@ def dashboard_home(request):
     # Fetch active tools for calculations
     all_tools = list(
         Tool.objects.filter(is_active=True)
-        .select_related('category', 'vendor_product')
+        .select_related('category', 'vendor_product').defer('vendor_product__raw_data')
     )
 
     for t in all_tools:
