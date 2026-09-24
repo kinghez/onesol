@@ -66,21 +66,9 @@ def _sync_tool_for_vendor_product(vp, vendor):
                 logger.info(f"Re-linked Tool '{tool.name}' to rotated VendorProduct '{vp.name}' (ID: {vp.vendor_product_id})")
                 break
 
-    # Auto-create Tool if still not found
+    # If no Tool is linked, do not auto-create: products must be manually pulled/curated to Tools
     if not tool:
-        cat = _determine_category_for_product(vp.name, vp.description)
-        desc = vp.description or f"Purchase {vp.name} securely and instantly."
-        short_desc = (desc[:297] + "...") if len(desc) > 300 else desc
-        tool = Tool.objects.create(
-            name=vp.name,
-            category=cat,
-            vendor_product=vp,
-            description=desc,
-            short_description=short_desc,
-            is_active=(vp.stock != "0"),
-        )
-        was_created = True
-        logger.info(f"Auto-created Tool '{tool.name}' for VendorProduct '{vp.name}' in category '{cat.name}'")
+        return None, False, False
 
     # Sync active status and pricing
     if vp.stock != "0":

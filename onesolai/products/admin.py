@@ -60,7 +60,7 @@ class ToolAdmin(admin.ModelAdmin):
         'is_featured', 'is_active', 'updated_at'
     )
     list_display_links = ('logo_preview', 'name')
-    list_filter = ('category', 'is_ai_refined', 'is_featured', 'is_active')
+    list_filter = ('vendor_product__vendor', 'category', 'is_ai_refined', 'is_featured', 'is_active')
     list_editable = ('is_featured', 'is_active')
     search_fields = ('name', 'description', 'developer')
     prepopulated_fields = {'slug': ('name',)}
