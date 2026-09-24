@@ -86,7 +86,7 @@ class Tool(models.Model):
 
     def save(self, *args, **kwargs):
         if not self.slug:
-            base_slug = slugify(self.name) or 'tool'
+            base_slug = (slugify(self.name) or 'tool')[:40]
             slug = base_slug
             count = 1
             while Tool.objects.filter(slug=slug).exclude(pk=self.pk).exists():
@@ -95,7 +95,7 @@ class Tool(models.Model):
             self.slug = slug
         else:
             # Ensure manually set or inherited slug is unique
-            slug = self.slug
+            slug = self.slug[:40]
             base_slug = slug
             count = 1
             while Tool.objects.filter(slug=slug).exclude(pk=self.pk).exists():
