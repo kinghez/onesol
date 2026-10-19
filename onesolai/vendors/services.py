@@ -415,6 +415,9 @@ class MlogsService(BaseVendorService):
         return 1500.0
 
     def get_balance(self) -> float:
+        """
+        Returns Mlogs balance converted to USD to match the unified platform currency.
+        """
         try:
             response = self._request_with_retry(
                 "get",
@@ -427,7 +430,9 @@ class MlogsService(BaseVendorService):
             if response.status_code == 200:
                 data = response.json()
                 if isinstance(data, dict):
-                    return float(data.get('balance', 0))
+                    ngn_balance = float(data.get('balance', 0))
+                    rate = self._get_ngn_rate()
+                    return round(ngn_balance / rate, 2) if ngn_balance > 0 else 0.0
         except Exception as e:
             logger.error(f"Mlogs get_balance error: {e}")
         return 0.0
