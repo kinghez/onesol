@@ -164,20 +164,47 @@ Raw Description: {raw_desc}
 def deterministic_clean_credentials(raw_text: str, tool_name: str = "") -> str:
     """
     Fallback deterministic parser to structure messy credentials if AI service is unavailable.
-    Handles JSON blocks, pipe-separated accounts, colon-separated credentials, and license keys.
+    Handles activation links, JSON blocks, pipe-separated accounts, colon-separated credentials, and license keys.
     """
     if not raw_text or not raw_text.strip():
         return raw_text
 
     raw_text = raw_text.strip()
-    
+
+    # Clean leading wrappers
+    clean_raw = re.sub(r'^(\[Auto-Fulfilled Credentials\]\s*)?', '', raw_text).strip()
+    clean_raw = re.sub(r'^(Code:\s*)+', '', clean_raw).strip()
+
+    # 0. Check for Direct Activation / Claim Links (e.g. Gemini Pro from Akunding or Stock Lara)
+    lines = [l.strip() for l in clean_raw.splitlines() if l.strip()]
+    cleaned_lines = [re.sub(r'^(Code|Link|User|URL):\s*', '', l, flags=re.I).strip() for l in lines]
+    urls = [l for l in cleaned_lines if l.startswith(('http://', 'https://'))]
+    if urls and len(urls) == len(cleaned_lines):
+        if len(urls) == 1:
+            return (
+                f"🔗 Subscription Activation Link\n\n"
+                f"Product: {tool_name or 'Software Tool'}\n\n"
+                f"Activation Link:\n{urls[0]}\n\n"
+                f"👉 Instructions:\n"
+                f"Open or copy the link above into your browser to claim and activate your subscription."
+            )
+        else:
+            links_formatted = "\n\n".join(f"Link {i+1}:\n{u}" for i, u in enumerate(urls))
+            return (
+                f"🔗 Subscription Activation Links\n\n"
+                f"Product: {tool_name or 'Software Tool'}\n\n"
+                f"{links_formatted}\n\n"
+                f"👉 Instructions:\n"
+                f"Open each link above in your browser to activate your subscriptions."
+            )
+
     # 1. Check for JSON blocks (single JSON object, list of objects, or line-by-line JSON)
     json_objects = []
-    s_idx = raw_text.find('{')
-    e_idx = raw_text.rfind('}')
+    s_idx = clean_raw.find('{')
+    e_idx = clean_raw.rfind('}')
     if s_idx != -1 and e_idx != -1 and e_idx > s_idx:
         try:
-            parsed = json.loads(raw_text[s_idx:e_idx+1])
+            parsed = json.loads(clean_raw[s_idx:e_idx+1])
             if isinstance(parsed, dict) and any(k in parsed for k in ['email', 'password', 'pass', 'user', '2fa', 'tokens', 'code', 'uid', 'account_id']):
                 json_objects.append(parsed)
             elif isinstance(parsed, list):
@@ -188,7 +215,7 @@ def deterministic_clean_credentials(raw_text: str, tool_name: str = "") -> str:
             pass
 
     if not json_objects:
-        for line in raw_text.splitlines():
+        for line in clean_raw.splitlines():
             s = line.find('{')
             e = line.rfind('}')
             if s != -1 and e != -1 and e > s:
@@ -207,33 +234,35 @@ def deterministic_clean_credentials(raw_text: str, tool_name: str = "") -> str:
             password = acc.get('password') or acc.get('pass') or acc.get('pwd') or ''
             two_fa = acc.get('2fa') or acc.get('two_factor') or acc.get('secret') or acc.get('totp') or ''
             account_id = acc.get('account_id') or acc.get('uid') or acc.get('id') or ''
-            
-            lines = [title, ""]
+
+            lines_out = [title, ""]
             if email:
-                lines.append(f"Email: {email}")
+                lines_out.append(f"Email: {email}")
             if password:
-                lines.append(f"Password: {password}")
+                lines_out.append(f"Password: {password}")
             if two_fa:
-                lines.append(f"2FA Secret Key: {two_fa}")
+                lines_out.append(f"2FA Secret Key: {two_fa}")
             if account_id:
-                lines.append(f"Account ID: {account_id}")
+                lines_out.append(f"Account ID: {account_id}")
             if two_fa:
-                lines.append("\n👉 2FA Code Generator: Paste key at https://2fa.live")
-            outputs.append("\n".join(lines).strip())
+                lines_out.append("\n👉 2FA Code Generator: Paste key at https://2fa.live")
+            outputs.append("\n".join(lines_out).strip())
         return "\n\n----------------------------------------\n\n".join(outputs)
 
     # 2. Try line-by-line pipe or colon extraction
-    raw_lines = [l.strip() for l in raw_text.splitlines() if l.strip()]
+    raw_lines = [l.strip() for l in clean_raw.splitlines() if l.strip()]
     parsed_accounts = []
     for line in raw_lines:
         clean_l = re.sub(r'^\d+[\.\)]\s*', '', line) # Strip leading "1. " or "1) "
         clean_l = re.sub(r'^(Code|User):\s*', '', clean_l, flags=re.I)
-        
+
         # Check for pipe separated
         if '|' in clean_l:
-            parts = [p.strip() for p in re.split(r'\s*\|\s*', clean_l) if p.strip()]
+            raw_parts = [p.strip() for p in re.split(r'\s*\|\s*', clean_l) if p.strip()]
+            parts = [re.sub(r'^(User|Pass|Password|Email|Username|Pwd|Key|2FA):\s*', '', p, flags=re.I).strip() for p in raw_parts]
         elif ':' in clean_l and '@' in clean_l and not clean_l.startswith('http') and not '{' in clean_l:
-            parts = [p.strip() for p in clean_l.split(':') if p.strip()]
+            raw_parts = [p.strip() for p in clean_l.split(':') if p.strip()]
+            parts = [re.sub(r'^(User|Pass|Password|Email|Username|Pwd|Key|2FA):\s*', '', p, flags=re.I).strip() for p in raw_parts]
         else:
             parts = []
 
@@ -266,85 +295,124 @@ def deterministic_clean_credentials(raw_text: str, tool_name: str = "") -> str:
         outputs = []
         for i, acc in enumerate(parsed_accounts):
             title = f"{tool_name} — Account {i+1}" if len(parsed_accounts) > 1 and tool_name else ("🔐 Login Credentials" if len(parsed_accounts) == 1 else f"Account {i+1}")
-            lines = [title, ""]
+            lines_out = [title, ""]
             if len(parsed_accounts) > 1:
                 if acc['email']:
-                    lines.append(f"Email:\n{acc['email']}\n")
+                    lines_out.append(f"Email:\n{acc['email']}\n")
                 if acc['password']:
-                    lines.append(f"Password:\n{acc['password']}\n")
+                    lines_out.append(f"Password:\n{acc['password']}\n")
                 if acc['two_fa']:
-                    lines.append(f"2FA Secret Key:\n{acc['two_fa']}")
-                    lines.append("\n👉 2FA Code Generator: Paste key at https://2fa.live")
+                    lines_out.append(f"2FA Secret Key:\n{acc['two_fa']}")
+                    lines_out.append("\n👉 2FA Code Generator: Paste key at https://2fa.live")
                 if acc.get('account_id'):
-                    lines.append(f"\nAccount ID: {acc['account_id']}")
+                    lines_out.append(f"\nAccount ID: {acc['account_id']}")
             else:
                 if acc['email']:
-                    lines.append(f"Email: {acc['email']}")
+                    lines_out.append(f"Email: {acc['email']}")
                 if acc['password']:
-                    lines.append(f"Password: {acc['password']}")
+                    lines_out.append(f"Password: {acc['password']}")
                 if acc['two_fa']:
-                    lines.append(f"2FA Secret Key: {acc['two_fa']}")
-                    lines.append("\n👉 2FA Code Generator: Paste key at https://2fa.live")
+                    lines_out.append(f"2FA Secret Key: {acc['two_fa']}")
+                    lines_out.append("\n👉 2FA Code Generator: Paste key at https://2fa.live")
                 if acc.get('account_id'):
-                    lines.append(f"Account ID: {acc['account_id']}")
-            outputs.append("\n".join(lines).strip())
+                    lines_out.append(f"Account ID: {acc['account_id']}")
+            outputs.append("\n".join(lines_out).strip())
         return "\n\n----------------------------------------\n\n".join(outputs)
 
-    # If plain single code/license key without separators
-    return f"🔐 Access Details\n\n{raw_text}"
+    # 3. If single license key or activation code
+    return f"🔑 Access Key / Details\n\nProduct: {tool_name or 'Software Tool'}\n\nDetails:\n{clean_raw}"
 
 
 def clean_access_credentials(raw_credentials: str, tool_name: str = "") -> str:
     """
-    Uses OpenRouter AI to parse messy vendor credentials into a clean, professional,
-    customer-friendly format. Falls back gracefully to deterministic parsing if AI is unavailable or rate-limited.
+    Cleans messy vendor credentials into a neat, human-friendly presentation.
+    - Pure activation / claim URLs are formatted instantly with 0ms latency.
+    - Accounts, JSON dumps, and complex credentials are professionally formatted via OpenRouter AI.
+    - Deterministic parser serves as a 100% reliable fallback.
     """
     if not raw_credentials or not str(raw_credentials).strip():
         return ""
 
     raw_credentials = str(raw_credentials).strip()
 
-    # Clean any leading wrappers before sending to AI
+    # Clean wrappers
     cleaned_input = re.sub(r'^(\[Auto-Fulfilled Credentials\]\s*)?', '', raw_credentials).strip()
     cleaned_input = re.sub(r'^(Code:\s*)+', '', cleaned_input).strip()
     cleaned_input = re.sub(r'^(User:\s*)+', '', cleaned_input).strip()
 
+    # Fast-path for pure activation / claim URLs (Akunding, Stock Lara, etc.)
+    # Avoids unnecessary LLM calls, latency, rate-limits, or hallucinations on simple URLs!
+    lines = [l.strip() for l in cleaned_input.splitlines() if l.strip()]
+    cleaned_lines = [re.sub(r'^(Code|Link|User|URL):\s*', '', l, flags=re.I).strip() for l in lines]
+    urls = [l for l in cleaned_lines if l.startswith(('http://', 'https://'))]
+    if urls and len(urls) == len(cleaned_lines):
+        return deterministic_clean_credentials(cleaned_input, tool_name=tool_name)
+
     settings = SiteSettings.get()
     api_key = settings.openrouter_api_key.strip() if settings else ""
     model = settings.openrouter_model.strip() if settings else "openrouter/free"
+    site_name = settings.site_name if settings else "OneSol AI Hub"
 
     if api_key:
-        prompt = f"""Format the following software license/login data into a neat, human-friendly summary for the purchaser.
-Extract the login email, password, and 2FA key. Omit access tokens, session cookies, and internal JSON brackets.
+        prompt = f"""You are the automated fulfillment delivery assistant for {site_name}.
+Your job is to format the raw vendor delivery data below into a clean, professional message for a customer who purchased "{tool_name or 'Software Tool'}".
+
+Raw Vendor Data:
+{cleaned_input}
+
+INSTRUCTIONS:
+Determine which ONE of the following 4 categories matches the data, and output ONLY that category. Do NOT output multiple categories or any "None" fields.
+
+CATEGORY 1: If the data is an ACTIVATION / CLAIM / INVITE LINK (a URL starting with http:// or https://):
+🔗 Subscription Activation Link
 
 Product: {tool_name or 'Software Tool'}
 
-Data:
-{cleaned_input}
+Activation Link:
+<exact URL from data>
 
-Formatting guidelines:
-- If there are multiple accounts, label each clearly, e.g.:
+👉 Instructions: Open or copy the link above into your browser to activate your subscription.
+
+CATEGORY 2: If the data is SINGLE LOGIN CREDENTIALS:
+🔐 Login Credentials
+
+Email: <email from data>
+Password: <password from data>
+2FA Secret Key: <2fa key from data if present>
+Account ID: <account id from data if present>
+👉 2FA Code Generator: Paste key at https://2fa.live (include if 2FA key is present)
+
+CATEGORY 3: If the data has MULTIPLE LOGIN ACCOUNTS:
+For each account, extract the Email, Password, and 2FA Secret Key.
+Format each account as:
 {tool_name or 'Account'} — Account 1
 
 Email:
-<email>
+<email from data>
 
 Password:
-<password>
+<password from data>
 
 2FA Secret Key:
-<2fa>
+<2fa key from data>
 
 👉 2FA Code Generator: Paste key at https://2fa.live
 
-- If there is only one account, format as:
-🔐 Login Credentials
-Email: <email>
-Password: <password>
-2FA Secret Key: <2fa>
-(include the 2FA Code Generator instruction if a 2FA key is present)
+{tool_name or 'Account'} — Account 2
+...
 
-Output ONLY the final clean formatted text. No markdown code blocks (no ```), no conversational greetings or explanations.
+CATEGORY 4: If the data is a LICENSE KEY / REDEMPTION CODE:
+🔑 License Key / Activation Code
+
+Product: {tool_name or 'Software Tool'}
+Key: <exact code/key>
+
+CRITICAL RULES:
+- CHOOSE ONLY ONE CATEGORY. Never print multiple categories. Never output "None", "N/A", or "Not provided".
+- Keep emails, usernames, and passwords EXACTLY as given in the data without removing any plus (+) signs, prefixes, or numbers.
+- Never invent fake values. Use ONLY the exact details from the data.
+- Omit internal JSON brackets, access tokens, session cookies, and refresh timestamps.
+- Output ONLY the final message text. No markdown code blocks (no ```). No greeting, no conversational text.
 """
 
         headers = {
@@ -364,25 +432,26 @@ Output ONLY the final clean formatted text. No markdown code blocks (no ```), no
         max_retries = 2
         for attempt in range(max_retries):
             try:
-                response = requests.post("https://openrouter.ai/api/v1/chat/completions", headers=headers, json=payload, timeout=20)
+                response = requests.post("https://openrouter.ai/api/v1/chat/completions", headers=headers, json=payload, timeout=12)
                 if response.status_code == 200:
                     data = response.json()
                     choices = data.get('choices', [])
                     if choices:
                         text = choices[0].get('message', {}).get('content', '').strip()
-                        # If the model triggered safety refusal or placeholder template output, fall back
-                        if text and "User Safety: unsafe" not in text:
-                            if "<email>" in text or "<password>" in text:
-                                logger.warning("OpenRouter returned placeholder template text, falling back to deterministic parser")
-                            else:
-                                # Strip accidental code blocks
-                                if text.startswith("```"):
-                                    text = re.sub(r'^```[a-zA-Z]*\n?', '', text)
-                                    text = re.sub(r'\n?```$', '', text)
-                                logger.info(f"OpenRouter successfully cleaned credentials for {tool_name}")
-                                return text.strip()
+                        # If the model triggered safety refusal or empty or hallucinations, fall back
+                        bad_markers = ['user safety: unsafe', '<email>', '<password>', 'user@example.com', 'securepass123', 'not provided', ': none']
+                        emoji_headers = sum(text.count(e) for e in ['🔐', '🔗', '🔑'])
+                        if text and not any(bm in text.lower() for bm in bad_markers) and emoji_headers <= 1:
+                            # Strip accidental code blocks
+                            if text.startswith("```"):
+                                text = re.sub(r'^```[a-zA-Z]*\n?', '', text)
+                                text = re.sub(r'\n?```$', '', text)
+                            logger.info(f"OpenRouter successfully cleaned credentials for {tool_name}")
+                            return text.strip()
+                        else:
+                            logger.warning(f"OpenRouter output rejected due to invalid/placeholder content for {tool_name}")
                 elif response.status_code == 429 and attempt < max_retries - 1:
-                    time.sleep(2)
+                    time.sleep(1)
                     continue
                 else:
                     logger.warning(f"OpenRouter clean credentials returned {response.status_code}: {response.text[:200]}")
