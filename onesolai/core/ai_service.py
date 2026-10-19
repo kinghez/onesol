@@ -159,3 +159,236 @@ Raw Description: {raw_desc}
                 return None
     
     return None
+
+
+def deterministic_clean_credentials(raw_text: str, tool_name: str = "") -> str:
+    """
+    Fallback deterministic parser to structure messy credentials if AI service is unavailable.
+    Handles JSON blocks, pipe-separated accounts, colon-separated credentials, and license keys.
+    """
+    if not raw_text or not raw_text.strip():
+        return raw_text
+
+    raw_text = raw_text.strip()
+    
+    # 1. Check for JSON blocks (single JSON object, list of objects, or line-by-line JSON)
+    json_objects = []
+    s_idx = raw_text.find('{')
+    e_idx = raw_text.rfind('}')
+    if s_idx != -1 and e_idx != -1 and e_idx > s_idx:
+        try:
+            parsed = json.loads(raw_text[s_idx:e_idx+1])
+            if isinstance(parsed, dict) and any(k in parsed for k in ['email', 'password', 'pass', 'user', '2fa', 'tokens', 'code', 'uid', 'account_id']):
+                json_objects.append(parsed)
+            elif isinstance(parsed, list):
+                for item in parsed:
+                    if isinstance(item, dict):
+                        json_objects.append(item)
+        except Exception:
+            pass
+
+    if not json_objects:
+        for line in raw_text.splitlines():
+            s = line.find('{')
+            e = line.rfind('}')
+            if s != -1 and e != -1 and e > s:
+                try:
+                    obj = json.loads(line[s:e+1])
+                    if isinstance(obj, dict):
+                        json_objects.append(obj)
+                except Exception:
+                    pass
+
+    if json_objects:
+        outputs = []
+        for i, acc in enumerate(json_objects):
+            title = f"{tool_name} — Account {i+1}" if len(json_objects) > 1 and tool_name else ("🔐 Login Credentials" if len(json_objects) == 1 else f"Account {i+1}")
+            email = acc.get('email') or acc.get('user') or acc.get('username') or acc.get('mail') or ''
+            password = acc.get('password') or acc.get('pass') or acc.get('pwd') or ''
+            two_fa = acc.get('2fa') or acc.get('two_factor') or acc.get('secret') or acc.get('totp') or ''
+            account_id = acc.get('account_id') or acc.get('uid') or acc.get('id') or ''
+            
+            lines = [title, ""]
+            if email:
+                lines.append(f"Email: {email}")
+            if password:
+                lines.append(f"Password: {password}")
+            if two_fa:
+                lines.append(f"2FA Secret Key: {two_fa}")
+            if account_id:
+                lines.append(f"Account ID: {account_id}")
+            if two_fa:
+                lines.append("\n👉 2FA Code Generator: Paste key at https://2fa.live")
+            outputs.append("\n".join(lines).strip())
+        return "\n\n----------------------------------------\n\n".join(outputs)
+
+    # 2. Try line-by-line pipe or colon extraction
+    raw_lines = [l.strip() for l in raw_text.splitlines() if l.strip()]
+    parsed_accounts = []
+    for line in raw_lines:
+        clean_l = re.sub(r'^\d+[\.\)]\s*', '', line) # Strip leading "1. " or "1) "
+        clean_l = re.sub(r'^(Code|User):\s*', '', clean_l, flags=re.I)
+        
+        # Check for pipe separated
+        if '|' in clean_l:
+            parts = [p.strip() for p in re.split(r'\s*\|\s*', clean_l) if p.strip()]
+        elif ':' in clean_l and '@' in clean_l and not clean_l.startswith('http') and not '{' in clean_l:
+            parts = [p.strip() for p in clean_l.split(':') if p.strip()]
+        else:
+            parts = []
+
+        if len(parts) >= 2:
+            email = None
+            password = None
+            two_fa = None
+            account_id = None
+            for p in parts:
+                if '@' in p and '.' in p and not email:
+                    email = p
+                elif re.match(r'^[A-Z0-9]{16,64}$', p) and not two_fa and not p.lower().startswith('http'):
+                    two_fa = p
+                elif re.match(r'^\d{10,20}$', p) and not account_id:
+                    account_id = p
+                elif not password:
+                    password = p
+                elif not two_fa:
+                    two_fa = p
+
+            if email or password:
+                parsed_accounts.append({
+                    'email': email or parts[0],
+                    'password': password or (parts[1] if len(parts) > 1 else ''),
+                    'two_fa': two_fa or (parts[2] if len(parts) > 2 else ''),
+                    'account_id': account_id or ''
+                })
+
+    if parsed_accounts:
+        outputs = []
+        for i, acc in enumerate(parsed_accounts):
+            title = f"{tool_name} — Account {i+1}" if len(parsed_accounts) > 1 and tool_name else ("🔐 Login Credentials" if len(parsed_accounts) == 1 else f"Account {i+1}")
+            lines = [title, ""]
+            if len(parsed_accounts) > 1:
+                if acc['email']:
+                    lines.append(f"Email:\n{acc['email']}\n")
+                if acc['password']:
+                    lines.append(f"Password:\n{acc['password']}\n")
+                if acc['two_fa']:
+                    lines.append(f"2FA Secret Key:\n{acc['two_fa']}")
+                    lines.append("\n👉 2FA Code Generator: Paste key at https://2fa.live")
+                if acc.get('account_id'):
+                    lines.append(f"\nAccount ID: {acc['account_id']}")
+            else:
+                if acc['email']:
+                    lines.append(f"Email: {acc['email']}")
+                if acc['password']:
+                    lines.append(f"Password: {acc['password']}")
+                if acc['two_fa']:
+                    lines.append(f"2FA Secret Key: {acc['two_fa']}")
+                    lines.append("\n👉 2FA Code Generator: Paste key at https://2fa.live")
+                if acc.get('account_id'):
+                    lines.append(f"Account ID: {acc['account_id']}")
+            outputs.append("\n".join(lines).strip())
+        return "\n\n----------------------------------------\n\n".join(outputs)
+
+    # If plain single code/license key without separators
+    return f"🔐 Access Details\n\n{raw_text}"
+
+
+def clean_access_credentials(raw_credentials: str, tool_name: str = "") -> str:
+    """
+    Uses OpenRouter AI to parse messy vendor credentials into a clean, professional,
+    customer-friendly format. Falls back gracefully to deterministic parsing if AI is unavailable or rate-limited.
+    """
+    if not raw_credentials or not str(raw_credentials).strip():
+        return ""
+
+    raw_credentials = str(raw_credentials).strip()
+
+    # Clean any leading wrappers before sending to AI
+    cleaned_input = re.sub(r'^(\[Auto-Fulfilled Credentials\]\s*)?', '', raw_credentials).strip()
+    cleaned_input = re.sub(r'^(Code:\s*)+', '', cleaned_input).strip()
+    cleaned_input = re.sub(r'^(User:\s*)+', '', cleaned_input).strip()
+
+    settings = SiteSettings.get()
+    api_key = settings.openrouter_api_key.strip() if settings else ""
+    model = settings.openrouter_model.strip() if settings else "openrouter/free"
+
+    if api_key:
+        prompt = f"""Format the following software license/login data into a neat, human-friendly summary for the purchaser.
+Extract the login email, password, and 2FA key. Omit access tokens, session cookies, and internal JSON brackets.
+
+Product: {tool_name or 'Software Tool'}
+
+Data:
+{cleaned_input}
+
+Formatting guidelines:
+- If there are multiple accounts, label each clearly, e.g.:
+{tool_name or 'Account'} — Account 1
+
+Email:
+<email>
+
+Password:
+<password>
+
+2FA Secret Key:
+<2fa>
+
+👉 2FA Code Generator: Paste key at https://2fa.live
+
+- If there is only one account, format as:
+🔐 Login Credentials
+Email: <email>
+Password: <password>
+2FA Secret Key: <2fa>
+(include the 2FA Code Generator instruction if a 2FA key is present)
+
+Output ONLY the final clean formatted text. No markdown code blocks (no ```), no conversational greetings or explanations.
+"""
+
+        headers = {
+            "Authorization": f"Bearer {api_key}",
+            "HTTP-Referer": settings.site_url,
+            "X-Title": settings.site_name,
+            "Content-Type": "application/json"
+        }
+
+        payload = {
+            "model": model,
+            "messages": [
+                {"role": "user", "content": prompt}
+            ]
+        }
+
+        max_retries = 2
+        for attempt in range(max_retries):
+            try:
+                response = requests.post("https://openrouter.ai/api/v1/chat/completions", headers=headers, json=payload, timeout=20)
+                if response.status_code == 200:
+                    data = response.json()
+                    choices = data.get('choices', [])
+                    if choices:
+                        text = choices[0].get('message', {}).get('content', '').strip()
+                        # If the model triggered safety refusal or placeholder template output, fall back
+                        if text and "User Safety: unsafe" not in text:
+                            if "<email>" in text or "<password>" in text:
+                                logger.warning("OpenRouter returned placeholder template text, falling back to deterministic parser")
+                            else:
+                                # Strip accidental code blocks
+                                if text.startswith("```"):
+                                    text = re.sub(r'^```[a-zA-Z]*\n?', '', text)
+                                    text = re.sub(r'\n?```$', '', text)
+                                logger.info(f"OpenRouter successfully cleaned credentials for {tool_name}")
+                                return text.strip()
+                elif response.status_code == 429 and attempt < max_retries - 1:
+                    time.sleep(2)
+                    continue
+                else:
+                    logger.warning(f"OpenRouter clean credentials returned {response.status_code}: {response.text[:200]}")
+            except Exception as e:
+                logger.warning(f"OpenRouter clean credentials error (Attempt {attempt+1}): {e}")
+
+    # Fallback to deterministic regex/JSON cleaner
+    logger.info(f"Using deterministic credentials cleaner for {tool_name}")
+    return deterministic_clean_credentials(cleaned_input, tool_name=tool_name)

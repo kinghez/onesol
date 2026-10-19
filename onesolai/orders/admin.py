@@ -67,7 +67,7 @@ class OrderAdmin(admin.ModelAdmin):
     search_fields = ('user__email', 'delivery_email', 'id', 'paystack_reference', 'vendor_order_id')
     ordering = ('-created_at',)
     readonly_fields = ('created_at', 'updated_at', 'user', 'total_amount_ngn',
-                       'local_amount', 'exchange_rate', 'local_currency')
+                       'local_amount', 'exchange_rate', 'local_currency', 'raw_access_details')
     inlines = [OrderItemInline, PaymentTransactionInline]
     actions = ['mark_delivery_sent', 'mark_delivery_failed', 'mark_as_paid', 'mark_as_failed', export_as_csv]
 
@@ -76,7 +76,7 @@ class OrderAdmin(admin.ModelAdmin):
             'fields': ('user', 'status', 'total_amount_ngn', 'local_currency', 'local_amount', 'exchange_rate', 'vendor_order_id')
         }),
         ('Delivery', {
-            'fields': ('delivery_email', 'delivery_status', 'delivery_notes', 'access_details')
+            'fields': ('delivery_email', 'delivery_status', 'delivery_notes', 'access_details', 'raw_access_details')
         }),
         ('Referral', {
             'fields': ('referred_by',),

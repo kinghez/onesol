@@ -34,8 +34,10 @@ class Order(models.Model):
                                        choices=[('pending','Pending'),('sent','Sent'),('failed','Failed')],
                                        help_text="Status of access delivery")
     delivery_notes = models.TextField(blank=True, help_text="Internal notes on delivery")
+    raw_access_details = models.TextField(blank=True,
+        help_text="Original raw credentials returned directly from vendor API")
     access_details = models.TextField(blank=True,
-        help_text='Credentials/access info delivered to user after payment')
+        help_text='Cleaned credentials/access info delivered to user after payment')
     paystack_reference = models.CharField(max_length=200, blank=True,
         help_text='Paystack payment reference for this order')
     vendor_order_id = models.CharField(max_length=255, blank=True, null=True,

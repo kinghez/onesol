@@ -63,13 +63,31 @@ def shopbot_webhook(request):
                     # Or the vendor just marks it completed.
                     codes = data.get('codes', [])
                     if codes:
-                        existing = order.access_details or ""
-                        order.access_details = existing + "\n" + "\n".join(codes)
+                        raw_codes_text = '\n'.join(str(c) for c in codes)
+                        if order.raw_access_details:
+                            order.raw_access_details = f'{order.raw_access_details}\n\n{raw_codes_text}'.strip()
+                        else:
+                            order.raw_access_details = raw_codes_text
+
+                        from core.ai_service import clean_access_credentials
+                        tool_name = ''
+                        if order.items.exists():
+                            first_item = order.items.first()
+                            if first_item and first_item.tool:
+                                tool_name = first_item.tool.name
+
+                        cleaned_text = clean_access_credentials(raw_codes_text, tool_name=tool_name)
+                        if order.access_details:
+                            order.access_details = f'{order.access_details}\n\n{cleaned_text}'.strip()
+                        else:
+                            order.access_details = cleaned_text
+
                     order.delivery_status = 'sent'
-                    order.delivery_notes += f"\n[{timezone.now()}] Manual fulfillment completed via ShopBot webhook."
-                    order.save()
-                    # Trigger email
-                    # send_delivery_email(order.user.email, codes)
+                    order.delivery_notes = f'{(order.delivery_notes or "")}\n[{timezone.now()}] Manual fulfillment completed via ShopBot webhook.'.strip()
+                    order.save(update_fields=['raw_access_details', 'access_details', 'delivery_status', 'delivery_notes'])
+                    # Trigger customer delivery email & in-app notification
+                    from orders.delivery import trigger_delivery
+                    trigger_delivery(order)
 
         return JsonResponse({'success': True})
     except json.JSONDecodeError:

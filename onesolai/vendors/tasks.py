@@ -116,14 +116,31 @@ def _fulfill_order_logic(order_id):
 
         # Update order access details if codes were received
         if delivered_codes:
-            new_codes_text = "\n".join(f"Code: {c}" for c in delivered_codes)
-            if order.access_details:
-                order.access_details = f"{order.access_details}\n\n[Auto-Fulfilled Credentials]\n{new_codes_text}"
+            raw_codes_text = "\n".join(str(c) for c in delivered_codes)
+
+            # 1. Save original raw credentials from vendor
+            if order.raw_access_details:
+                order.raw_access_details = f"{order.raw_access_details}\n\n{raw_codes_text}".strip()
             else:
-                order.access_details = f"[Auto-Fulfilled Credentials]\n{new_codes_text}"
+                order.raw_access_details = raw_codes_text
+
+            # 2. Clean credentials via OpenRouter AI for customer presentation
+            from core.ai_service import clean_access_credentials
+            tool_name = ""
+            if order.items.exists():
+                first_item = order.items.first()
+                if first_item and first_item.tool:
+                    tool_name = first_item.tool.name
+
+            cleaned_text = clean_access_credentials(raw_codes_text, tool_name=tool_name)
+
+            if order.access_details:
+                order.access_details = f"{order.access_details}\n\n{cleaned_text}".strip()
+            else:
+                order.access_details = cleaned_text
 
             order.delivery_status = 'sent'
-            order.save(update_fields=['access_details', 'delivery_status'])
+            order.save(update_fields=['raw_access_details', 'access_details', 'delivery_status'])
 
             # Re-trigger email delivery so user receives credentials immediately!
             trigger_delivery(order)
