@@ -5,6 +5,7 @@ class Vendor(models.Model):
         ('akunding', 'Akunding'),
         ('shopbot', 'Shop Bot'),
         ('canboso', 'Canboso'),
+        ('mlogs', 'Mlogs'),
     ]
     name = models.CharField(max_length=100)
     api_type = models.CharField(max_length=20, choices=API_TYPE_CHOICES)

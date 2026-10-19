@@ -392,6 +392,154 @@ class CanbosoService(BaseVendorService):
 
 
 
+
+class MlogsService(BaseVendorService):
+    def __init__(self, vendor: Vendor):
+        super().__init__(vendor)
+        self.api_key = vendor.api_key
+        self.base_url = vendor.base_url.rstrip('/') if vendor.base_url else "https://mlogs.com.ng/api/accounts/v1"
+
+    def _headers(self):
+        return {
+            "Accept": "application/json"
+        }
+
+    def _get_ngn_rate(self) -> float:
+        try:
+            from core.models import SiteSettings
+            settings = SiteSettings.get()
+            if settings and settings.usd_to_ngn_rate:
+                return float(settings.usd_to_ngn_rate)
+        except Exception:
+            pass
+        return 1500.0
+
+    def get_balance(self) -> float:
+        try:
+            response = self._request_with_retry(
+                "get",
+                self.base_url,
+                headers=self._headers(),
+                params={"key": self.api_key, "action": "balance"},
+                max_retries=3,
+                retry_delay=5
+            )
+            if response.status_code == 200:
+                data = response.json()
+                if isinstance(data, dict):
+                    return float(data.get('balance', 0))
+        except Exception as e:
+            logger.error(f"Mlogs get_balance error: {e}")
+        return 0.0
+
+    def fetch_products(self) -> list:
+        response = self._request_with_retry(
+            "get",
+            self.base_url,
+            headers=self._headers(),
+            params={"key": self.api_key, "action": "products"},
+            max_retries=3,
+            retry_delay=5
+        )
+        response.raise_for_status()
+        data = response.json()
+        products_data = data if isinstance(data, list) else (data.get('products', []) if isinstance(data, dict) else [])
+
+        rate = self._get_ngn_rate()
+
+        parsed_products = []
+        for p in products_data:
+            p_id = str(p.get('product_id') or p.get('id', ''))
+            name = p.get('name') or 'Unknown Mlogs Product'
+            category = p.get('category') or ''
+            p_min = p.get('min', 1)
+            p_max = p.get('max', '')
+            desc = f"Category: {category} | Min: {p_min} | Max: {p_max}".strip()
+
+            ngn_price = float(p.get('price') or 0.0)
+            usd_price = round(ngn_price / rate, 2) if ngn_price > 0 else 0.0
+
+            stock_val = str(p.get('stock', '0'))
+
+            parsed_products.append({
+                'vendor_product_id': p_id,
+                'name': name,
+                'description': desc,
+                'price': usd_price,
+                'stock': stock_val,
+                'is_manual': False,
+                'raw_data': p
+            })
+        return parsed_products
+
+    def purchase(self, vendor_product_id: str, quantity: int, buyer_info: str = "") -> dict:
+        params = {
+            "key": self.api_key,
+            "action": "buy",
+            "product": vendor_product_id,
+            "quantity": quantity
+        }
+        try:
+            response = self._request_with_retry(
+                "get",
+                self.base_url,
+                headers=self._headers(),
+                params=params,
+                max_retries=3,
+                retry_delay=5
+            )
+            
+            if response.status_code != 200:
+                err_msg = response.text[:300] if response.content else f"HTTP {response.status_code}"
+                try:
+                    err_data = response.json()
+                    err_msg = err_data.get('error') or err_data.get('message') or err_msg
+                except Exception:
+                    pass
+                return {'status': 'failed', 'error': err_msg}
+                
+            data = response.json()
+            if isinstance(data, dict) and data.get('error'):
+                return {'status': 'failed', 'error': data.get('error')}
+                
+            order_id = str(data.get('order_id') or data.get('iid', '') or data.get('id') or data.get('order', {}).get('order_id', ''))
+
+            codes = []
+            items = data.get('items', []) if isinstance(data, dict) else []
+
+            if not items and order_id:
+                try:
+                    order_resp = requests.get(self.base_url, params={"key": self.api_key, "action": "order", "order": order_id}, headers=self._headers(), timeout=15)
+                    if order_resp.status_code == 200:
+                        order_data = order_resp.json()
+                        if isinstance(order_data, dict):
+                            items = order_data.get('items', [])
+                except Exception as oe:
+                    logger.warning(f"Mlogs could not fetch order details for #{order_id}: {oe}")
+
+            for it in items:
+                if isinstance(it, dict):
+                    dt = it.get('details') or it.get('code') or it.get('account') or it.get('credentials')
+                    if dt:
+                        codes.append(str(dt))
+                elif isinstance(it, str):
+                    codes.append(it)
+
+            status_str = data.get('status', 'completed') if isinstance(data, dict) else 'completed'
+            return {
+                'status': 'completed' if codes or status_str in ['completed', 'paid', 'success'] else 'pending_manual',
+                'codes': codes,
+                'order_id': order_id,
+                'error': None
+            }
+        except requests.RequestException as e:
+            err_msg = str(e)
+            if e.response is not None:
+                err_msg = f"{e.response.status_code}: {e.response.text}"
+            return {'status': 'failed', 'error': err_msg}
+
+
+
 def get_vendor_service(vendor: Vendor) -> BaseVendorService:
     if vendor.api_type == 'akunding':
         return AkundingService(vendor)
@@ -399,4 +547,6 @@ def get_vendor_service(vendor: Vendor) -> BaseVendorService:
         return ShopBotService(vendor)
     elif vendor.api_type == 'canboso':
         return CanbosoService(vendor)
+    elif vendor.api_type == 'mlogs':
+        return MlogsService(vendor)
     raise VendorException("Unknown Vendor API Type")

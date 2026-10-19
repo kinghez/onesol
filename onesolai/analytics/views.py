@@ -222,6 +222,8 @@ def vendor_wallets_view(request):
         vendor_data.append({
             'id': v.id,
             'name': v.name,
+            'api_type': v.api_type,
+            'currency': 'NGN' if v.api_type == 'mlogs' else 'USD',
             'balance': latest_snapshot.balance if latest_snapshot else 0.00,
             'last_updated': latest_snapshot.timestamp if latest_snapshot else None,
             'tool_count': tool_count,
@@ -257,6 +259,8 @@ def reload_vendor_balances(request):
                 results.append({
                     'id': vendor.id,
                     'name': vendor.name,
+                    'api_type': vendor.api_type,
+                    'currency': 'NGN' if vendor.api_type == 'mlogs' else 'USD',
                     'balance': balance,
                     'status': 'success'
                 })

@@ -27,7 +27,7 @@
             <i class="fa-solid fa-plug" style="color: var(--admin-accent-purple);"></i> {{ v.name }} Wallet
         </div>
         <div class="admin-card-value vendor-amount-display" style="color: var(--admin-accent-cyan);">
-            ${{ v.balance|floatformat:2 }}
+            {% if v.currency == 'NGN' or v.api_type == 'mlogs' %}₦{{ v.balance|floatformat:2 }}{% else %}${{ v.balance|floatformat:2 }}{% endif %}
         </div>
         <div class="admin-card-subtext vendor-status-display" style="white-space: normal; line-height: 1.2; font-size: 10px;">Last updated: <br>{{ v.last_updated|timesince }} ago</div>
         
@@ -175,7 +175,8 @@
                             statusDisplay.textContent = v.error;
                         } else {
                             amountDisplay.style.color = 'var(--admin-accent-cyan)';
-                            amountDisplay.textContent = '$' + parseFloat(v.balance).toFixed(2);
+                            const sym = (v.currency === 'NGN' || v.api_type === 'mlogs') ? '₦' : '$';
+                            amountDisplay.textContent = sym + parseFloat(v.balance).toFixed(2);
                             statusDisplay.textContent = 'Last updated: Just now';
                         }
                     }
