@@ -1,8 +1,10 @@
-from django.urls import path
+from django.urls import path, re_path
 from . import views
 
 urlpatterns = [
     path('health/', views.health_check, name='health_check'),
+    path('google595a3ac64208eb4d.html', views.google_verification, name='google_verification_exact'),
+    re_path(r'^google(?P<code>[a-zA-Z0-9]+)\.html$', views.google_verification, name='google_verification_dynamic'),
     path('', views.home, name='home'),
     path('about-us/', views.about_us, name='about_us'),
     path('api/currencies/', views.api_currency_rates, name='api_currencies'),

@@ -1,9 +1,14 @@
 from django.contrib import admin
-from django.urls import path, include
+from django.urls import path, include, re_path
 from accounts import views as accounts_views
+from core import views as core_views
 
 urlpatterns = [
     path('admin/', admin.site.urls),
+
+    # Google Search Console HTML Verification
+    path('google595a3ac64208eb4d.html', core_views.google_verification, name='google_verification_exact'),
+    re_path(r'^google(?P<code>[a-zA-Z0-9]+)\.html$', core_views.google_verification, name='google_verification_dynamic'),
 
     # Home
     path('', include('core.home_urls')),

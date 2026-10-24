@@ -245,3 +245,15 @@ def health_check(request):
     """Ultra-lightweight ping endpoint for Render keep-alive (0 DB egress)."""
     from django.http import JsonResponse
     return JsonResponse({"status": "ok"})
+
+
+def google_verification(request, code='595a3ac64208eb4d'):
+    """
+    Serves Google Search Console HTML verification file at root.
+    Supports both the specific file google595a3ac64208eb4d.html
+    and any future dynamic google<code/hash>.html verification file.
+    """
+    from django.http import HttpResponse
+    actual_code = code or '595a3ac64208eb4d'
+    content = f"google-site-verification: google{actual_code}.html\n"
+    return HttpResponse(content, content_type='text/html; charset=utf-8')
