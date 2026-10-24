@@ -247,13 +247,11 @@ def health_check(request):
     return JsonResponse({"status": "ok"})
 
 
-def google_verification(request, code='595a3ac64208eb4d'):
+def google_verification(request):
     """
-    Serves Google Search Console HTML verification file at root.
-    Supports both the specific file google595a3ac64208eb4d.html
-    and any future dynamic google<code/hash>.html verification file.
+    Serves the exact Google Search Console HTML verification file.
+    Must ONLY serve the exact token (google595a3ac64208eb4d.html) and return 404 for any other
+    to pass Google's anti-hack canary test.
     """
     from django.http import HttpResponse
-    actual_code = code or '595a3ac64208eb4d'
-    content = f"google-site-verification: google{actual_code}.html\n"
-    return HttpResponse(content, content_type='text/html; charset=utf-8')
+    return HttpResponse("google-site-verification: google595a3ac64208eb4d.html", content_type='text/html; charset=utf-8')

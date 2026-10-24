@@ -7,8 +7,7 @@ urlpatterns = [
     path('admin/', admin.site.urls),
 
     # Google Search Console HTML Verification
-    path('google595a3ac64208eb4d.html', core_views.google_verification, name='google_verification_exact'),
-    re_path(r'^google(?P<code>[a-zA-Z0-9]+)\.html$', core_views.google_verification, name='google_verification_dynamic'),
+    path('google595a3ac64208eb4d.html', core_views.google_verification, name='google_verification'),
 
     # Home
     path('', include('core.home_urls')),
